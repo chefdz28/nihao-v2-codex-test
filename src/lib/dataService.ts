@@ -204,7 +204,10 @@ export async function fetchPronunciationResults(userId: string) {
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
-  if (error) throw error;
+
+  // `pronunciation_results` is optional. If the table is not installed, keep the
+  // rest of the app working and simply omit pronunciation history.
+  if (error) return [];
   return data || [];
 }
 

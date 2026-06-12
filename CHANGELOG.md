@@ -1,5 +1,35 @@
 # NiHao V2 — Changelog
 
+## V2.0.2 (2026-06-12)
+
+### Changed
+- Set `package.json` version to `2.0.2` and kept engines at Node.js >= 18.20.8 / npm >= 9 for the RunCloud test target.
+- Replaced the stale `package-lock.json` content because it still contained Vite 7, React Router 7, Supabase JS 2.108.x, and other Node 20-only package entries from the previous toolchain. Run `npm install` on RunCloud/CI with normal npm registry access to hydrate the clean Node 18 lockfile from the pinned package versions.
+- Made optional `pronunciation_results` reads and writes failure-safe so the app continues working when that optional table is not installed.
+
+### Verified
+- `npm run build` completed successfully with the Vite 5.4.21 package installed in this workspace.
+- `npm install` was attempted, but this workspace registry proxy returned 403 for npm registry requests; repeat it on RunCloud/CI to regenerate the lockfile before test deployment.
+
+## V2.0.1 (2026-06-12)
+
+### Changed
+- Downgraded the frontend build toolchain for RunCloud Node 18.20.8 compatibility: `vite@5.4.21`, `@vitejs/plugin-react@4.7.0`, `react-router@6.30.1`, `react-router-dom@6.30.1`, and `@supabase/supabase-js@2.46.0`.
+- Removed `kimi-plugin-inspect-react` because it peers against Vite 7 and would keep the app tied to the Node 20-only toolchain.
+- Updated `package.json` engines to Node.js >= 18.20.8 and npm >= 9 for the RunCloud build server.
+- Expanded deployment documentation for RunCloud/Apache SPA fallback, Supabase environment variables, asset upload order, and no-secrets handling.
+- Expanded testing documentation with route, lesson-flow, Supabase, SPA, and Node 18 compatibility checks.
+
+### Verified
+- `npm run build` completed successfully with Vite 5.4.21 and no TypeScript errors.
+- `npm install` should be run on RunCloud/CI with normal npm registry access to refresh Node 18 packages; this workspace registry proxy returned 403 for uncached downgraded packages.
+- `dist/index.html` uses root-relative `/assets/...` links while Vite `base` remains `/`.
+- Frontend Supabase client uses only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+
+### Known risks
+- The compatibility fix was built in this workspace with Node 24 because Node 18.20.8 is not installed here; package engines and selected toolchain versions are set for the RunCloud Node 18.20.8 build test.
+- Live logged-in `user_progress` writes still require a real authenticated Supabase session to verify end-to-end.
+
 ## V2.0.0 (2026-06-12)
 
 ### Added

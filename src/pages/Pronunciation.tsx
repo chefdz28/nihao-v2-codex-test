@@ -144,8 +144,8 @@ export default function Pronunciation() {
         score,
         feedback: score >= 80 ? 'Excellent!' : score >= 60 ? 'Good effort' : 'Keep practicing',
       });
-    } catch (err) {
-      console.error('Failed to save pronunciation result:', err);
+    } catch {
+      // `pronunciation_results` is optional; keep the UI result locally if saving is unavailable.
     } finally {
       setSaving(false);
     }
