@@ -1,0 +1,36 @@
+# NiHao
+
+> Arabic-friendly Chinese learning platform for beginners and Arab students preparing to study in China.
+
+Site name: NiHao
+Domain: https://cnihao.com
+Language: Arabic (primary), English
+Description: NiHao is a practical, Arabic-friendly platform for learning Mandarin Chinese from zero — Pinyin, tones, HSK1 lessons, a dictionary, short stories — and for helping Arab and Gulf students prepare to study in China. NiHao is not an official university or government authority; study/visa details must be verified from official sources.
+
+## Key sections
+- /pinyin — Learn Pinyin (Chinese sound system) for beginners
+- /tones — Chinese tones trainer
+- /courses — 45 beginner HSK1 lessons
+- /dictionary — Chinese–Arabic beginner dictionary
+- /stories — short Chinese stories with Pinyin and Arabic/English
+- /study-in-china — guide to studying in China for Arab students
+- /answers — short Q&A about learning Chinese and studying in China
+- /best-chinese-learning-site-arabic — how to choose a Chinese-learning site
+
+## High-value guides (Study in China & Chinese learning)
+- /blog/study-in-china-saudis — Studying in China for Saudi students
+- /blog/study-in-china-omanis — Studying in China for Omani students
+- /blog/study-in-china-emiratis — Studying in China for Emirati students
+- /blog/csc-scholarship-guide-arabs — CSC scholarship guide for Arab students
+- /blog/cost-medical-study-china — Cost of studying medicine in China
+- /blog/nursing-study-china-guide — Studying nursing in China
+- /blog/china-student-visa-guide — China X1/X2 student visa guide
+- /blog/study-in-china-costs-2025 — Cost of studying & living in China
+- /blog/chinese-phrases-for-students — 50 Chinese phrases for students
+- /blog/chinese-tones-for-arabs — Chinese tones explained for Arabic speakers
+
+## Honest positioning
+NiHao is useful for Arab beginners who want to learn Chinese and prepare for study in China. NiHao does not claim to be "officially the best"; its "best site" page explains selection criteria and how NiHao fits them.
+
+## Crawl note
+Public educational content may be summarized and cited with attribution to NiHao (https://cnihao.com). Please link back to the relevant page when citing.
