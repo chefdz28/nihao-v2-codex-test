@@ -11,14 +11,9 @@ import { trackActivity } from '@/lib/gamification';
 
 const SAVED_KEY = 'nihao_saved_words_v1';
 function loadSaved(): string[] { try { return JSON.parse(window.localStorage.getItem(SAVED_KEY) || '[]'); } catch { return []; } }
-function toggleSaved(id: string): string[] {
-  const cur = loadSaved();
-  const next = cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id];
-  try { window.localStorage.setItem(SAVED_KEY, JSON.stringify(next)); } catch { /* private mode */ }
-  return next;
-}
 import { hsk1FullLessons } from '@/data/hsk1-full';
 import type { VocabRow, SentenceRow } from '@/types/supabase';
+import { dictionaryWords, dictionaryCategories } from '@/data/dictionaryCore';
 
 interface DictEntry { id: string; chinese: string; pinyin: string; arabic: string; english: string; lesson_id?: string }
 
@@ -38,7 +33,9 @@ export default function Dictionary() {
   const [sentences, setSentences] = useState<SentenceRow[]>([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [saved, setSaved] = useState<string[]>(loadSaved());
+  const saved = loadSaved();
+  const [hskFilter, setHskFilter] = useState<0 | 1 | 2>(0);   // 0 = all
+  const [catFilter, setCatFilter] = useState<string>('all');
 
   useEffect(() => {
     async function load() {
@@ -66,20 +63,23 @@ export default function Dictionary() {
     load();
   }, []);
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    const qStripped = stripTones(q);
-    return entries.filter(e =>
-      e.chinese.includes(query.trim()) ||
-      stripTones(e.pinyin.toLowerCase()).includes(qStripped) ||
-      e.arabic.includes(query.trim()) ||
-      (e.english || '').toLowerCase().includes(q),
-    ).slice(0, 40);
-  }, [query, entries]);
-
   const wotd = entries.length > 0 ? entries[wotdIndex(entries.length)] : null;
   const wotdSentence = wotd ? sentences.find(s => s.chinese.includes(wotd.chinese)) : null;
+
+  // V2.8A: browse the canonical dictionary with HSK + category filters
+  const browse = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const qStripped = stripTones(q);
+    return dictionaryWords.filter(w => {
+      if (hskFilter !== 0 && w.hsk !== hskFilter) return false;
+      if (catFilter !== 'all' && w.category !== catFilter) return false;
+      if (!q) return true;
+      return w.chinese.includes(query.trim())
+        || stripTones(w.pinyin.toLowerCase()).includes(qStripped)
+        || w.arabic.includes(query.trim())
+        || (w.english || '').toLowerCase().includes(q);
+    });
+  }, [query, hskFilter, catFilter]);
 
   if (loading) {
     return (
@@ -159,32 +159,34 @@ export default function Dictionary() {
         />
       </div>
 
-      {query && (
-        <p className="text-xs mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
-          {results.length} {t('dict.results')}
-        </p>
-      )}
+      {/* V2.8A: HSK + category filters */}
+      <div className="flex flex-wrap gap-2 mb-4" dir="rtl">
+        <div className="flex gap-1 liquid-glass rounded-xl p-1">
+          {([0, 1, 2] as const).map(h => (
+            <button key={h} onClick={() => setHskFilter(h)} className={`px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-colors ${hskFilter === h ? 'bg-[#FF3333] text-white' : 'text-[#a0a0a0] hover:text-white'}`}>
+              {h === 0 ? 'الكل' : `HSK${h}`}
+            </button>
+          ))}
+        </div>
+        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="bg-[#161616] border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none font-arabic">
+          <option value="all">كل التصنيفات</option>
+          {dictionaryCategories.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <span className="text-xs flex items-center px-2 font-arabic" style={{ color: 'var(--color-text-tertiary)' }}>{browse.length} كلمة</span>
+      </div>
 
-      <div className="space-y-2">
-        {results.map(e => (
-          <div key={e.id} className="liquid-glass p-4 flex items-center gap-4">
-            <span className="font-chinese text-2xl text-white w-20 shrink-0">{e.chinese}</span>
-            <div className="flex-1 min-w-0">
-              <PinyinText size="base">{e.pinyin}</PinyinText>
-              <p className="text-sm font-arabic text-white" dir="rtl">{e.arabic}</p>
-              <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{e.english}</p>
-            </div>
-            <button onClick={() => setSaved(toggleSaved(e.id))} aria-label="save"
-              className={`w-9 h-9 rounded-full border flex items-center justify-center shrink-0 transition-colors ${saved.includes(e.id) ? 'bg-[#f59e0b]/15 border-[#f59e0b]/40 text-[#f59e0b]' : 'bg-white/5 border-white/10 text-[#888] hover:text-white'}`}>
-              <Star size={14} />
-            </button>
-            <button onClick={() => { play(e.chinese); trackActivity('words_seen'); }} className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-[#FF3333]/40 flex items-center justify-center shrink-0 transition-colors">
-              <Volume2 size={14} className="text-white" />
-            </button>
-          </div>
+      {/* V2.8A: browse grid — each card links to its word page */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-8" dir="rtl">
+        {browse.slice(0, 120).map(w => (
+          <Link key={w.slug} to={`/dictionary/${w.slug}`} className="liquid-glass rounded-2xl p-4 text-center hover:border-[#FF3333]/30 border border-transparent transition-colors">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FF3333]/15 text-[#FF3333] font-display font-bold inline-block mb-1">HSK{w.hsk}</span>
+            <span className="font-chinese text-3xl text-white block mb-1">{w.chinese}</span>
+            <PinyinText className="text-center">{w.pinyin}</PinyinText>
+            <span className="text-xs font-arabic text-white block mt-1">{w.arabic}</span>
+          </Link>
         ))}
-        {query && results.length === 0 && (
-          <p className={`text-center py-10 text-sm ${isAr ? 'font-arabic' : ''}`} style={{ color: 'var(--color-text-tertiary)' }}>{t('dict.empty')}</p>
+        {browse.length === 0 && (
+          <p className="col-span-full text-center py-10 text-sm font-arabic" style={{ color: 'var(--color-text-tertiary)' }}>لا توجد كلمات مطابقة.</p>
         )}
       </div>
     </div>

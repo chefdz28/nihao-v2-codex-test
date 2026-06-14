@@ -1,3 +1,122 @@
+# NiHao V2.8B — Student Dialogues System + Dictionary Cross-Links
+
+Base: local V2.8A source. Second layer of V2.8 ("dialogues + linking"), built on
+top of the V2.8A dictionary. Merges the uploaded "NiHao Dialogues Batch 1" (12
+dialogues) PLUS 3 authored dialogues, and links every dialogue word to its
+/dictionary/:slug page. Preserved: Vite 5.4.21, plugin-react 4.7.0, router
+6.30.1, supabase-js 2.46.0, Node >=18.20.8. No SQL for the public site, no
+paid/AI APIs, no new dependencies.
+
+## What's new
+### 15 student dialogues (12 from the pack + 3 authored)
+src/data/studentDialogues.ts — airport, taxi, university registration, dorm
+check-in, meeting a classmate, cafeteria, restaurant, supermarket, bank account,
+SIM card, hospital, homework (the 12 pack dialogues), plus authored: library
+book borrowing, asking directions, buying coffee. 167 total turns, AR/EN/ZH +
+pinyin, HSK1–HSK2, with per-dialogue vocab lists and disclaimers where relevant
+(registration, bank, hospital). Speaker mapping: the Arab student = speaker B
+(highlighted), the other person = A.
+
+### Dialogue pages (/dialogues/:slug) + hub (/dialogues)
+src/pages/StudentDialogues.tsx — the hub lists all 15 with an HSK filter; each
+/dialogues/:slug page renders the conversation (tappable audio per line),
+disclaimer, and a vocabulary section where each word links to its dictionary
+page. Emits BreadcrumbList JSON-LD and sets its own SEO title + meta description.
+The previous interactive A/B dialogues are preserved at /dialogues-practice
+(nothing removed).
+
+### Dictionary grew via dialogue vocab (no duplicates)
+src/data/dictionaryDialogueWords.ts — 77 unique new words pulled from the
+dialogue vocab (passport, visa, dormitory, bank card, prescription...) added to
+the canonical dictionary. Deduped by Chinese char + tone-stripped pinyin, so no
+duplicates with HSK1/HSK2. Dictionary: 172 → 247 words, 0 duplicate slugs.
+Dialogue-vocab → dictionary linkage went from 64/148 to 147/148.
+
+### Cross-linking web (the "reference" goal)
+src/lib/wordUsages.ts now also scans the student dialogues, so a word page's
+"appears in" section links to the specific dialogues that use it (e.g. 护照 →
+airport, registration, bank, SIM dialogues). Dialogue ⇄ dictionary is now
+bidirectional.
+
+## SEO
+- sitemap.xml → 347 URLs: +247 dictionary word pages, +15 dialogue pages.
+  NO admin, draft, or /dialogues-practice routes (verified 0).
+- llms.txt notes the student-situation dialogues.
+- BreadcrumbList JSON-LD on dialogue pages; DefinedTerm on word pages (V2.8A).
+- robots.txt unchanged.
+
+## Safety
+Existing /dictionary (with V2.8A filters), lessons, stories, admin drafts, and
+the mobile voice recorder all intact. The old interactive dialogues are kept at
+/dialogues-practice. Build passes on Node 18. No new dependencies.
+
+## Sample test URLs
+/dialogues (hub) · /dialogues/airport-arrival · /dialogues/university-registration ·
+/dialogues/bank-account · /dialogues/hospital-visit · /dialogues/buying-coffee.
+Word page cross-links: /dictionary/huzhao (护照, "appears in" airport/bank/...).
+
+---
+
+# NiHao V2.8A — Dictionary Expansion + Individual Word Pages
+
+Base: local V2.7.3 source (GitHub main was at V2.6; the V2.7A chain + V2.8A ship
+together — deploy combined, run the admin migration once, then push). First
+layer of V2.8 ("the reference layer"). Stories/dialogues will link INTO these
+word pages in a later layer (V2.8B/C). Preserved: Vite 5.4.21, plugin-react
+4.7.0, router 6.30.1, supabase-js 2.46.0, Node >=18.20.8, any-client + BUCKETS,
+noImplicitAny:false. No SQL required for the public site, no paid/AI APIs, no new
+dependencies.
+
+## Dictionary page system
+New canonical, in-code dictionary so every word page is always indexable
+(independent of Supabase):
+- src/data/dictionaryCore.ts — builds a de-duplicated DictWord[] from the
+  existing HSK1 data + an HSK2 batch. Provides stripTones(), wordSlug() (tone-
+  stripped pinyin → url-safe slug, hanzi-codepoint fallback), category inference
+  (Arabic labels), related-word linking (same category), and exports
+  dictionaryWords, wordBySlug(), dictionaryCategories, dictionarySlugs.
+- src/data/dictionaryHsk2.ts — a clean initial HSK2 batch (20 words) with
+  examples. Kept small on purpose to avoid overloading the release.
+- src/pages/DictionaryWord.tsx — the /dictionary/:slug page: Chinese character,
+  pinyin (PinyinText, with audio), Arabic meaning, English (if available),
+  category, HSK level badge, example sentences (zh + pinyin + Arabic, tappable
+  audio), related words (linked), and "appears in" cross-links to stories/
+  dialogues that use the word. Sets its own SEO <title> + meta description and
+  emits DefinedTerm + BreadcrumbList JSON-LD.
+- src/lib/wordUsages.ts — finds stories/dialogues containing a word (static
+  lookups, no network) for the cross-links.
+
+## Dictionary list page (/dictionary)
+- Search (zh / pinyin tone-insensitive / Arabic / English).
+- Filter by HSK level (All / HSK1 / HSK2).
+- Filter by category (Arabic labels).
+- Clean browse grid of cards, each linking to /dictionary/<slug>.
+- Existing Supabase fetch + fallback, Word-of-the-Day and saved words preserved.
+
+## Duplication protection + slugs
+- Dedup key = Chinese characters + tone-stripped pinyin; duplicates are dropped
+  at build time (227 raw HSK1 items → 152 unique words).
+- Slugs are url-safe and made unique; homophone collisions get a -2/-3 suffix.
+- Verified: 172 words total (152 HSK1 + 20 HSK2), 0 duplicate slugs.
+
+## SEO
+- sitemap.xml regenerated → 257 URLs, including all 172 /dictionary/<slug> word
+  pages (priority 0.6). NO admin or draft routes (verified 0).
+- /dictionary list links internally to every word page.
+- robots.txt unchanged; llms.txt notes the dictionary word-page section.
+- DefinedTerm + BreadcrumbList JSON-LD on each word page.
+
+## Safety
+Existing dictionary search/WOTD/saved words, lessons, stories, admin drafts and
+the mobile voice recorder are all intact (Stories.tsx byte-identical to V2.7.3).
+Build passes on Node 18. No new dependencies.
+
+## Sample test URLs
+/dictionary/ni · /dictionary/hao · /dictionary/xiexie · /dictionary/xuexiao ·
+/dictionary/zhidao (HSK2) · /dictionary/shijian (HSK2). List + filters: /dictionary
+
+---
+
 # NiHao V2.7.3 — Combined Package (V2.7A + V2.7A.1 + V2.7A.2 + V2.7A.3)
 
 This single package merges the full admin-content + mobile-voice work, because

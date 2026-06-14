@@ -50,6 +50,9 @@ const Answers = lazy(() => import('./pages/Answers'));
 const AnswerPageView = lazy(() => import('./pages/Answers').then(m => ({ default: m.AnswerPageView })));
 const BestSite = lazy(() => import('./pages/BestSite'));
 const AdminContentDrafts = lazy(() => import('./pages/AdminContentDrafts'));
+const DictionaryWord = lazy(() => import('./pages/DictionaryWord'));
+const StudentDialogues = lazy(() => import('./pages/StudentDialogues'));
+const StudentDialogueView = lazy(() => import('./pages/StudentDialogues').then(m => ({ default: m.StudentDialogueView })));
 import Daily from './pages/Daily';
 import Review from './pages/Review';
 
@@ -96,13 +99,16 @@ export default function App() {
         <Route path="/essentials" element={<Essentials />} />
         <Route path="/tones" element={<ToneTrainer />} />
         <Route path="/numbers" element={<NumberTrainer />} />
-        <Route path="/dialogues" element={<Dialogues />} />
+        <Route path="/dialogues" element={<StudentDialogues />} />
+        <Route path="/dialogues/:slug" element={<StudentDialogueView />} />
+        <Route path="/dialogues-practice" element={<Dialogues />} />
         <Route path="/path" element={<PathMap />} />
         <Route path="/worksheet/:lessonId" element={<Worksheet />} />
         <Route path="/missions" element={<Missions />} />
         <Route path="/achievements" element={<Achievements />} />
         <Route path="/placement-test" element={<PlacementTest />} />
         <Route path="/dictionary" element={<Dictionary />} />
+        <Route path="/dictionary/:slug" element={<DictionaryWord />} />
         <Route path="/stories" element={<Stories />} />
         <Route path="/stories/:storyId" element={<StoryReader />} />
         <Route path="/certificates" element={<Certificates />} />

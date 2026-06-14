@@ -74,3 +74,16 @@ export function learningResourceLd(opts: { name: string; description: string; pa
     provider: { '@type': 'Organization', name: 'NiHao', url: DOMAIN },
   };
 }
+
+// V2.8A — dictionary word page (DefinedTerm in a glossary)
+export function definedTermLd(opts: { term: string; definition: string; path: string; pinyin?: string }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    name: opts.term,
+    ...(opts.pinyin ? { alternateName: opts.pinyin } : {}),
+    description: opts.definition,
+    inDefinedTermSet: `${DOMAIN}/dictionary`,
+    url: `${DOMAIN}${opts.path}`,
+  };
+}

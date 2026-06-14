@@ -1,3 +1,26 @@
+# V2.8B additions
+- [ ] /dialogues hub lists 15 dialogues with HSK filter
+- [ ] /dialogues/airport-arrival etc. render conversation with per-line audio
+- [ ] Dialogue vocab words link to /dictionary/:slug pages
+- [ ] Disclaimers show on registration/bank/hospital dialogues
+- [ ] Word page "appears in" links to the dialogues using that word (e.g. /dictionary/huzhao)
+- [ ] Dictionary now 247 words (172 + 77 from dialogues), 0 duplicates
+- [ ] Old interactive dialogues still work at /dialogues-practice
+- [ ] sitemap has 15 dialogue + 247 word pages, 0 admin/draft/practice
+- [ ] Lessons, stories, admin, voice recorder all still work
+- [ ] Build passes on Node 18; no new dependencies
+
+# V2.8A additions
+- [ ] /dictionary/ni, /dictionary/xiexie, /dictionary/zhidao render full word pages
+- [ ] Word page shows char, pinyin+audio, Arabic, English, category, HSK badge, examples, related, "appears in"
+- [ ] DefinedTerm + BreadcrumbList JSON-LD present on word pages (Rich Results Test)
+- [ ] /dictionary has HSK filter (All/HSK1/HSK2) + category filter + search; cards link to word pages
+- [ ] Existing /dictionary search, Word-of-the-Day, saved words still work
+- [ ] sitemap.xml has 172 /dictionary/<slug> URLs and 0 admin/draft URLs
+- [ ] No duplicate words (你 appears once); slugs unique
+- [ ] Lessons, stories, admin drafts, mobile voice recorder all still work
+- [ ] Build passes on Node 18; no new dependencies
+
 # V2.7A.3 additions
 - [ ] Story audio (Play all / sentence speakers) still works
 - [ ] Microphone permission prompt appears only AFTER tapping "سجّل صوتك"

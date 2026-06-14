@@ -150,7 +150,7 @@ export default function Seo() {
   useEffect(() => {
     const path = location.pathname;
     // dynamic detail pages manage their own title
-    const isDynamic = /^\/(stories|blog|courses|present|worksheet|quiz)\/.+/.test(path);
+    const isDynamic = /^\/(stories|blog|courses|present|worksheet|quiz|dictionary|dialogues)\/.+/.test(path);
     const canonical = `${DOMAIN}${path === '/' ? '/' : path.replace(/\/$/, '')}`;
     upsertCanonical(canonical);
 
