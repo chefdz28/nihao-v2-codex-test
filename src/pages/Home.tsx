@@ -420,6 +420,10 @@ function LevelsSection() {
                   <img
                     src={level.image}
                     alt={level.titleEn}
+                    loading="lazy"
+                    decoding="async"
+                    width={360}
+                    height={200}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent" />
@@ -479,10 +483,10 @@ function HowItWorksSection() {
   const { t } = useI18n();
 
   const steps = [
-    { num: '01', title: 'how.step1.title', desc: 'how.step1.desc', img: '/images/how-it-works-1.png' },
-    { num: '02', title: 'how.step2.title', desc: 'how.step2.desc', img: '/images/how-it-works-2.png' },
-    { num: '03', title: 'how.step3.title', desc: 'how.step3.desc', img: '/images/how-it-works-3.png' },
-    { num: '04', title: 'how.step4.title', desc: 'how.step4.desc', img: '/images/how-it-works-4.png' },
+    { num: '01', title: 'how.step1.title', desc: 'how.step1.desc', img: '/images/how-it-works-1.webp' },
+    { num: '02', title: 'how.step2.title', desc: 'how.step2.desc', img: '/images/how-it-works-2.webp' },
+    { num: '03', title: 'how.step3.title', desc: 'how.step3.desc', img: '/images/how-it-works-3.webp' },
+    { num: '04', title: 'how.step4.title', desc: 'how.step4.desc', img: '/images/how-it-works-4.webp' },
   ];
 
   return (
@@ -494,8 +498,9 @@ function HowItWorksSection() {
           loop
           muted
           playsInline
+          preload="none"
           className="w-full h-full object-cover"
-          poster="/images/lesson-school.jpg"
+          poster="/images/lesson-school.webp"
         >
           <source src="/videos/video-classroom.mp4" type="video/mp4" />
         </video>
@@ -527,7 +532,7 @@ function HowItWorksSection() {
               whileHover={{ y: -4 }}
             >
               <span className="font-display font-black text-5xl text-[#FF3333]/30 block mb-4">{step.num}</span>
-              <img src={step.img} alt="" className="w-[120px] h-[120px] mx-auto mb-4 object-contain" />
+              <img src={step.img} alt="" loading="lazy" decoding="async" width={120} height={120} className="w-[120px] h-[120px] mx-auto mb-4 object-contain" />
               <h3 className="font-display font-bold text-xl text-white mb-3">{t(step.title)}</h3>
               <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>{t(step.desc)}</p>
             </motion.div>

@@ -1,3 +1,14 @@
+# V2.9C checks (mobile performance, progress preserved)
+- [ ] Homepage visually identical (dark/red, fonts, glass, layout)
+- [ ] Homepage media ~1.2MB (was ~11.6MB); images WebP; video 548KB
+- [ ] Main index JS ~448KB (was 731KB); gzip ~129KB
+- [ ] Lazy pages (Courses/Lesson/Practice/Dashboard/Dictionary) load fine
+- [ ] Mobile blur lighter; desktop unchanged; menu still solid
+- [ ] Complete one dialogue → dashboard shows dialogues=1, XP=15 everywhere, Arabic recent label
+- [ ] All feature files present; voice local-only (no storage)
+- [ ] sitemap/robots/llms unchanged; /daily in; /dashboard out; 0 admin/draft
+- [ ] Build passes on Node 18; no new dependencies
+
 # V2.9B.1 checks (dashboard XP consistency)
 - [ ] After completing one dialogue, top XP badge AND stats card both show 15 XP
 - [ ] No card shows 0 XP when progress exists

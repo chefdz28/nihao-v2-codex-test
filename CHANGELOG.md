@@ -1,3 +1,81 @@
+# NiHao V2.9C — Mobile Performance (built on latest main, progress preserved)
+
+Started from the latest GitHub main commit 4fa42b3 (V2.9B.1, v2.9.2) — NOT from
+any older base. All V2.9B/V2.9B.1 progress features are preserved. Performance-
+only pass: no redesign, no new features, no schema change, no new dependencies,
+no voice storage. Preserved: Vite 5.4.21, plugin-react 4.7.0, router 6.30.1,
+supabase-js 2.46.0, Node >=18.20.8.
+
+## Scope 1 — Homepage audit
+Home, Header, Layout, Footer import no heavy data (only the small courses list).
+No accidental dictionary/dialogues/stories/study-in-china/admin imports on the
+homepage path. The weight was (a) images/video and (b) several non-homepage
+pages bundled eagerly.
+
+## Scope 2 — Image optimization (the ~6MB savings)
+- 4 how-it-works illustrations: PNG → WebP, resized to 3x their 120px display
+  size. 5,718KB → 120KB (saved ~5.6MB).
+- 7 homepage level images: JPG → WebP. 536KB → 141KB.
+- Hero video recompressed with ffmpeg (1280x720 kept, CRF 30, muted/no audio,
+  +faststart): 4.5MB → 548KB (-88%). Same filename. Added preload="none" + WebP
+  poster.
+- Added loading="lazy", decoding="async", width/height to homepage images.
+- Originals kept in the repo (used elsewhere / per spec).
+- Homepage media payload: ~11.6MB → ~1.2MB (about -90%).
+
+## Scope 3 — JS / main-thread reduction
+- Kept V2.9A lazy loading + manualChunks (react-vendor / motion / supabase).
+- Moved 5 non-homepage pages that were still eager (Courses, Lesson, Practice,
+  Dashboard, Dictionary) to React.lazy. Home, Login, Register stay eager.
+- Main index JS: 731KB → 448KB (-39%). Gzipped: 208KB → 129KB (-38%).
+- Largest chunks after: index 448KB, motion 127KB, supabase 103KB, StudyInChina
+  66KB, studentDialogues 60KB. No tiny over-splitting; warning not suppressed.
+
+## Scope 4 — CSS / animations
+- prefers-reduced-motion already present (kept).
+- Added MOBILE-ONLY backdrop-blur reduction (20/30px → 10/14px under 768px) to
+  cut GPU compositing cost / TBT. Desktop unchanged. Mobile menu stays solid.
+
+## Scope 5 — Fonts
+- Already non-render-blocking (media=print → onload all) with trimmed weights
+  from V2.9A; kept as-is. CJK (Noto Serif SC) is genuinely used on the homepage
+  (Chinese word previews + decorative characters), loaded non-blocking with
+  display=swap, so no change needed. No huge CJK self-hosting attempted.
+
+## Scope 6 — Server recommendations (RunCloud / Cloudflare)
+- Cache /assets/* for 1 year (immutable); /images/* ~1 month.
+- Enable Brotli. Do not cache HTML aggressively.
+- IMPORTANT (from an earlier curl test): the live server returned /assets/*.js
+  with content-type text/html and cache-control no-store, and TTFB ~3.9s. Ensure
+  nginx serves assets with `try_files $uri =404`, correct MIME types, long cache
+  + brotli_static, and investigate the high TTFB. Code can't fix server config.
+- Do not rely on Cloudflare to fix oversized images (already optimized here).
+
+## Scope 7 — SEO safety
+sitemap.xml, robots.txt, llms.txt byte-identical to main. /daily present;
+/dashboard NOT indexed; 0 admin/draft/practice routes; 28 study-in-china pages
+intact. Structured data untouched.
+
+## Scope 8 — Feature preservation
+All present and working: studentProgress.ts, MarkComplete.tsx, ProgressPanel.tsx,
+20260614_student_progress.sql, Daily.tsx, Dashboard.tsx, StudentDialogues.tsx,
+DictionaryWord.tsx, VoicePractice.tsx. Voice stays local-only (no Storage, no
+voice_submissions, no upload).
+
+## Changed files
+- src/pages/Home.tsx (WebP refs + lazy/dims + video preload)
+- src/data/courses.ts (level images → WebP)
+- src/App.tsx (5 more pages lazy)
+- src/index.css (mobile blur reduction)
+- public/images/*.webp (new optimized), public/videos/video-classroom.mp4 (recompressed)
+- package.json (2.9.3)
+
+## Routes tested
+/ /daily /dashboard /dialogues /dialogues/airport-arrival /stories /dictionary
+/dictionary/huzhao /study-in-china /admin/content-drafts /sitemap.xml /llms.txt
+
+---
+
 # NiHao V2.9B.1 — Dashboard Progress Consistency Fix
 
 Base: V2.9B (v2.9.1). Bug-fix only. No redesign, no new features, no schema

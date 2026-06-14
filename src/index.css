@@ -257,3 +257,17 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* V2.9C: lighten heavy backdrop-blur on mobile only (keeps the glass look but
+   far cheaper to composite on phone GPUs — helps TBT/main-thread). Desktop
+   unchanged. The mobile menu stays solid (not transparent). */
+@media (max-width: 768px) {
+  .liquid-glass {
+    backdrop-filter: blur(10px) saturate(115%);
+    -webkit-backdrop-filter: blur(10px) saturate(115%);
+  }
+  .liquid-glass-strong {
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+  }
+}

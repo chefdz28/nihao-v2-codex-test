@@ -4,17 +4,12 @@ import { useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import Seo from './components/Seo';
 import Home from './pages/Home';
-import Courses from './pages/Courses';
-import Lesson from './pages/Lesson';
-import Practice from './pages/Practice';
-import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 const Blog = lazy(() => import('./pages/Blog'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Worksheet = lazy(() => import('./pages/Worksheet'));
 import { Missions, Achievements } from './pages/Missions';
-import Dictionary from './pages/Dictionary';
 const Stories = lazy(() => import('./pages/Stories').then(m => ({ default: m.Stories })));
 const StoryReader = lazy(() => import('./pages/Stories').then(m => ({ default: m.StoryReader })));
 const Certificates = lazy(() => import('./pages/Certificates'));
@@ -81,6 +76,12 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Review = lazy(() => import('./pages/Review'));
 const Daily = lazy(() => import('./pages/Daily'));
 const Pinyin = lazy(() => import('./pages/Pinyin'));
+
+const Courses = lazy(() => import('./pages/Courses'));
+const Lesson = lazy(() => import('./pages/Lesson'));
+const Practice = lazy(() => import('./pages/Practice'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Dictionary = lazy(() => import('./pages/Dictionary'));
 
 export default function App() {
   return (
