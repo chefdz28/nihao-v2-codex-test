@@ -8,6 +8,7 @@ import JsonLd from '@/components/JsonLd';
 import { breadcrumbLd, definedTermLd } from '@/lib/structuredData';
 import { wordBySlug, dictionaryWords } from '@/data/dictionaryCore';
 import { findUsages } from '@/lib/wordUsages';
+import { trackEvent } from '@/lib/analytics';
 
 /** V2.8A /dictionary/:slug — individual reference page for one word. */
 export default function DictionaryWord() {
@@ -22,6 +23,7 @@ export default function DictionaryWord() {
       let m = document.querySelector('meta[name="description"]');
       if (!m) { m = document.createElement('meta'); m.setAttribute('name', 'description'); document.head.appendChild(m); }
       m.setAttribute('content', desc);
+      trackEvent('dictionary_word_view', { content_slug: word.slug, hsk: word.hsk });
     }
     return () => { document.title = 'NiHao'; };
   }, [word]);

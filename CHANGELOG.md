@@ -1,3 +1,60 @@
+# NiHao V2.9D — GA4 Analytics on top of V2.9C
+
+Base: GitHub main 6c5dc07 (V2.9C, v2.9.3) — the latest commit WITH the mobile
+performance work. This rebuilds GA4 on the correct base (the earlier GA4 package
+was built on V2.9B.1 and is superseded). All V2.9C performance optimizations and
+V2.9B/B.1 progress features are preserved. One GA4 tag only — no GTM, no new
+dependencies, no redesign, no schema change, no voice storage.
+
+## V2.9C performance preserved (verified)
+- 12 WebP images present (how-it-works-1..4, lesson-activities/chinese-basics/
+  colors/family/food/greetings/numbers/school).
+- src/pages/Home.tsx references WebP; src/data/courses.ts keeps WebP refs.
+- public/videos/video-classroom.mp4 stays compressed (548KB, not 4.5MB).
+- Main index JS: 449KB (V2.9C was 448KB; GA4 adds ~1KB — no regression, nowhere
+  near the old ~690KB). V2.9C lazy routes + manualChunks intact.
+
+## V2.9B/B.1 progress preserved
+studentProgress.ts, MarkComplete.tsx, ProgressPanel.tsx, the student_progress
+migration, Daily.tsx, Dashboard.tsx all present; the dashboard XP-consistency fix
+(stats card reads summary.xp) is intact. XP system, /daily, /dashboard unchanged.
+
+## GA4 — how it was added
+- src/lib/analytics.ts — initAnalytics(), trackPageView(path), trackEvent(name,
+  params). Dynamically injects the async gtag.js (never blocks first paint),
+  configures with send_page_view:false + anonymize_ip, guarded against double
+  init.
+- src/components/AnalyticsTracker.tsx — mounted once in App (inside Router);
+  inits GA and sends a MANUAL page_view on each route change (path only). No
+  double counting.
+- src/types/analytics.d.ts — window.gtag / window.dataLayer types.
+- .env.example — documents VITE_GA_MEASUREMENT_ID.
+
+## GA4 — privacy & safety
+- Runs only when import.meta.env.PROD AND VITE_GA_MEASUREMENT_ID are set (dev =
+  no GA). ID is not hardcoded.
+- Any path starting with /admin is excluded (no page views/events).
+- No PII: only page path/title + content slugs/types. No email/name/user id/
+  progress details/voice/answers. anonymize_ip on.
+- No GTM. index.html has zero GA code (injected once) → no duplicate scripts.
+
+## Events (minimal, safe)
+start_lesson, complete_lesson, complete_dialogue, complete_daily, complete_story,
+dictionary_word_view — slugs/types only.
+
+## Changed/new files
+- NEW: src/lib/analytics.ts, src/components/AnalyticsTracker.tsx,
+  src/types/analytics.d.ts, .env.example
+- EDIT: src/App.tsx (mount tracker), src/components/MarkComplete.tsx (completion
+  events), src/pages/DictionaryWord.tsx (word view), src/pages/Lesson.tsx
+  (start_lesson)
+
+## Build & SEO
+npm install && npm run build → passes on Node 18. sitemap/robots/llms unchanged.
+No .env / node_modules / dist / .git in the package.
+
+---
+
 # NiHao V2.9C — Mobile Performance (built on latest main, progress preserved)
 
 Started from the latest GitHub main commit 4fa42b3 (V2.9B.1, v2.9.2) — NOT from

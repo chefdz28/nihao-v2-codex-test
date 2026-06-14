@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import PinyinText from '@/components/PinyinText';
 import { awardXP, trackActivity, XP_REWARDS } from '@/lib/gamification';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -58,6 +59,7 @@ export default function Lesson() {
       const { data: lessonData } = await supabase.from('lessons').select('*').eq('id', id).single();
       if (!lessonData) { setError('Lesson not found'); setLoading(false); return; }
       setLesson(lessonData);
+      trackEvent('start_lesson', { content_slug: id });
 
       const { data: neighborLessons } = await supabase
         .from('lessons')

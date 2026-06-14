@@ -1,3 +1,11 @@
+# V2.9D GA4-on-V2.9C checks
+- [ ] Base is V2.9C (6c5dc07): 12 WebP present, video 548KB, index ~449KB
+- [ ] Set VITE_GA_MEASUREMENT_ID in production env; dev sends nothing
+- [ ] Page views fire once per route change; /admin* excluded
+- [ ] Events: start_lesson, complete_*, dictionary_word_view
+- [ ] No PII; no GTM; no duplicate GA script in index.html
+- [ ] Progress features + dashboard XP fix still work
+- [ ] Build passes; no .env/dist/node_modules/.git in zip
 # V2.9C checks (mobile performance, progress preserved)
 - [ ] Homepage visually identical (dark/red, fonts, glass, layout)
 - [ ] Homepage media ~1.2MB (was ~11.6MB); images WebP; video 548KB

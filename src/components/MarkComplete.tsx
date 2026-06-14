@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Check, Circle, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { markCompleted, unmarkCompleted, isCompleted, type ContentType } from '@/lib/studentProgress';
+import { trackEvent } from '@/lib/analytics';
 
 /**
  * V2.9B — shared "mark complete" control for stories, dialogues, lessons, daily.
@@ -26,7 +27,16 @@ export default function MarkComplete({ type, slug, score }: { type: ContentType;
   const toggle = async () => {
     setBusy(true);
     if (done) { await unmarkCompleted(type, slug); setDone(false); }
-    else { await markCompleted(type, slug, score); setDone(true); }
+    else {
+      await markCompleted(type, slug, score);
+      setDone(true);
+      const evt = type === 'lesson' ? 'complete_lesson'
+        : type === 'dialogue' ? 'complete_dialogue'
+        : type === 'daily' ? 'complete_daily'
+        : type === 'story' ? 'complete_story'
+        : 'complete_content';
+      trackEvent(evt, { content_type: type, content_slug: slug });
+    }
     setBusy(false);
   };
 
