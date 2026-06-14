@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { recordMistake } from '@/lib/mistakes';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpenText, Volume2, Check, X, ArrowLeft, ArrowRight, Eye, EyeOff, Play, Pause, Mic, Square } from 'lucide-react';
-import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
+import { BookOpenText, Volume2, Check, X, ArrowLeft, ArrowRight, Eye, EyeOff, Play, Pause } from 'lucide-react';
+import VoicePractice from '@/components/VoicePractice';
 import { useI18n } from '@/i18n';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
 import { stories } from '@/data/stories2';
+import { wordBySlug, wordSlug } from '@/data/dictionaryCore';
 import { awardXP, trackActivity } from '@/lib/gamification';
 import { STAGES } from '@/data/levels';
 
@@ -78,11 +79,8 @@ export function StoryReader() {
   const [currentSentence, setCurrentSentence] = useState(-1);
   const playingRef = useRef(false);
   // V2.2.1 + V2.7A.3: shadowing — record yourself, replay for self-comparison
-  // (no API). Mobile-safe recorder picks an iOS-compatible MIME and handles
-  // playback + errors. Story audio (speechSynthesis) is untouched.
-  const recorder = useVoiceRecorder();
-  const recordPlaybackRef = useRef<HTMLAudioElement | null>(null);
-  const [playbackError, setPlaybackError] = useState(false);
+  // Story audio (speechSynthesis) is untouched; the user's mic recording is now
+  // handled by the shared <VoicePractice/> component (local-only).
 
   useEffect(() => () => {
     playingRef.current = false;
@@ -119,27 +117,6 @@ export function StoryReader() {
     }
     playingRef.current = false;
     setPlayingAll(false);
-  };
-
-  const toggleRecord = async () => {
-    setPlaybackError(false);
-    if (recorder.isRecording) {
-      recorder.stop();
-    } else {
-      await recorder.start();
-    }
-  };
-
-  const playRecording = async () => {
-    setPlaybackError(false);
-    const el = recordPlaybackRef.current;
-    if (!el) return;
-    try {
-      el.currentTime = 0;
-      await el.play();
-    } catch {
-      setPlaybackError(true);
-    }
   };
 
   if (!story) {
@@ -206,67 +183,40 @@ export function StoryReader() {
           <div className="liquid-glass p-4 mb-6">
             <p className="text-xs font-display font-semibold uppercase mb-3" style={{ color: 'var(--color-text-tertiary)' }}>{t('stories.wordsUsed')}</p>
             <div className="flex flex-wrap gap-2">
-              {story.vocab.map(v => (
-                <button key={v.zh} onClick={() => play(v.zh)} className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#FF3333]/40 px-3 py-2 text-center transition-colors">
-                  <span className="font-chinese text-lg text-white block">{v.zh}</span>
-                  {showPinyin && <PinyinText className="text-center">{v.py}</PinyinText>}
-                  <span className="text-[10px] block" style={{ color: 'var(--color-text-secondary)' }}>{isAr ? v.ar : v.en}</span>
-                </button>
-              ))}
+              {story.vocab.map(v => {
+                const slug = wordSlug(v.zh, v.py);
+                const inDict = wordBySlug(slug);
+                const inner = (
+                  <>
+                    <span className="font-chinese text-lg text-white block">{v.zh}</span>
+                    {showPinyin && <PinyinText className="text-center">{v.py}</PinyinText>}
+                    <span className="text-[10px] block" style={{ color: 'var(--color-text-secondary)' }}>{isAr ? v.ar : v.en}</span>
+                  </>
+                );
+                return inDict ? (
+                  <Link key={v.zh} to={`/dictionary/${slug}`} onClick={() => trackActivity('words_seen')} className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#FF3333]/40 px-3 py-2 text-center transition-colors">
+                    {inner}
+                  </Link>
+                ) : (
+                  <button key={v.zh} onClick={() => play(v.zh)} className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#FF3333]/40 px-3 py-2 text-center transition-colors">
+                    {inner}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* V2.2.1 + V2.7A.3: listening mode + shadowing bar */}
-          <div className="liquid-glass p-4 mb-2 flex flex-wrap items-center justify-center gap-3">
+          {/* V2.2.1 + V2.7A.3 + V2.8C: listening mode (speechSynthesis) + unified voice practice */}
+          <div className="liquid-glass p-4 mb-2 flex items-center justify-center">
             <button onClick={playAll} className="btn-primary text-sm py-2.5 px-5">
               {playingAll ? <><Pause size={14} /> {t('stories.pause')}</> : <><Play size={14} /> {t('stories.playAll')}</>}
             </button>
-            {recorder.supported && (
-              <button onClick={toggleRecord} disabled={recorder.state === 'requesting' || recorder.state === 'processing'} className={`text-sm py-2.5 px-5 rounded-xl font-display font-bold transition-colors flex items-center gap-1.5 disabled:opacity-60 ${recorder.isRecording ? 'bg-[#FF3333] text-white animate-pulse' : 'bg-white/5 hover:bg-white/10 text-white'}`}>
-                {recorder.isRecording
-                  ? <><Square size={13} /> {t('stories.stopRec')}</>
-                  : recorder.state === 'requesting'
-                    ? <>{t('stories.requesting')}</>
-                    : recorder.state === 'processing'
-                      ? <>{t('stories.processing')}</>
-                      : <><Mic size={13} /> {t('stories.shadow')}</>}
-              </button>
-            )}
-            {recorder.recordUrl && !recorder.isRecording && (
-              <button onClick={playRecording} className="text-sm py-2.5 px-5 rounded-xl font-display font-bold bg-[#10b981]/15 hover:bg-[#10b981]/25 text-[#10b981] transition-colors flex items-center gap-1.5">
-                <Play size={13} /> {t('stories.playRec')}
-              </button>
-            )}
           </div>
 
-          {/* hidden audio element drives playback so we can catch play() errors */}
-          {recorder.recordUrl && (
-            <audio
-              ref={recordPlaybackRef}
-              src={recorder.recordUrl}
-              controls
-              onError={() => setPlaybackError(true)}
-              className="w-full max-w-[280px] mx-auto block h-9 mb-2"
-            />
-          )}
-
-          {/* recorder error messages (Arabic) */}
-          {recorder.state === 'error' && recorder.error && (
-            <p className="text-[12px] text-center mb-2 text-[#FF3333] font-arabic">{recorder.error}</p>
-          )}
-          {playbackError && (
-            <p className="text-[12px] text-center mb-2 text-[#FF3333] font-arabic">
-              تم التسجيل، لكن المتصفح لم يستطع تشغيل التسجيل. جرّب Safari أو Chrome محدث.
-            </p>
-          )}
-
-          {recorder.recordUrl && !recorder.isRecording && recorder.state === 'ready' && (
-            <p className={`text-[11px] text-center mb-1 ${isAr ? 'font-arabic' : ''}`} style={{ color: 'var(--color-text-tertiary)' }}>{t('stories.shadowHint')}</p>
-          )}
-          {/* persistent helper text */}
-          <p className="text-[11px] text-center mb-4 font-arabic" style={{ color: 'var(--color-text-tertiary)' }}>
-            إذا لم يعمل التسجيل، تأكد من السماح للميكروفون وفتح الموقع عبر HTTPS.
-          </p>
+          {/* shared local-only voice practice (record / play back / retry) */}
+          <div className="mb-4">
+            <VoicePractice />
+          </div>
 
           {/* Story sentences */}
           <div className="space-y-3 mb-8">

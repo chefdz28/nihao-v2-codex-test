@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Volume2, BookA, Layers, MessagesSquare, BookOpenText, Hash } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Volume2, BookA, Layers, MessagesSquare, BookOpenText, Hash, GraduationCap } from 'lucide-react';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
 import JsonLd from '@/components/JsonLd';
@@ -95,7 +95,7 @@ export default function DictionaryWord() {
             <div className="flex flex-wrap gap-2">
               {usages.map((u, i) => (
                 <Link key={i} to={u.path} className="liquid-glass rounded-xl px-4 py-2.5 text-sm font-arabic text-white hover:border-[#FF3333]/30 border border-transparent transition-colors inline-flex items-center gap-2">
-                  {u.type === 'story' ? <BookOpenText size={14} className="text-[#FF3333]" /> : <MessagesSquare size={14} className="text-[#FF3333]" />}
+                  {u.type === 'story' ? <BookOpenText size={14} className="text-[#FF3333]" /> : u.type === 'lesson' ? <GraduationCap size={14} className="text-[#FF3333]" /> : <MessagesSquare size={14} className="text-[#FF3333]" />}
                   {u.title}
                 </Link>
               ))}

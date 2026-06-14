@@ -1,3 +1,16 @@
+# V2.8C additions
+- [ ] /stories/:id vocab cards link to /dictionary/:slug when the word exists
+- [ ] Dictionary grew to 254 words (8 story words added), 0 duplicates
+- [ ] Word pages show "appears in" dialogues + stories + lessons
+- [ ] /dictionary/huzhao shows related dialogues; /dictionary/qichuang shows its story + lesson
+- [ ] /dialogues/:slug has "تدرّب على النطق" voice practice (record/stop/play/retry)
+- [ ] Story page still has "Play all" (speechSynthesis) AND the shared voice practice
+- [ ] Voice recording works on iPhone Safari/Chrome (MIME detection); local-only, no upload
+- [ ] "سجّل صوتك" / "استمع إلى تسجيلك" / "أعد المحاولة" all present
+- [ ] sitemap has 0 admin/draft/dialogues-practice; robots/llms unchanged
+- [ ] V2.8B dialogues, admin drafts, story audio all still work
+- [ ] Build passes on Node 18; no new dependencies
+
 # V2.8B additions
 - [ ] /dialogues hub lists 15 dialogues with HSK filter
 - [ ] /dialogues/airport-arrival etc. render conversation with per-line audio

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MessagesSquare, ArrowLeft, ArrowRight, Volume2, BookA, AlertTriangle, Hash } from 'lucide-react';
+import { MessagesSquare, ArrowLeft, ArrowRight, Volume2, BookA, AlertTriangle, Hash, Mic } from 'lucide-react';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
 import JsonLd from '@/components/JsonLd';
 import { breadcrumbLd } from '@/lib/structuredData';
 import { studentDialogues, studentDialogueById } from '@/data/studentDialogues';
 import { wordBySlug } from '@/data/dictionaryCore';
+import VoicePractice from '@/components/VoicePractice';
 
 /** V2.8B /dialogues/:slug — single student dialogue with audio + dictionary links */
 export function StudentDialogueView() {
@@ -80,6 +81,15 @@ export function StudentDialogueView() {
             </div>
           ))}
         </div>
+
+        {/* V2.8C: unified voice practice (local-only recording) */}
+        <section className="mb-8">
+          <h2 className="font-display font-bold text-lg text-white mb-3 font-arabic flex items-center gap-2"><Mic size={18} className="text-[#FF3333]" /> تدرّب على النطق</h2>
+          <p className="text-xs font-arabic mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
+            سجّل صوتك وأنت تقرأ الحوار، ثم استمع إلى تسجيلك وقارن نطقك. التسجيل محلي فقط ولا يُحفظ.
+          </p>
+          <VoicePractice />
+        </section>
 
         {/* Vocabulary with dictionary links */}
         {dialogue.vocab.length > 0 && (

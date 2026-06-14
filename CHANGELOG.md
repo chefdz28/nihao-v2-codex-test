@@ -1,3 +1,58 @@
+# NiHao V2.8C — Story↔Dictionary Linking + Unified Voice Practice
+
+Base: GitHub main b509fec (V2.8B, v2.8.1). Third layer of V2.8. Links story
+vocabulary to dictionary word pages, expands word-usage cross-links to include
+lessons, and introduces ONE shared voice-practice component used by both stories
+and dialogues. Preserved: Vite 5.4.21, plugin-react 4.7.0, router 6.30.1,
+supabase-js 2.46.0, Node >=18.20.8. No SQL changes, no paid/AI APIs, no new deps.
+
+## Scope 1 — Story → dictionary linking
+- Story vocab cards on /stories/:id now link to /dictionary/<slug> when the word
+  exists (audio-play fallback otherwise). Uses dictionaryCore's wordSlug so slugs
+  match exactly.
+- Added a small, documented batch of 8 story words that appeared in stories but
+  weren't in the dictionary (起床, 饭馆, 服务员, 饭店, 到, 星期六, 公园, 每天) →
+  src/data/dictionaryStoryWords.ts, wired into dictionaryCore. Deduped by Chinese
+  char + tone-stripped pinyin. Dictionary: 247 → 254 words, 0 duplicate slugs.
+  Story-vocab → dictionary linkage: 32/40 → 39/40.
+
+## Scope 2 — Word-usage expansion
+- src/lib/wordUsages.ts now also returns LESSONS that teach a word (matched on
+  lesson vocabulary), deep-linking to /courses/<stage>/<lessonId> via the stage
+  range map. Word pages now show "appears in": dialogues, stories, AND lessons.
+- Verified: /dictionary/huzhao → airport/registration/bank/SIM dialogues;
+  story words (e.g. 起床) → their story + the lesson that teaches them.
+- DictionaryWord.tsx renders a lesson icon (GraduationCap) for lesson links.
+
+## Scope 3 — Unified voice practice (local-only)
+- New src/components/VoicePractice.tsx wraps the existing mobile-safe
+  useVoiceRecorder hook (iOS MIME detection). LOCAL ONLY: record → stop → play
+  back → retry. No Supabase, no upload, no storage.
+- Buttons (Arabic): "سجّل صوتك" / "أوقف التسجيل" / "استمع إلى تسجيلك" /
+  "أعد المحاولة", plus the playback-failure message and the HTTPS/mic helper text.
+- Used on dialogue pages (/dialogues/:slug) under "تدرّب على النطق".
+- Stories.tsx refactored to use the SAME component; the story "Play all" listening
+  mode (speechSynthesis) is kept separate and UNTOUCHED.
+
+## Scope 4 — SEO
+- sitemap.xml regenerated → 354 URLs (+254 word pages, +15 dialogue pages). NO
+  admin, draft, or /dialogues-practice routes (verified 0).
+- robots.txt and llms.txt unchanged. BreadcrumbList/DefinedTerm JSON-LD unchanged
+  and safe.
+
+## Safety
+V2.8B dialogues, admin/content-drafts (AdminContentDrafts.tsx + adminDrafts.ts
+byte-identical), and the voice recorder hook (useVoiceRecorder.ts byte-identical)
+are all intact. Story speechSynthesis audio untouched. Build passes on Node 18.
+No new dependencies.
+
+## Sample test URLs
+/stories · /stories/school-day (vocab cards now link to dictionary) · /dialogues ·
+/dialogues/airport-arrival (voice practice + vocab links) · /dictionary/huzhao
+(appears-in dialogues) · /dictionary/qichuang (story word, appears-in story+lesson).
+
+---
+
 # NiHao V2.8B — Student Dialogues System + Dictionary Cross-Links
 
 Base: local V2.8A source. Second layer of V2.8 ("dialogues + linking"), built on

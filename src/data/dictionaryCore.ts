@@ -5,6 +5,7 @@
 import { hsk1FullLessons } from '@/data/hsk1-full';
 import { hsk2Batch } from '@/data/dictionaryHsk2';
 import { dialogueWords } from '@/data/dictionaryDialogueWords';
+import { storyWords } from '@/data/dictionaryStoryWords';
 
 export interface DictExample { zh: string; py: string; ar: string; en?: string }
 export interface DictWord {
@@ -97,6 +98,9 @@ function collectRaw(): RawWord[] {
     out.push({ chinese: w.chinese, pinyin: w.pinyin, arabic: w.arabic, english: w.english, hsk: 2, examples: w.examples });
   }
   for (const w of dialogueWords) {
+    out.push({ chinese: w.chinese, pinyin: w.pinyin, arabic: w.arabic, english: w.english, hsk: w.hsk, examples: w.examples });
+  }
+  for (const w of storyWords) {
     out.push({ chinese: w.chinese, pinyin: w.pinyin, arabic: w.arabic, english: w.english, hsk: w.hsk, examples: w.examples });
   }
   return out;
