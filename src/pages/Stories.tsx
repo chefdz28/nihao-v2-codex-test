@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BookOpenText, Volume2, Check, X, ArrowLeft, ArrowRight, Eye, EyeOff, Play, Pause } from 'lucide-react';
 import VoicePractice from '@/components/VoicePractice';
+import MarkComplete from '@/components/MarkComplete';
 import { useI18n } from '@/i18n';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
@@ -296,6 +297,10 @@ export function StoryReader() {
           </div>
           <h2 className="font-display font-bold text-2xl text-white mb-2">{t('stories.quizDone')}</h2>
           <p className="text-xs text-[#f59e0b] mb-6">+15 XP</p>
+          {/* V2.9B: save story completion to progress */}
+          <div className="mb-6 flex justify-center">
+            <MarkComplete type="story" slug={story.id} score={score} />
+          </div>
           <div className="flex justify-center gap-3">
             <button onClick={() => { setQuizMode(false); setFinished(false); setQIndex(0); setPicked(null); setScore(0); }} className="btn-secondary text-sm">{t('stories.readAgain')}</button>
             <Link to="/stories" className="btn-primary text-sm">{t('stories.more')}</Link>

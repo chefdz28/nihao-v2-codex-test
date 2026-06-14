@@ -9,6 +9,7 @@ import { calculateXP, averageQuizScore, computeStreak } from '@/lib/learning';
 import { TodaysPlan, DailyMissions } from '@/components/TodaysPlan';
 import StartHere from '@/components/StartHere';
 import { getXP } from '@/lib/gamification';
+import ProgressPanel from '@/components/ProgressPanel';
 import type { QuizResult, UserProgressItem, LessonRow, LevelRow } from '@/types/supabase';
 
 export default function Dashboard() {
@@ -105,6 +106,9 @@ export default function Dashboard() {
           </h1>
           <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.subtitle')}</p>
         </div>
+
+        {/* V2.9B: student progress panel (counts, XP, recent activity, continue) */}
+        <ProgressPanel />
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

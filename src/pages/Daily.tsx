@@ -1,12 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sun, BookOpen, MessageSquare, HelpCircle, Check, X, ArrowRight, Loader2, PartyPopper } from 'lucide-react';
+import { Sun, BookOpen, MessageSquare, HelpCircle, Check, X, ArrowRight, Loader2, PartyPopper, Mic } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchLessons, fetchVocabulary, fetchSentences, fetchQuizQuestions, fetchUserProgress } from '@/lib/dataService';
 import { firstIncompleteLesson, shuffle } from '@/lib/learning';
 import AudioButton from '@/components/AudioButton';
+import VoicePractice from '@/components/VoicePractice';
+import MarkComplete from '@/components/MarkComplete';
 import type { LessonRow, VocabRow, SentenceRow, QuizQuestionRow, QuizOption } from '@/types/supabase';
 
 type Step = 'words' | 'sentences' | 'quiz' | 'done';
@@ -35,6 +37,16 @@ export default function Daily() {
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState(0);
+
+  // V2.9B: Arabic SEO title + meta for /daily
+  useEffect(() => {
+    document.title = 'التدريب اليومي — تعلّم الصينية كل يوم | NiHao';
+    const desc = 'جلسة تدريب يومية قصيرة لتعلّم الصينية: 5 كلمات، جمل، تدريب نطق، واختبار سريع. ابنِ عادة تعلّم يومية مع NiHao.';
+    let m = document.querySelector('meta[name="description"]');
+    if (!m) { m = document.createElement('meta'); m.setAttribute('name', 'description'); document.head.appendChild(m); }
+    m.setAttribute('content', desc);
+    return () => { document.title = 'NiHao'; };
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -225,6 +237,19 @@ export default function Daily() {
               {t('daily.quizScore')}: {score} / {questions.length}
             </p>
           )}
+
+          {/* V2.9B: speaking practice (local-only) */}
+          <div className="mb-6 text-right" dir="rtl">
+            <p className="text-sm font-arabic font-bold text-white mb-2 flex items-center gap-2 justify-center"><Mic size={16} className="text-[#FF3333]" /> تدرّب على النطق</p>
+            <p className="text-xs font-arabic mb-3 text-center" style={{ color: 'var(--color-text-tertiary)' }}>اقرأ كلمات اليوم بصوت واضح، سجّل واستمع لنفسك. التسجيل محلي فقط.</p>
+            <VoicePractice />
+          </div>
+
+          {/* V2.9B: mark daily complete (slug = today's date) */}
+          <div className="mb-6 flex justify-center">
+            <MarkComplete type="daily" slug={new Date().toISOString().slice(0, 10)} score={questions.length > 0 ? score : undefined} />
+          </div>
+
           <div className="flex flex-wrap gap-3 justify-center">
             <Link to={`/courses/${lesson.level_id}/${lesson.id}`} className="btn-primary text-sm">{t('daily.openLesson')}</Link>
             <Link to="/dashboard" className="btn-secondary text-sm">{t('daily.dashboard')}</Link>

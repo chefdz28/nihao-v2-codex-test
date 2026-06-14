@@ -1,3 +1,69 @@
+# NiHao V2.9B — Student Progress + Dashboard + Daily Practice + Light XP
+
+Base: local V2.9A source (GitHub main was at V2.8C; the V2.8C + V2.9A + V2.9B
+chain ships together — deploy combined, then run the new migration once). Second
+half of the V2.9 plan — the learning-experience layer. Preserved: Vite 5.4.21,
+plugin-react 4.7.0, router 6.30.1, supabase-js 2.46.0, Node >=18.20.8. No new
+dependencies. No voice storage.
+
+## Scope 1 — Student progress system
+- New migration supabase/migrations/20260614_student_progress.sql creates the
+  student_progress table (id, user_id, content_type, content_slug, status, score,
+  completed_at, created_at, updated_at), a UNIQUE(user_id, content_type,
+  content_slug) constraint, indexes, and an updated_at trigger. RLS: students
+  manage only their own rows; admins can read all via the existing user_roles
+  pattern. The public site/SEO do NOT depend on this table.
+- New src/lib/studentProgress.ts: getProgress(), markCompleted(),
+  unmarkCompleted(), isCompleted(), getRecentActivity(), getSummary(). Uses
+  Supabase when logged in, else a localStorage fallback for guests. XP map lives
+  here (lesson 10, story 15, dialogue 15, quiz 10, daily 20).
+
+## Scope 2 — Mark-complete buttons
+- New src/components/MarkComplete.tsx: "علّم كمكتمل" / "تم إكماله" /
+  "إلغاء الإكمال", with a "سجّل الدخول لحفظ تقدمك" prompt for guests.
+- Wired into story pages (on quiz finish, type=story) and dialogue pages
+  (type=dialogue). Lessons were intentionally NOT modified: the Lesson page
+  already has its own Supabase completion + XP flow, so adding a second tracker
+  there would risk double-counting. The dashboard still reflects lessons via the
+  existing system.
+
+## Scope 3 — Dashboard improvements
+- New src/components/ProgressPanel.tsx at the top of /dashboard: total XP,
+  continue-learning / suggested next step, completed counts (lessons, stories,
+  dialogues, daily) as cards, and recent activity. Empty state:
+  "ابدأ أول درس أو حوار ليظهر تقدمك هنا." Mobile-first, Arabic-first.
+
+## Scope 4 — Daily practice (/daily)
+- The existing /daily page (5 words + 3 sentences + mini quiz) gained: a local
+  speaking-practice task using the shared VoicePractice component, and a
+  MarkComplete (type=daily, slug = today's date) on the done step. Arabic SEO
+  title + meta added. /daily added to the sitemap (public, priority 0.8).
+
+## Scope 5 — Light XP
+- XP computed from progress (lesson 10 / story 15 / dialogue 15 / quiz 10 /
+  daily 20) and shown on the dashboard. No streaks, no leaderboards, no badges.
+
+## Scope 6 — Voice policy
+- Voice stays LOCAL ONLY (record / stop / play / retry). No Supabase Storage, no
+  voice_submissions table. The migration explicitly stores no audio.
+
+## Scope 7 — SEO safety
+- sitemap.xml: /daily added; 0 admin, draft, or /dialogues-practice routes;
+  /dashboard NOT indexed (private). robots.txt and llms.txt unchanged. No SEO
+  pages removed.
+
+## Manual Supabase step (one-time)
+Run supabase/migrations/20260614_student_progress.sql in the Supabase SQL editor
+(in addition to the earlier 20260613_admin_content_drafts.sql). Requires the
+existing user_roles table for the admin read policy.
+
+## Routes to test
+/ · /dashboard (progress panel) · /daily (voice + mark complete) · /stories
+(mark complete after quiz) · /dialogues/airport-arrival (mark complete) ·
+/dictionary/huzhao · /admin/content-drafts · /sitemap.xml · /llms.txt
+
+---
+
 # NiHao V2.9A — Mobile Performance + Mobile Menu Fix
 
 Base: local V2.8C source (GitHub main was at V2.8B; V2.8C + this ship together).

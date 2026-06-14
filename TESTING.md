@@ -1,3 +1,17 @@
+# V2.9B additions
+- [ ] Run 20260614_student_progress.sql in Supabase (table + RLS + trigger)
+- [ ] Logged in: mark a story/dialogue/daily complete → persists across reloads
+- [ ] Guest: mark complete works (localStorage) + "سجّل الدخول لحفظ تقدمك" shows
+- [ ] /dashboard shows XP, counts, recent activity, continue-learning
+- [ ] Empty state: "ابدأ أول درس أو حوار ليظهر تقدمك هنا."
+- [ ] /daily has 5 words + 3 sentences + voice practice + mini quiz + mark complete
+- [ ] /daily has Arabic <title>/meta; appears in sitemap
+- [ ] XP: lesson 10 / story 15 / dialogue 15 / quiz 10 / daily 20
+- [ ] No voice upload anywhere; no voice_submissions table
+- [ ] sitemap has 0 admin/draft/practice; /dashboard not indexed
+- [ ] Lessons, admin drafts, dictionary, dialogues, stories all still work
+- [ ] Build passes on Node 18; no new dependencies
+
 # V2.9A additions
 - [ ] Homepage loads fast; main JS chunk ~665KB (was 1.1MB)
 - [ ] Lazy pages load with "جاري التحميل..." fallback

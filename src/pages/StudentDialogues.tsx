@@ -8,6 +8,7 @@ import JsonLd from '@/components/JsonLd';
 import { breadcrumbLd } from '@/lib/structuredData';
 import { studentDialogues, studentDialogueById } from '@/data/studentDialogues';
 import { wordBySlug } from '@/data/dictionaryCore';
+import MarkComplete from '@/components/MarkComplete';
 import VoicePractice from '@/components/VoicePractice';
 
 /** V2.8B /dialogues/:slug — single student dialogue with audio + dictionary links */
@@ -117,6 +118,11 @@ export function StudentDialogueView() {
             </div>
           </section>
         )}
+
+        {/* V2.9B: mark dialogue complete */}
+        <div className="my-8 flex justify-center">
+          <MarkComplete type="dialogue" slug={dialogue.id} />
+        </div>
 
         <Link to="/dictionary" className="btn-primary text-sm py-3 px-6 inline-flex font-arabic">تصفّح القاموس <ArrowRight size={15} /></Link>
       </motion.div>
