@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, BookOpen, Languages, FileText,
@@ -66,6 +67,14 @@ export default function Admin() {
                 {tab.label}
               </button>
             ))}
+            {/* V2.7A: admin-only content drafts manager (separate route) */}
+            <Link
+              to="/admin/content-drafts"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-display font-semibold text-[#a0a0a0] hover:text-white hover:bg-white/5 transition-all border-t border-white/5 mt-1 pt-3"
+            >
+              <FileText size={16} />
+              Content Drafts · مسودات المحتوى
+            </Link>
           </div>
         </aside>
 

@@ -1,3 +1,220 @@
+# NiHao V2.7.3 — Combined Package (V2.7A + V2.7A.1 + V2.7A.2 + V2.7A.3)
+
+This single package merges the full admin-content + mobile-voice work, because
+GitHub main was still at V2.6 and the intermediate releases were not pushed
+individually. Deploy this one package (and run the migration once) to get
+everything. Version: 2.7.3. Node 18 compatible. No paid/AI APIs. No new
+dependencies. Public SEO routes, sitemap.xml, robots.txt, llms.txt and story
+audio all UNCHANGED.
+
+Included:
+- V2.7A  — Admin Content Draft Manager (admin-only drafts, RLS, migration).
+- V2.7A.1 — Admin draft preview polish (dependency-free Markdown rendering).
+- V2.7A.2 — FAQ/internal-links JSON parser compatibility + path normalization.
+- V2.7A.3 — Mobile user voice-recording playback fix (iOS MediaRecorder MIME).
+
+Per-release detail follows below.
+
+---
+
+# NiHao V2.7A.3 — Mobile Voice Recording Fix
+
+Base: local V2.7A.2 source. Focused hotfix for the story "shadowing" feature's
+USER voice recording on mobile. Story audio (speechSynthesis) UNCHANGED. Public
+SEO routes, sitemap.xml, robots.txt, llms.txt, DB schema all UNCHANGED. No AI,
+no paid APIs, no new dependencies. Node 18 compatible.
+
+## Root cause (iPhone MediaRecorder MIME)
+The old code did `new MediaRecorder(stream)` then built the Blob with a
+hard-coded `{ type: 'audio/webm' }`. iOS Safari cannot record or play
+audio/webm — it records audio/mp4 — so the recorded Blob had a type the browser
+could not decode, and playback silently failed. On desktop Chrome it happened to
+work because Chrome records webm, which masked the bug.
+
+## The fix
+New hook src/hooks/useVoiceRecorder.ts:
+- Picks a supported MIME via MediaRecorder.isTypeSupported, in order:
+  audio/webm;codecs=opus -> audio/webm -> audio/mp4 -> audio/mpeg -> (no
+  mimeType, browser default). On iOS/Safari this resolves to audio/mp4 instead
+  of forcing webm.
+- Builds the final Blob with the type the recorder ACTUALLY used
+  (mimeRef || rec.mimeType), so the object URL is always decodable.
+- Explicit state machine: idle -> requesting -> recording -> processing ->
+  ready -> error. Recording starts only after the user taps "سجّل صوتك".
+- On stop: stops all microphone tracks, collects chunks, builds the Blob,
+  creates an object URL, and exposes it for playback. Revokes old URLs.
+- Clear Arabic error messages by getUserMedia error name:
+  - NotFound -> "لم يتم العثور على ميكروفون."
+  - NotAllowed/Security -> "تم رفض إذن الميكروفون. فعّل الميكروفون من إعدادات المتصفح."
+  - unsupported recorder -> "متصفحك لا يدعم تسجيل الصوت بهذه الصيغة."
+  - empty/other -> "تعذر تشغيل التسجيل. جرّب تحديث الصفحة."
+
+## Stories.tsx (shadowing UI only)
+- Uses the hook instead of inline MediaRecorder logic.
+- New explicit "استمع إلى تسجيلك" (Listen to your recording) button that calls
+  audio.play() and catches failures.
+- If playback fails: "تم التسجيل، لكن المتصفح لم يستطع تشغيل التسجيل. جرّب Safari
+  أو Chrome محدث."
+- Record button shows requesting/processing states and is disabled during them.
+- The recorder section is hidden entirely when MediaRecorder/getUserMedia are
+  unsupported (no broken audio player).
+- Persistent helper text: "إذا لم يعمل التسجيل، تأكد من السماح للميكروفون وفتح
+  الموقع عبر HTTPS."
+- No pronunciation scoring is attempted; the minimum success (record + play
+  back) is never blocked.
+
+## i18n
+Added stories.playRec, stories.requesting, stories.processing (AR + EN).
+
+## SEO safety (verified)
+sitemap.xml, robots.txt, llms.txt byte-for-byte UNCHANGED. Story audio
+(speechSynthesis) untouched. Public routes unchanged.
+
+---
+
+# NiHao V2.7A.2 — Admin Preview JSON Compatibility Fix
+
+Base: local V2.7A.1 source (GitHub main was still V2.6; V2.7A/.1 not yet pushed,
+so this package contains V2.7A + V2.7A.1 + this fix — deploy combined, or push
+the earlier ones first). Admin-only preview hotfix. PUBLIC SITE, SEO,
+sitemap.xml, robots.txt, llms.txt and DB schema all UNCHANGED. No AI, no paid
+APIs, no new dependencies.
+
+## Root cause
+The preview read draft.faq_json[i].q / .a and internal_links_json[i].path /
+.label directly. Drafts authored with alternate key names (question/answer,
+title/body, url/href/text) — or JSONB columns that arrive as JSON strings —
+therefore rendered as EMPTY cards / empty link sections.
+
+## Fix — tolerant parsers (src/lib/adminDrafts.ts)
+- coerceToArray(): accepts an array, a single object, or a JSON string needing
+  JSON.parse; returns a clear Arabic error for invalid/unsupported JSON.
+- parseFaq(): recognizes {q,a} | {question,answer} | {title,body} (+ Q/A/text).
+  Items with no recognized keys are marked unsupported and carry their raw keys.
+- parseLinks(): recognizes {label,path} | {label,url} | {text,href} (+ to/link/
+  title/name). Detects external URLs; normalizes internal paths.
+- normalizeLinkPath(): now also strips a trailing slash, so "pinyin/" -> "/pinyin"
+  (was "/pinyin/"). "pinyin"->"/pinyin", "/pinyin"->"/pinyin", deep paths like
+  "/blog/study-in-china-saudis" kept, external https:// unchanged.
+- canonicalFaq()/canonicalLinks(): emit canonical {q,a} / {label,path} for export
+  and the SEO checklist counts.
+
+## Preview (src/pages/AdminContentDrafts.tsx)
+- FAQ cards now show question + answer for every supported shape; empty fields
+  show "(سؤال/إجابة فارغة)". Unsupported items show "FAQ item has unsupported
+  keys" + a small admin-only debug line listing the raw keys. Invalid JSON shows
+  a clear warning.
+- Internal links render clickable: internal via react-router <Link> in the same
+  tab, external via <a target="_blank" rel="noopener noreferrer">. Normalized
+  path shown beside the label.
+- Markdown preview (AdminMarkdown) renders #/##/### headings, paragraphs, bullet
+  and numbered lists, **bold**, [text](/path) links (clickable), and line breaks,
+  in RTL.
+
+## Export normalization (requirement 7)
+Copy JSON now emits normalized FAQ as [{ "q", "a" }] and internal links as
+[{ "label", "path" }]. Copy Markdown and Copy static-article format also run
+through the tolerant parsers, so exports are consistent regardless of input shape.
+
+## Verified with the spec's exact inputs
+- FAQ ({q,a} + {question,answer}) → both questions and answers display.
+- Links ({label,path:"pinyin/"}, {label,url:"/tones"}, {text,href:"courses"}) →
+  /pinyin, /tones, /courses.
+
+## SEO safety (verified)
+sitemap.xml, robots.txt, llms.txt byte-for-byte UNCHANGED. No draft URLs. No
+public draft route. /admin/content-drafts stays behind AdminRoute. DB schema
+unchanged.
+
+---
+
+# NiHao V2.7A.1 — Admin Draft Preview Polish
+
+Base: local V2.7A source (GitHub main was still V2.6 at build time — V2.7A not
+yet pushed — so this package contains V2.7A + this polish; deploy V2.7A then
+push, or deploy this combined package). Admin-only preview fix. PUBLIC SITE,
+SEO, sitemap, robots, llms, database schema all UNCHANGED. No AI, no paid APIs.
+
+## What changed (admin draft preview only)
+- New src/components/AdminMarkdown.tsx: dependency-free Markdown renderer for the
+  admin preview — ## / ### headings, paragraphs, bullet lists (-, *), numbered
+  lists (1.), **bold**, and [text](url) inline links. (## no longer shows as raw
+  text.)
+- DraftPreview now renders the markdown body via AdminMarkdown instead of raw
+  whitespace-pre-wrap.
+- FAQ preview shows clean question/answer cards with س:/ج: labels.
+- Internal links render as clickable admin-preview links (react-router <Link>),
+  using normalized paths.
+- normalizeLinkPath() in adminDrafts.ts: "pinyin" -> "/pinyin", "tones" ->
+  "/tones", "courses" -> "/courses", "dictionary" -> "/dictionary",
+  "study-in-china" -> "/study-in-china"; deeper paths (study-in-china/...) kept;
+  already-prefixed and external https:// URLs left as-is. Applied in the preview
+  AND in the Markdown export.
+- Export section in preview: Copy Markdown, Copy JSON, and Copy static-article
+  format (draftToStaticArticle() emits a V2.6 SeoArticle-shaped object ready to
+  paste into src/data for later static publishing).
+
+## SEO safety (verified)
+sitemap.xml, robots.txt, llms.txt byte-for-byte UNCHANGED. No draft URLs
+anywhere. /admin/content-drafts remains behind AdminRoute. Database schema
+unchanged. Public routes untouched.
+
+---
+
+# NiHao V2.7A — Admin Content Draft Manager (MVP)
+
+Base: GitHub main 96e1c62 (V2.6 — confirmed deployed/pushed). Admin-only content
+management; PUBLIC SITE UNCHANGED. Preserved: Vite 5.4.21, plugin-react 4.7.0,
+router 6.30.1, supabase-js 2.46.0, Node >=18.20.8, any-client + BUCKETS,
+noImplicitAny:false, all V2.6 public routes, sitemap/robots/llms, all static SEO
+articles, Study-in-China, AEO answers. No SQL required for the public site, no
+paid/AI APIs.
+
+## Supabase schema (migration: supabase/migrations/20260613_admin_content_drafts.sql)
+- admin_content_drafts: id, slug (unique), title_ar, meta_title_ar,
+  meta_description_ar, target_keyword, secondary_keywords text[], category,
+  content_markdown, content_json jsonb, faq_json jsonb, internal_links_json
+  jsonb, status (draft|review|ready|archived, CHECK), notes, last_updated,
+  created_by, created_at, updated_at (+ updated_at trigger, status/keyword indexes).
+- admin_content_audit_log: id, draft_id (FK ON DELETE SET NULL), action, details
+  jsonb, created_by, created_at.
+
+## RLS summary
+Both tables: RLS enabled, NO public/anon access. Admin-only via the existing
+pattern EXISTS(SELECT 1 FROM user_roles ur WHERE ur.user_id=auth.uid() AND
+ur.role='admin'): admins FOR ALL on drafts; admins SELECT + INSERT on the audit
+log. The SQL documents how to swap the predicate if a project uses a different
+admin mechanism.
+
+## Admin feature summary
+- New admin-only route /admin/content-drafts (behind AdminRoute / isAdmin).
+- Link added to the Admin sidebar ("Content Drafts · مسودات المحتوى"). NOT in
+  public navigation.
+- List: search (title/keyword/slug), filter by status, inline status switch,
+  edit, delete, archive; shows keyword, slug, category, updated date.
+- Editor: Arabic title, slug, target keyword, secondary keywords, meta title,
+  meta description, category, markdown body, FAQ JSON, internal links JSON,
+  notes, status. Plain textareas (no heavy rich-text editor).
+- Preview: admin-only render (SEO snippet, title, markdown, FAQ, internal links)
+  with a clear "not published / not indexed" banner.
+- SEO checklist: slug, title, meta description, target keyword, content length
+  (≥300 words), FAQ present, ≥3 internal links, status, ready-to-convert.
+- Export: copy as JSON and copy as Markdown (front-matter) for later conversion.
+- Service (src/lib/adminDrafts.ts) talks to Supabase, with localStorage fallback
+  + a clear banner when the tables/RLS aren't ready, so drafting works offline.
+
+## SEO safety summary (verified)
+Drafts in sitemap.xml: 0. Drafts in llms.txt: 0. No public /drafts route. /blog,
+/study-in-china, /answers do not import or render drafts. The public site,
+sitemap, robots and llms are byte-for-byte unchanged. RLS blocks anon reads even
+if a URL were guessed.
+
+## Docs
+- ADMIN_CONTENT_WORKFLOW.md added (lifecycle, create/ready/export, why drafts
+  aren't public, V2.7B safe-publishing plan).
+
+---
+
 # NiHao V2.6 — Keyword-Based SEO Expansion Sprint 1
 
 Base: GitHub main e8b6095 (V2.5 — confirmed deployed/pushed). Built from Kimi's

@@ -49,6 +49,7 @@ const StudyInChinaArticle = lazy(() => import('./pages/StudyInChina').then(m => 
 const Answers = lazy(() => import('./pages/Answers'));
 const AnswerPageView = lazy(() => import('./pages/Answers').then(m => ({ default: m.AnswerPageView })));
 const BestSite = lazy(() => import('./pages/BestSite'));
+const AdminContentDrafts = lazy(() => import('./pages/AdminContentDrafts'));
 import Daily from './pages/Daily';
 import Review from './pages/Review';
 
@@ -138,6 +139,7 @@ export default function App() {
 
         {/* Admin only */}
         <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+        <Route path="/admin/content-drafts" element={<AdminRoute><AdminContentDrafts /></AdminRoute>} />
       </Routes>
       </Suspense>
     </Layout>

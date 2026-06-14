@@ -1,3 +1,48 @@
+# V2.7A.3 additions
+- [ ] Story audio (Play all / sentence speakers) still works
+- [ ] Microphone permission prompt appears only AFTER tapping "سجّل صوتك"
+- [ ] iPhone Safari: record then tap "استمع إلى تسجيلك" — playback works (audio/mp4)
+- [ ] iPhone Chrome + Android Chrome: record + playback works
+- [ ] No generic "Error" — only clear Arabic messages
+- [ ] If mic denied: "تم رفض إذن الميكروفون…" shown; feature not broken
+- [ ] If playback fails: "تم التسجيل، لكن المتصفح لم يستطع تشغيل التسجيل…" shown
+- [ ] Helper text about HTTPS + mic permission is visible
+- [ ] No broken audio player when MediaRecorder unsupported
+- [ ] npm run build passes on Node 18
+
+# V2.7A.2 additions
+- [ ] FAQ preview renders {q,a}, {question,answer}, {title,body} shapes; empty fields labelled
+- [ ] FAQ JSON pasted as a string still renders; invalid JSON shows a warning
+- [ ] Unsupported FAQ item shows "FAQ item has unsupported keys" + raw keys (admin debug)
+- [ ] Internal links render {label,path}, {label,url}, {text,href}; clickable
+- [ ] pinyin/ -> /pinyin, /tones -> /tones, courses -> /courses; deep & external paths preserved
+- [ ] External links open in a new tab; internal use same-tab router links
+- [ ] Markdown [text](/path) links are clickable; headings/lists/bold render in RTL
+- [ ] Copy JSON emits normalized FAQ [{q,a}] and links [{label,path}]
+- [ ] /admin/content-drafts works; drafts NOT in sitemap/llms; public site unchanged
+- [ ] npm run build passes on Node 18
+
+# V2.7A.1 additions
+- [ ] Draft preview renders ## / ### as headings, not raw text
+- [ ] Bullet and numbered lists render as lists; **bold** and [links](url) inline work
+- [ ] FAQ preview shows clean Q/A cards
+- [ ] Internal links are clickable; bare "pinyin" shows as /pinyin (normalized)
+- [ ] Preview export: Copy Markdown / Copy JSON / Copy static-article format all work
+- [ ] /admin/content-drafts still works; drafts NOT in sitemap; public site unchanged
+- [ ] npm run build passes on Node 18
+
+# V2.7A additions
+- [ ] /admin still works for admins; non-admins redirected
+- [ ] /admin/content-drafts works for admins (link in Admin sidebar)
+- [ ] Create draft (title + slug required); edit; status switch; delete/archive; search; filter
+- [ ] SEO checklist updates live; export JSON + export Markdown copy correctly
+- [ ] Preview shows admin-only banner and SEO snippet; not indexable
+- [ ] If Supabase tables absent: yellow fallback banner + localStorage drafting works
+- [ ] After running migration: drafts persist in Supabase; non-admins cannot read (RLS)
+- [ ] sitemap.xml has NO draft URLs; llms.txt unchanged; robots.txt still allows crawling
+- [ ] /blog, /study-in-china, /answers unchanged; no public draft routes
+- [ ] Build succeeds on Node 18; no .env/secrets committed
+
 # V2.6 additions
 - [ ] All 10 new /blog/<slug> routes render the rich SEO article (direct answer, blocks, FAQ, links, disclaimer, updated date)
 - [ ] chinese-phrases-for-students shows 8 phrase groups with PinyinText + audio
