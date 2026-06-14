@@ -1,3 +1,12 @@
+# V2.9E hero/LCP checks
+- [ ] Homepage looks identical (canvas hero, h1, black/red, fonts)
+- [ ] h1 headline paints immediately (no 0.5s delay) → better LCP
+- [ ] hero-illustration.webp (141KB) + hero-illustration-mobile.webp (62KB) exist
+- [ ] unused 2.3MB hero-illustration.png removed; not in dist
+- [ ] how-it-works WebP (4) still exist; video 548KB
+- [ ] GA4 files present; /admin not tracked; GA non-blocking
+- [ ] Progress features + dashboard intact; index JS ~449KB
+- [ ] sitemap/robots/llms unchanged; build passes
 # V2.9D GA4-on-V2.9C checks
 - [ ] Base is V2.9C (6c5dc07): 12 WebP present, video 548KB, index ~449KB
 - [ ] Set VITE_GA_MEASUREMENT_ID in production env; dev sends nothing

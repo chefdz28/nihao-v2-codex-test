@@ -222,7 +222,7 @@ void main() {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ delay: 0, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
           <h1
             className="font-display font-black text-white leading-[0.9] tracking-tight mb-6"
@@ -240,7 +240,7 @@ void main() {
           style={{ color: 'var(--color-text-secondary)' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.6 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
         >
           {t('hero.subtitle')}
         </motion.p>
@@ -249,7 +249,7 @@ void main() {
           className="flex flex-wrap gap-4 mb-8"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.2, duration: 0.5 }}
+          transition={{ delay: 0.25, duration: 0.4 }}
         >
           <Link to="/register" className="btn-primary">
             {t('hero.cta.start')}
@@ -265,7 +265,7 @@ void main() {
           style={{ color: 'var(--color-text-tertiary)' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.5 }}
+          transition={{ delay: 0.35, duration: 0.4 }}
         >
           <span>{t('hero.stats.levels')}</span>
           <span className="text-[#FF3333]">•</span>

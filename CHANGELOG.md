@@ -1,3 +1,61 @@
+# NiHao V2.9E — Homepage Hero / LCP Optimization
+
+Base: GitHub main 4dd9fc8 (V2.9D, GA4 on V2.9C). No redesign, no font/visual
+change, no new dependencies, no schema change. GA4, V2.9C performance, and
+V2.9B/B.1 progress features all preserved.
+
+## What the LCP element actually is
+Inspecting Home.tsx: the hero (HeroSection) uses a WebGL <canvas> background plus
+a large animated <h1> headline. The LCP element is that <h1> text — NOT an image.
+public/images/hero-illustration.png (2.3MB) was referenced NOWHERE in the source
+(checked src, CSS, index.html, manifest), so it was never the live hero; it was
+dead weight that Vite still copied into the build.
+
+## Fixes
+1. LCP text paint: the <h1> was wrapped in a motion.div with `delay: 0.5s` and
+   `opacity: 0` initial, so the LCP text couldn't paint for ~500ms+. Reduced to
+   `delay: 0` (duration 0.6s) so the headline paints immediately. Also reduced
+   the above-the-fold subtitle (1s→0.15s), buttons (1.2s→0.25s), and trust row
+   (1.5s→0.35s) delays. The staggered entrance feel is kept; nothing else
+   changes visually.
+2. Removed the unused 2.3MB hero-illustration.png so it's no longer shipped/
+   copied to dist (it was never used as the hero). 
+3. Created optimized hero images for any future use / per checklist:
+   - public/images/hero-illustration.webp — 141KB (was 2.3MB PNG, -94%)
+   - public/images/hero-illustration-mobile.webp — 62KB
+4. Hero video already preload="none" and not above-the-fold blocking (kept). The
+   WebGL canvas initializes in a useEffect (after first paint), so it doesn't
+   block FCP. GA4 stays async/dynamic and never blocks first paint.
+
+## Hero image before/after
+- hero-illustration.png: ~2,263KB → removed from the live build.
+- hero-illustration.webp: 141KB (desktop), hero-illustration-mobile.webp: 62KB.
+- Mobile hero image: yes, a smaller mobile WebP was added.
+
+## Preserved (verified)
+- GA4: analytics.ts, AnalyticsTracker.tsx, analytics.d.ts present; /admin still
+  excluded; VITE_GA_MEASUREMENT_ID still used; non-blocking.
+- V2.9C: 4 how-it-works WebP present; video-classroom.mp4 = 548KB; lazy routes +
+  manualChunks intact. Index JS = 449KB (V2.9D was ~449KB — no regression).
+- V2.9B/B.1: studentProgress.ts, MarkComplete.tsx, ProgressPanel.tsx,
+  Dashboard.tsx, Daily.tsx all present; XP system intact.
+- SEO: sitemap.xml, robots.txt, llms.txt unchanged.
+
+## Index JS after build
+449KB (unchanged from V2.9D — this pass was animation timing + images, not JS).
+
+## Changed files
+- src/pages/Home.tsx (hero above-the-fold animation delays reduced)
+- public/images/hero-illustration.webp (new), hero-illustration-mobile.webp (new)
+- removed public/images/hero-illustration.png (unused 2.3MB)
+- package.json (2.9.4)
+
+## Build
+npm install && npm run build → passes on Node 18. No .env/dist/node_modules/.git
+in the package.
+
+---
+
 # NiHao V2.9D — GA4 Analytics on top of V2.9C
 
 Base: GitHub main 6c5dc07 (V2.9C, v2.9.3) — the latest commit WITH the mobile
