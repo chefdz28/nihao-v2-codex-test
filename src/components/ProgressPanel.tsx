@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BookOpenText, MessagesSquare, GraduationCap, Zap, Flame, BookA, Sparkles, ArrowLeft } from 'lucide-react';
 import { getSummary, getRecentActivity, type ProgressSummary, type ProgressRow } from '@/lib/studentProgress';
+import { studentDialogueById } from '@/data/studentDialogues';
+import { stories } from '@/data/stories2';
 
 const TYPE_AR: Record<string, string> = {
   lesson: 'درس', story: 'قصة', dialogue: 'حوار', quiz: 'اختبار', daily: 'تدريب يومي',
@@ -10,6 +12,23 @@ const TYPE_AR: Record<string, string> = {
 const TYPE_PATH: Record<string, string> = {
   lesson: '/courses', story: '/stories', dialogue: '/dialogues', quiz: '/stories', daily: '/daily',
 };
+
+/** V2.9B.1: resolve a progress row to a nice Arabic label instead of a raw slug. */
+function niceLabel(r: ProgressRow): string {
+  const kind = TYPE_AR[r.content_type] || r.content_type;
+  if (r.content_type === 'dialogue') {
+    const d = studentDialogueById(r.content_slug);
+    if (d) return `${kind}: ${d.title_ar}`;
+  }
+  if (r.content_type === 'story') {
+    const s = stories.find(x => x.id === r.content_slug);
+    if (s) return `${kind}: ${s.title_ar || s.title_zh}`;
+  }
+  if (r.content_type === 'daily') {
+    return `${kind}: ${r.content_slug}`; // slug is the date — already readable
+  }
+  return `${kind}: ${r.content_slug}`;
+}
 
 /** V2.9B — learning-progress panel shown at the top of the dashboard. */
 export default function ProgressPanel() {
@@ -86,17 +105,22 @@ export default function ProgressPanel() {
             <div className="liquid-glass rounded-2xl p-5">
               <p className="text-xs font-display font-semibold uppercase mb-3 font-arabic" style={{ color: 'var(--color-text-tertiary)' }}>آخر نشاط</p>
               <div className="flex flex-col gap-2">
-                {recent.map((r, i) => (
-                  <Link key={i} to={TYPE_PATH[r.content_type] || '/'} className="flex items-center justify-between text-sm hover:bg-white/[0.03] rounded-lg px-2 py-1.5 transition-colors">
-                    <span className="font-arabic text-white flex items-center gap-2">
-                      <ArrowLeft size={13} className="text-[#FF3333]" />
-                      {TYPE_AR[r.content_type] || r.content_type}: {r.content_slug}
-                    </span>
-                    {r.completed_at && (
-                      <span className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }} dir="ltr">{r.completed_at.slice(0, 10)}</span>
-                    )}
-                  </Link>
-                ))}
+                {recent.map((r, i) => {
+                  const path = r.content_type === 'dialogue' ? `/dialogues/${r.content_slug}`
+                    : r.content_type === 'story' ? `/stories/${r.content_slug}`
+                    : TYPE_PATH[r.content_type] || '/';
+                  return (
+                    <Link key={i} to={path} className="flex items-center justify-between text-sm hover:bg-white/[0.03] rounded-lg px-2 py-1.5 transition-colors">
+                      <span className="font-arabic text-white flex items-center gap-2">
+                        <ArrowLeft size={13} className="text-[#FF3333]" />
+                        {niceLabel(r)}
+                      </span>
+                      {r.completed_at && (
+                        <span className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }} dir="ltr">{r.completed_at.slice(0, 10)}</span>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}

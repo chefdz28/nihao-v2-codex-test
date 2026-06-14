@@ -1,3 +1,13 @@
+# V2.9B.1 checks (dashboard XP consistency)
+- [ ] After completing one dialogue, top XP badge AND stats card both show 15 XP
+- [ ] No card shows 0 XP when progress exists
+- [ ] Completed dialogues count = 1
+- [ ] Recent activity shows "حوار: في المطار — الوصول إلى الصين" (not raw slug)
+- [ ] Recent activity links to /dialogues/airport-arrival
+- [ ] Guest (logged-out) XP still works via localStorage
+- [ ] /daily, /dialogues/:slug, /stories, /dashboard all still work
+- [ ] No schema change, no voice storage; build passes
+
 # V2.9B additions
 - [ ] Run 20260614_student_progress.sql in Supabase (table + RLS + trigger)
 - [ ] Logged in: mark a story/dialogue/daily complete → persists across reloads

@@ -1,3 +1,54 @@
+# NiHao V2.9B.1 — Dashboard Progress Consistency Fix
+
+Base: V2.9B (v2.9.1). Bug-fix only. No redesign, no new features, no schema
+change, no new dependencies, no voice storage.
+
+## The bug
+The dashboard had TWO different XP sources:
+- The new V2.9B ProgressPanel read XP from getSummary() → correctly showed 15 XP
+  after one dialogue.
+- The old stats card computed `calculateXP(progress, quizResults) + getXP()`
+  (Supabase lesson progress + the old local gamification ledger), which knew
+  nothing about the new student_progress dialogues → showed 0 XP.
+
+## The fix
+- Dashboard.tsx now loads the V2.9B progress summary (getSummary()) into state
+  and the stats XP card reads `summary.xp` — the SAME source ProgressPanel uses.
+  Removed the now-unused calculateXP/getXP XP computation. So after completing one
+  dialogue, every XP card shows 15 XP.
+- XP formula unchanged: lesson 10, story 15, dialogue 15, daily 20.
+- getSummary() already works for guests (localStorage fallback), so the
+  logged-out path is preserved.
+- Recent activity and the completed-dialogue count are untouched and still work.
+
+## Nicer activity labels
+Recent activity used to show the raw slug ("airport-arrival : حوار"). It now
+resolves to a readable Arabic label:
+- dialogue → "حوار: <title_ar>" e.g. "حوار: في المطار — الوصول إلى الصين"
+- story → "قصة: <title_ar>"
+- daily → "تدريب يومي: <date>"
+Recent-activity links now also point to the specific item
+(/dialogues/<slug>, /stories/<slug>).
+
+## Safety
+Dark/red layout, fonts, and visual style unchanged. /daily, /dialogues/:slug,
+/stories, /dashboard all still work. No Supabase schema change. No voice storage.
+sitemap/robots/llms unchanged; 0 admin/draft routes. Build passes on Node 18.
+
+## Changed files
+- src/pages/Dashboard.tsx (XP card now reads the unified summary)
+- src/components/ProgressPanel.tsx (nice Arabic activity labels + specific links)
+- package.json (version 2.9.2)
+
+## Test cases
+1. Complete /dialogues/airport-arrival (علّم كمكتمل).
+2. Open /dashboard.
+3. Completed dialogues = 1.
+4. XP = 15 in BOTH the top badge and the stats card.
+5. Recent activity shows "حوار: في المطار — الوصول إلى الصين" and links to the dialogue.
+
+---
+
 # NiHao V2.9B — Student Progress + Dashboard + Daily Practice + Light XP
 
 Base: local V2.9A source (GitHub main was at V2.8C; the V2.8C + V2.9A + V2.9B

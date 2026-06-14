@@ -5,10 +5,10 @@ import { BookOpen, Flame, TrendingUp, Play, Award, Star, Target, ArrowRight, Zap
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchUserProgress, fetchQuizResults, fetchLevels, fetchLessons } from '@/lib/dataService';
-import { calculateXP, averageQuizScore, computeStreak } from '@/lib/learning';
+import { averageQuizScore, computeStreak } from '@/lib/learning';
 import { TodaysPlan, DailyMissions } from '@/components/TodaysPlan';
 import StartHere from '@/components/StartHere';
-import { getXP } from '@/lib/gamification';
+import { getSummary, type ProgressSummary } from '@/lib/studentProgress';
 import ProgressPanel from '@/components/ProgressPanel';
 import type { QuizResult, UserProgressItem, LessonRow, LevelRow } from '@/types/supabase';
 
@@ -19,11 +19,14 @@ export default function Dashboard() {
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [levels, setLevels] = useState<LevelRow[]>([]);
   const [lessons, setLessons] = useState<LessonRow[]>([]);
+  const [summary, setSummary] = useState<ProgressSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
-      if (!user) return;
+      // V2.9B.1: the progress summary (unified XP source) works for guests too
+      try { setSummary(await getSummary()); } catch { /* ignore */ }
+      if (!user) { setLoading(false); return; }
       try {
         const [progData, resultsData, levelsData, lessonsData] = await Promise.all([
           fetchUserProgress(user.id),
@@ -48,7 +51,6 @@ export default function Dashboard() {
   const inProgressLessons = progress.filter(p => p.status === 'in_progress');
   const avgScore = averageQuizScore(quizResults);
   const totalLessons = lessons.length;
-  const xp = calculateXP(progress, quizResults);
   const overallPct = totalLessons > 0 ? Math.round((completedLessons.length / totalLessons) * 100) : 0;
   const remainingForCert = Math.max(0, totalLessons - completedLessons.length);
   // V2.0.5: real streak from existing activity timestamps (no new tables)
@@ -75,7 +77,7 @@ export default function Dashboard() {
 
   const stats = [
     { label: `${t('dashboard.completed')} / ${t('dashboard.totalLessons')}`, value: `${completedLessons.length} / ${totalLessons}`, icon: BookOpen, color: '#ffffff' },
-    { label: t('dashboard.xp'), value: `${xp + getXP()} XP`, icon: Zap, color: '#f59e0b' },
+    { label: t('dashboard.xp'), value: `${summary?.xp ?? 0} XP`, icon: Zap, color: '#f59e0b' },
     { label: t('dashboard.avgScore'), value: `${avgScore}%`, icon: TrendingUp, color: '#10b981' },
     // V2.0.5: real streak computed from activity timestamps
     { label: t('dashboard.streak'), value: streak > 0 ? `${streak} 🔥` : '0', icon: Flame, color: '#FF3333' },
