@@ -74,7 +74,7 @@ export default function Header() {
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        backgroundColor: scrolled ? 'rgba(10,10,10,0.95)' : 'rgba(10,10,10,0.8)',
+        backgroundColor: scrolled ? 'rgba(10,10,10,0.97)' : 'rgba(10,10,10,0.92)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         height: '72px',
@@ -224,8 +224,9 @@ export default function Header() {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div
-          className="lg:hidden liquid-glass-strong absolute top-[72px] left-4 right-4 p-6 flex flex-col gap-2"
-          style={{ animation: 'fadeIn 0.2s ease-out' }}
+          className="lg:hidden absolute top-[72px] left-4 right-4 p-6 flex flex-col gap-1 rounded-2xl border border-white/10 shadow-2xl max-h-[80vh] overflow-y-auto"
+          style={{ animation: 'fadeIn 0.2s ease-out', backgroundColor: '#0A0A0A' }}
+          onClick={(e) => { if ((e.target as HTMLElement).closest('a,button')) setMobileOpen(false); }}
         >
           {[...navLeft, ...navRight].map((link, i) => (
             <Link
@@ -245,7 +246,7 @@ export default function Header() {
             <Link
               key={link.path}
               to={link.path}
-              className="flex items-center gap-3 text-[#a0a0a0] hover:text-white py-2 px-4 rounded-lg hover:bg-white/5 transition-colors"
+              className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-3 px-4 rounded-lg hover:bg-white/5 transition-colors"
             >
               <link.icon size={18} />
               <span className="font-display font-semibold">{t(link.label)}</span>
@@ -256,7 +257,7 @@ export default function Header() {
             <Link
               key={link.path}
               to={link.path}
-              className="flex items-center gap-3 text-[#a0a0a0] hover:text-white py-2 px-4 rounded-lg hover:bg-white/5 transition-colors"
+              className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-3 px-4 rounded-lg hover:bg-white/5 transition-colors"
             >
               <link.icon size={18} />
               <span className="font-display font-semibold">{t(link.label)}</span>
@@ -266,14 +267,14 @@ export default function Header() {
           {isAuthenticated && (
             <>
               <hr className="border-white/10 my-2" />
-              <Link to="/dashboard" className="flex items-center gap-3 text-[#a0a0a0] hover:text-white py-2 px-4 rounded-lg hover:bg-white/5 transition-colors">
+              <Link to="/dashboard" className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-3 px-4 rounded-lg hover:bg-white/5 transition-colors">
                 <LayoutDashboard size={18} /> Dashboard
               </Link>
-              <Link to="/profile" className="flex items-center gap-3 text-[#a0a0a0] hover:text-white py-2 px-4 rounded-lg hover:bg-white/5 transition-colors">
+              <Link to="/profile" className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-3 px-4 rounded-lg hover:bg-white/5 transition-colors">
                 <User size={18} /> Profile
               </Link>
               {isAdmin && (
-                <Link to="/admin" className="flex items-center gap-3 text-[#a0a0a0] hover:text-white py-2 px-4 rounded-lg hover:bg-white/5 transition-colors">
+                <Link to="/admin" className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-3 px-4 rounded-lg hover:bg-white/5 transition-colors">
                   <Settings size={18} /> Admin Panel
                 </Link>
               )}

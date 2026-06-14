@@ -1,3 +1,56 @@
+# NiHao V2.9A — Mobile Performance + Mobile Menu Fix
+
+Base: local V2.8C source (GitHub main was at V2.8B; V2.8C + this ship together).
+First half of the V2.9 plan — the urgent pre-marketing fixes (Parts 1, 2, 7).
+The student-experience features (progress, dashboard, daily, XP — Parts 3-6)
+follow in V2.9B so each can be tested independently. Preserved: Vite 5.4.21,
+plugin-react 4.7.0, router 6.30.1, supabase-js 2.46.0, Node >=18.20.8. No SQL,
+no paid/AI APIs, no new dependencies, no service worker, no SSR.
+
+## Part 1 — Mobile performance
+- Converted 19 more secondary pages to React.lazy (Quiz, Vocabulary,
+  Pronunciation, Results, Certificate, About, Contact, FAQ, Flashcards,
+  Essentials, ToneTrainer, NumberTrainer, Dialogues, PathMap, PlacementTest,
+  Profile, Review, Daily, Pinyin). Home, Login, Register, Dashboard stay eager
+  for fast core nav. Route URLs unchanged.
+- Added build.rollupOptions.manualChunks to split vendor libs into cacheable
+  chunks: react-vendor (34KB), motion (127KB), supabase (103KB).
+- Main index chunk: 1.1MB → 665KB (about -40%). The "chunk > 500KB" warning is
+  resolved.
+- Arabic Suspense fallback: "جاري التحميل..." with a spinner.
+- Fonts: reduced to the weights actually used and loaded non-render-blocking
+  (media="print" → onload media="all", with a <noscript> fallback) so they no
+  longer block first paint. This matters for the very slow mobile FCP/LCP.
+
+NOTE: code changes cut JS dramatically, but the live 70s FCP/87s LCP also point
+to a SERVER issue. On RunCloud, enable gzip/brotli compression and cache headers
+for /assets, and confirm a healthy TTFB — that's required alongside this build
+to reach good Core Web Vitals.
+
+## Part 2 — Mobile menu fix
+- Mobile menu is now a SOLID #0A0A0A panel with border + shadow (was
+  transparent liquid-glass), much clearer to read.
+- Menu closes automatically after tapping any link/button.
+- Larger tap targets (py-2 → py-3) and lighter text for contrast.
+- Header bar made more solid (0.92/0.97 opacity) so it stays clear on scroll.
+- Desktop nav unchanged; RTL preserved; routing unaffected.
+
+## Part 7 — SEO safety
+sitemap.xml, robots.txt, llms.txt unchanged from V2.8C. No admin, draft, or
+/dialogues-practice routes in the sitemap (verified 0).
+
+## Safety
+All existing routes and features intact (admin, dictionary, dialogues, stories,
+voice practice, study-in-china). No voice storage added. Build passes on Node 18.
+No new dependencies.
+
+## Routes to test
+/ (fast first paint) · /dictionary · /dictionary/huzhao · /dialogues ·
+/dialogues/airport-arrival · /stories · /admin/content-drafts. On mobile: open
+the menu (solid, readable), tap a link (menu closes).
+
+---
+
 # NiHao V2.8C — Story↔Dictionary Linking + Unified Voice Practice
 
 Base: GitHub main b509fec (V2.8B, v2.8.1). Third layer of V2.8. Links story

@@ -1,3 +1,15 @@
+# V2.9A additions
+- [ ] Homepage loads fast; main JS chunk ~665KB (was 1.1MB)
+- [ ] Lazy pages load with "جاري التحميل..." fallback
+- [ ] Vendor chunks (react-vendor/motion/supabase) load separately
+- [ ] Fonts don't block first paint (print→all swap)
+- [ ] Mobile menu is SOLID (not transparent), readable, with shadow/border
+- [ ] Mobile menu closes after tapping a link
+- [ ] Header stays clear on scroll; desktop nav unchanged; RTL works
+- [ ] All routes still work; sitemap has 0 admin/draft/practice
+- [ ] Build passes on Node 18; no new dependencies
+- [ ] (Server) gzip/brotli + cache headers enabled on RunCloud
+
 # V2.8C additions
 - [ ] /stories/:id vocab cards link to /dictionary/:slug when the word exists
 - [ ] Dictionary grew to 254 words (8 story words added), 0 duplicates

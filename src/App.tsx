@@ -6,31 +6,14 @@ import Seo from './components/Seo';
 import Home from './pages/Home';
 import Courses from './pages/Courses';
 import Lesson from './pages/Lesson';
-import Quiz from './pages/Quiz';
-import Vocabulary from './pages/Vocabulary';
 import Practice from './pages/Practice';
-import Pronunciation from './pages/Pronunciation';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Profile from './pages/Profile';
-import Results from './pages/Results';
-import Certificate from './pages/Certificate';
-import About from './pages/About';
 const Blog = lazy(() => import('./pages/Blog'));
-import Contact from './pages/Contact';
-import FAQPage from './pages/FAQPage';
 const Admin = lazy(() => import('./pages/Admin'));
-import Flashcards from './pages/Flashcards';
-import Pinyin from './pages/Pinyin';
-import Essentials from './pages/Essentials';
-import ToneTrainer from './pages/ToneTrainer';
-import NumberTrainer from './pages/NumberTrainer';
-import Dialogues from './pages/Dialogues';
-import PathMap from './pages/PathMap';
 const Worksheet = lazy(() => import('./pages/Worksheet'));
 import { Missions, Achievements } from './pages/Missions';
-import PlacementTest from './pages/PlacementTest';
 import Dictionary from './pages/Dictionary';
 const Stories = lazy(() => import('./pages/Stories').then(m => ({ default: m.Stories })));
 const StoryReader = lazy(() => import('./pages/Stories').then(m => ({ default: m.StoryReader })));
@@ -53,8 +36,6 @@ const AdminContentDrafts = lazy(() => import('./pages/AdminContentDrafts'));
 const DictionaryWord = lazy(() => import('./pages/DictionaryWord'));
 const StudentDialogues = lazy(() => import('./pages/StudentDialogues'));
 const StudentDialogueView = lazy(() => import('./pages/StudentDialogues').then(m => ({ default: m.StudentDialogueView })));
-import Daily from './pages/Daily';
-import Review from './pages/Review';
 
 // Protected route - requires authentication
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -81,11 +62,31 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+const Quiz = lazy(() => import('./pages/Quiz'));
+const Vocabulary = lazy(() => import('./pages/Vocabulary'));
+const Pronunciation = lazy(() => import('./pages/Pronunciation'));
+const Results = lazy(() => import('./pages/Results'));
+const Certificate = lazy(() => import('./pages/Certificate'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const FAQPage = lazy(() => import('./pages/FAQPage'));
+const Flashcards = lazy(() => import('./pages/Flashcards'));
+const Essentials = lazy(() => import('./pages/Essentials'));
+const ToneTrainer = lazy(() => import('./pages/ToneTrainer'));
+const NumberTrainer = lazy(() => import('./pages/NumberTrainer'));
+const Dialogues = lazy(() => import('./pages/Dialogues'));
+const PathMap = lazy(() => import('./pages/PathMap'));
+const PlacementTest = lazy(() => import('./pages/PlacementTest'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Review = lazy(() => import('./pages/Review'));
+const Daily = lazy(() => import('./pages/Daily'));
+const Pinyin = lazy(() => import('./pages/Pinyin'));
+
 export default function App() {
   return (
     <Layout>
       <Seo />
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-white">...</div></div>}>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center" dir="rtl"><div className="text-white font-arabic text-sm flex items-center gap-2"><span className="w-4 h-4 border-2 border-[#FF3333] border-t-transparent rounded-full animate-spin inline-block"></span> جاري التحميل...</div></div>}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/courses" element={<Courses />} />
