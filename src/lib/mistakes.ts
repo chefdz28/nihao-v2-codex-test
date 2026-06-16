@@ -2,7 +2,7 @@
 // quizzes, placement test, grammar exercises, story quizzes and the HSK1
 // simulation. localStorage only (key: nihao_mistakes), private-mode safe.
 
-export type MistakeSource = 'story' | 'placement' | 'grammar' | 'quiz' | 'hsk1';
+export type MistakeSource = 'story' | 'placement' | 'grammar' | 'quiz' | 'hsk1' | 'hsk3';
 
 export interface Mistake {
   id: string;             // stable hash of source+question

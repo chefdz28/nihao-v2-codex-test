@@ -1,3 +1,182 @@
+# NiHao V3.2 — HSK3 Exercises & Test + Combined Release
+
+Base: latest work (V3.0A + V3.1 stacked on GitHub main 88056d7). This is the
+COMBINED release to publish in one go. It contains, in order:
+- V3.0A: Social sharing buttons + email lead capture (Supabase email_leads).
+- V3.1: Dictionary expansion — HSK2 completion + HSK3 (254 → 586 words).
+- V3.2: HSK3 practice exercises & simulation test (this release's new work).
+All original content. No redesign, no new dependencies, no external SDK, no paid
+APIs, no voice storage. All V2.9B–V3.1 features preserved.
+
+## V3.2 — HSK3 exercises & test (new)
+### HSK3 practice simulation (/hsk3-simulation)
+- src/data/hsk3sim.ts — 40 ORIGINAL questions in HSK3 style (20 listening via
+  TTS + 20 reading), built around the HSK2/HSK3 vocabulary already in the
+  dictionary. Verified ZERO overlap with the HSK1 simulation questions, so no
+  duplication. Pass mark 60%, 25-minute timer.
+- src/pages/Hsk3Simulation.tsx — same proven flow as the HSK1 sim: timed test,
+  per-question navigation, audio replay, score + pass/fail, answer review, wrong
+  answers pushed to the Mistake Notebook (source 'hsk3'), +40 XP once/day
+  (higher than HSK1's +30 because HSK3 is harder). Clearly labelled a PRACTICE
+  simulation, not an official exam.
+- src/lib/hskResults.ts — generalized to store results per level
+  (loadHskResultsByLevel / saveHskResultByLevel). HSK1 stays backward compatible
+  (same nihao_hsk1_results key + original loadHskResults/saveHskResult helpers).
+- src/lib/mistakes.ts — MistakeSource now includes 'hsk3'.
+
+### Discoverability & addictive loop
+- Added to the Practice hub, the Header nav, and the sitemap (priority 0.8).
+- Seo.tsx gives /hsk3-simulation its own AR/EN title + description.
+- Dictionary: when the HSK1 or HSK3 filter is active, a contextual CTA invites
+  the learner to jump straight from browsing that level's words to its practice
+  test — closing the browse → test → mistakes → retry loop.
+
+## Preserved (verified)
+- V3.1 dictionary: 586 words (HSK1 192 / HSK2 160 / HSK3 234), 0 duplicate slugs.
+- V3.0A: SocialShareButtons, LeadCaptureBox, emailLeads + the email_leads
+  migration.
+- GA4 (analytics, /admin excluded), V2.9C/E (hero webp, how-it-works webp, video
+  548KB, no root images/videos), V2.9B/B.1 (progress, XP, dashboard, daily).
+- Index JS = 454KB (HSK3 sim is a lazy route chunk, not on the homepage).
+- robots.txt / llms.txt unchanged. Deps unchanged.
+
+## Changed / new files
+- NEW: src/data/hsk3sim.ts, src/pages/Hsk3Simulation.tsx
+- EDIT: src/lib/hskResults.ts (level-aware), src/lib/mistakes.ts (+hsk3 source),
+  src/App.tsx (route), src/pages/Practice.tsx (hub card), src/components/Header.tsx
+  (nav), src/components/Seo.tsx (meta), src/pages/Dictionary.tsx (CTA),
+  src/i18n/index.tsx (nav.hsk3 AR+EN), public/sitemap.xml, package.json
+- (Already included from V3.0A/V3.1: share + lead capture + HSK2/HSK3 dictionary.)
+
+## Manual Supabase step (one-time, from V3.0A)
+Run supabase/migrations/20260615_email_leads.sql alongside the earlier
+admin_content_drafts and student_progress migrations.
+
+## Build
+npm install && npm run build → passes on Node 18. No .env/dist/node_modules/.git.
+
+---
+
+# NiHao V3.1 — Dictionary Expansion (HSK2 completion + HSK3)
+
+Base: latest work (V3.0A on GitHub main 88056d7). Original content only. The HSK
+word LISTS are the official government/Hanban standard (a public standard, not
+copyrightable); every Arabic translation and example sentence here is ORIGINAL
+content written for NiHao — nothing is copied from any textbook or publisher.
+No redesign, no new dependencies, no schema change, no voice storage. All
+V2.9B–V3.0A features preserved.
+
+## What's new
+### Dictionary grew 254 → 586 words (0 duplicate slugs)
+- HSK1: 192 (unchanged)
+- HSK2: 62 → 160 (added the rest of the official HSK2 list)
+- HSK3: 0 → 234 (new level)
+New data files:
+- src/data/dictionaryHsk2Extra.ts — HSK2 completion batch (original examples).
+- src/data/dictionaryHsk3.ts — HSK3 batch (original examples).
+Both are wired into dictionaryCore and deduped by Chinese char + tone-stripped
+pinyin, so there are no duplicates with existing words. (Two characters appear
+twice on purpose — 还 huán/hái and 长 cháng/zhǎng — different readings/meanings,
+different slugs.)
+
+### HSK3 filter in the dictionary
+- The DictWord type now allows hsk 1 | 2 | 3.
+- src/pages/Dictionary.tsx gained an HSK3 filter button (الكل / HSK1 / HSK2 /
+  HSK3). Word pages show the correct "HSK3" badge automatically.
+
+### Every new word gets its own page + SEO
+- 586 /dictionary/:slug pages now exist (was 254). Each new HSK2/HSK3 word has a
+  Chinese–Arabic page with pinyin, an original example, category, HSK badge, and
+  cross-links (appears-in dialogues/stories/lessons via the existing system).
+- sitemap.xml regenerated → 687 URLs (+586 dictionary word pages). 0 admin/draft/
+  practice routes.
+
+## Copyright note
+The uploaded textbook PDFs (© New Concept Mandarin) were NOT copied. They were
+only a sanity check that a given word belongs to a given HSK level. HSK level
+membership comes from the official public HSK standard; all content here is
+original.
+
+## Preserved (verified)
+V3.0A (SocialShareButtons, LeadCaptureBox, emailLeads + migration), GA4
+(analytics, /admin excluded), V2.9C/E (hero webp, how-it-works webp, video 548KB,
+no root images/videos), V2.9B/B.1 (progress, XP, dashboard, daily). Index JS =
+453KB (the 586 words live in the lazy dictionaryCore chunk ~77KB, not on the
+homepage). robots.txt/llms.txt unchanged. Deps unchanged.
+
+## Changed / new files
+- NEW: src/data/dictionaryHsk2Extra.ts, src/data/dictionaryHsk3.ts
+- EDIT: src/data/dictionaryCore.ts (type hsk 1|2|3 + wire batches),
+  src/pages/Dictionary.tsx (HSK3 filter), public/sitemap.xml, package.json
+
+## Build
+npm install && npm run build → passes on Node 18. No .env/dist/node_modules/.git
+in the package.
+
+---
+
+# NiHao V3.0A — Social Sharing + Email Lead Capture
+
+Base: GitHub main 88056d7 (V2.9E, v2.9.4) — fresh clone, not local folders. First
+growth phase. No redesign — only two new components, a Supabase migration, and
+safe GA4 events. No new dependencies, no external SDKs, no paid APIs, no voice
+storage. All V2.9B–V2.9E work preserved.
+
+## Email lead capture (Supabase only)
+- New migration supabase/migrations/20260615_email_leads.sql creates email_leads
+  with ONLY: email, source_path, source_type, consent, created_at (UNIQUE email).
+  No name/phone/age/user_id — no extra PII. RLS:
+  * anon + authenticated may INSERT only when consent = true,
+  * NO public SELECT (visitors can never read the list),
+  * admins (existing user_roles pattern) may read it.
+- src/lib/emailLeads.ts — subscribeEmail() (insert-only, validates email, maps
+  unique-violation to a friendly "already subscribed").
+- src/components/LeadCaptureBox.tsx — "كلمة كل يوم في بريدك" with an email field
+  and a required consent checkbox. Shown on the homepage (banner before the CTA)
+  and in the footer (so it appears after content site-wide). On success it fires
+  a GA4 newsletter_signup event with source only — the email is NEVER sent to GA4.
+
+## Social sharing (lightweight, no SDK)
+- src/components/SocialShareButtons.tsx — uses navigator.share when available,
+  else WhatsApp / Facebook / X / copy-link via plain URLs. No Facebook SDK, no
+  Twitter SDK, no heavy libraries. Fires a safe GA4 share event (method + path).
+- Added to: story pages (after the quiz), dialogue pages (/dialogues/:slug),
+  dictionary word pages (/dictionary/:slug), and the daily practice done step.
+
+## GA4 events (safe, no PII)
+- newsletter_signup { source_type, source_path } — no email.
+- share { method, source_path }.
+Both go through the existing analytics helper, so they stay production-only and
+are skipped on /admin.
+
+## Preserved (verified)
+- V2.9E: hero-illustration.webp + mobile webp; old PNG still absent.
+- V2.9D: analytics.ts / AnalyticsTracker.tsx / analytics.d.ts; /admin not tracked.
+- V2.9C: 4 how-it-works WebP; video-classroom.mp4 = 548KB; no root images/ or
+  videos/ duplicates.
+- V2.9B/B.1: studentProgress.ts, MarkComplete.tsx, ProgressPanel.tsx, Dashboard,
+  Daily, the student_progress migration, XP system.
+- SEO: sitemap.xml, robots.txt, llms.txt unchanged; /daily in; no admin/draft.
+- Index JS: 453KB (V2.9E was 449KB; +4KB for the two small components, no heavy
+  deps). Deps unchanged.
+
+## Manual Supabase step (one-time)
+Run supabase/migrations/20260615_email_leads.sql in the Supabase SQL editor
+(alongside the earlier admin_content_drafts and student_progress migrations).
+
+## Changed / new files
+- NEW: supabase/migrations/20260615_email_leads.sql, src/lib/emailLeads.ts,
+  src/components/LeadCaptureBox.tsx, src/components/SocialShareButtons.tsx
+- EDIT: src/pages/Home.tsx (lead banner), src/components/Footer.tsx (lead box),
+  src/pages/Stories.tsx, src/pages/StudentDialogues.tsx,
+  src/pages/DictionaryWord.tsx, src/pages/Daily.tsx (share buttons), package.json
+
+## Build
+npm install && npm run build → passes on Node 18. No .env/dist/node_modules/.git
+in the package.
+
+---
+
 # NiHao V2.9E — Homepage Hero / LCP Optimization
 
 Base: GitHub main 4dd9fc8 (V2.9D, GA4 on V2.9C). No redesign, no font/visual

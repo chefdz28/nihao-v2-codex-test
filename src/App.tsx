@@ -22,6 +22,7 @@ const Present = lazy(() => import('./pages/Present'));
 const FlashcardsPrint = lazy(() => import('./pages/TeacherTools').then(m => ({ default: m.FlashcardsPrint })));
 const Dictation = lazy(() => import('./pages/TeacherTools').then(m => ({ default: m.Dictation })));
 const Hsk1Simulation = lazy(() => import('./pages/Hsk1Simulation'));
+const Hsk3Simulation = lazy(() => import('./pages/Hsk3Simulation'));
 const Report = lazy(() => import('./pages/Report'));
 const StudyInChina = lazy(() => import('./pages/StudyInChina'));
 const StudyInChinaArticle = lazy(() => import('./pages/StudyInChina').then(m => ({ default: m.StudyInChinaArticle })));
@@ -124,6 +125,7 @@ export default function App() {
         <Route path="/flashcards-print" element={<FlashcardsPrint />} />
         <Route path="/dictation" element={<Dictation />} />
         <Route path="/hsk1-simulation" element={<Hsk1Simulation />} />
+        <Route path="/hsk3-simulation" element={<Hsk3Simulation />} />
         <Route path="/report" element={<Report />} />
         <Route path="/study-in-china" element={<StudyInChina />} />
         <Route path="/study-in-china/:slug" element={<StudyInChinaArticle />} />

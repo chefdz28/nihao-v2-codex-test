@@ -96,6 +96,7 @@ const META: Record<string, SeoMeta> = {
   '/teacher': { title_ar: 'حزمة المعلم للطباعة', title_en: 'Teacher Lesson Pack', desc_ar: 'اطبع حزمة درس كاملة للفصل الدراسي.', desc_en: 'Print a full classroom lesson pack.' },
   '/dictation': { title_ar: 'الإملاء الصيني 听写', title_en: 'Chinese Dictation 听写', desc_ar: 'استمع واكتب ثم اكشف الإجابة.', desc_en: 'Listen, write, then reveal the answer.' },
   '/hsk1-simulation': { title_ar: 'محاكاة تدريبية لاختبار HSK1', title_en: 'HSK1 Practice Simulation', desc_ar: 'محاكاة تدريبية بـ40 سؤالاً — ليست اختباراً رسمياً.', desc_en: 'A 40-question practice simulation — not an official exam.' },
+  '/hsk3-simulation': { title_ar: 'محاكاة تدريبية لاختبار HSK3', title_en: 'HSK3 Practice Simulation', desc_ar: 'محاكاة تدريبية بـ40 سؤالاً بنمط HSK3 — استماع وقراءة. ليست اختباراً رسمياً.', desc_en: 'A 40-question HSK3-style practice simulation — listening and reading. Not an official exam.' },
   '/report': { title_ar: 'تقرير تقدم الطالب', title_en: 'Student Progress Report', desc_ar: 'تقرير قابل للطباعة بتقدمك ونقاط ضعفك وخطواتك التالية.', desc_en: 'A printable report of your progress, weak areas and next steps.' },
   '/answers': {
     title_ar: 'أسئلة وأجوبة عن تعلم الصينية والدراسة في الصين',

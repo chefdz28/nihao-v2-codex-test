@@ -1,3 +1,32 @@
+# V3.2 HSK3 exercises & test checks
+- [ ] /hsk3-simulation runs: 40 questions (20 listening + 20 reading), 25-min timer
+- [ ] Score + pass/fail (60%); wrong answers go to Mistake Notebook (hsk3)
+- [ ] +40 XP once per day; results saved separately from HSK1
+- [ ] HSK1 sim still works and keeps its own results (backward compatible)
+- [ ] HSK3 sim in Header nav + Practice hub; has its own SEO title/desc
+- [ ] Dictionary HSK3 filter shows a CTA to the HSK3 test
+- [ ] No duplicate questions between HSK1 and HSK3 sims
+- [ ] sitemap has /hsk3-simulation, 0 admin/draft; build passes; deps unchanged
+# V3.1 dictionary expansion checks
+- [ ] /dictionary shows HSK1 / HSK2 / HSK3 filter buttons
+- [ ] HSK3 filter shows 234 HSK3 words
+- [ ] Dictionary total = 586 words, 0 duplicate slugs
+- [ ] HSK3 word pages render with "HSK3" badge (e.g. /dictionary/huanjing, /dictionary/wenhua)
+- [ ] New words have original Arabic + example sentences
+- [ ] sitemap has 586 word pages, 0 admin/draft
+- [ ] V3.0A share/lead + GA4 + progress all still work
+- [ ] Index JS ~453KB (words in lazy chunk); build passes; no new deps
+# V3.0A social share + lead capture checks
+- [ ] Run 20260615_email_leads.sql in Supabase (table + RLS)
+- [ ] Homepage banner + footer show the email box with consent checkbox
+- [ ] Subscribe with consent → row in email_leads; without consent → blocked
+- [ ] Duplicate email → friendly "already subscribed"
+- [ ] Email is NEVER sent to GA4 (only newsletter_signup source)
+- [ ] Share buttons on stories/dialogues/words/daily (native + WhatsApp/FB/X/copy)
+- [ ] Copy link works; share fires GA4 share event (method only)
+- [ ] No external SDK loaded; index JS ~453KB
+- [ ] V2.9B–E features preserved; video 548KB; no root images/videos
+- [ ] sitemap/robots/llms unchanged; /admin not tracked; build passes
 # V2.9E hero/LCP checks
 - [ ] Homepage looks identical (canvas hero, h1, black/red, fonts)
 - [ ] h1 headline paints immediately (no 0.5s delay) → better LCP

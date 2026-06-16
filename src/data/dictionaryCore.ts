@@ -6,6 +6,8 @@ import { hsk1FullLessons } from '@/data/hsk1-full';
 import { hsk2Batch } from '@/data/dictionaryHsk2';
 import { dialogueWords } from '@/data/dictionaryDialogueWords';
 import { storyWords } from '@/data/dictionaryStoryWords';
+import { hsk2Extra } from '@/data/dictionaryHsk2Extra';
+import { hsk3Batch } from '@/data/dictionaryHsk3';
 
 export interface DictExample { zh: string; py: string; ar: string; en?: string }
 export interface DictWord {
@@ -15,7 +17,7 @@ export interface DictWord {
   arabic: string;        // مرحباً
   english?: string;
   category: string;      // inferred part-of-speech / topic bucket (Arabic label)
-  hsk: 1 | 2;
+  hsk: 1 | 2 | 3;
   examples: DictExample[];
   related: string[];     // slugs of related words
 }
@@ -85,7 +87,7 @@ function inferCategory(w: { chinese: string; arabic: string; english?: string })
 // For words without a stored sentence, a minimal example is generated from the
 // word itself is NOT done (to avoid fake content) — examples stay empty.
 
-interface RawWord { chinese: string; pinyin: string; arabic: string; english?: string; hsk: 1 | 2; examples?: DictExample[] }
+interface RawWord { chinese: string; pinyin: string; arabic: string; english?: string; hsk: 1 | 2 | 3; examples?: DictExample[] }
 
 function collectRaw(): RawWord[] {
   const out: RawWord[] = [];
@@ -102,6 +104,12 @@ function collectRaw(): RawWord[] {
   }
   for (const w of storyWords) {
     out.push({ chinese: w.chinese, pinyin: w.pinyin, arabic: w.arabic, english: w.english, hsk: w.hsk, examples: w.examples });
+  }
+  for (const w of hsk2Extra) {
+    out.push({ chinese: w.chinese, pinyin: w.pinyin, arabic: w.arabic, english: w.english, hsk: 2, examples: w.examples });
+  }
+  for (const w of hsk3Batch) {
+    out.push({ chinese: w.chinese, pinyin: w.pinyin, arabic: w.arabic, english: w.english, hsk: 3, examples: w.examples });
   }
   return out;
 }

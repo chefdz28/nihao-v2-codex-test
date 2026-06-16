@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { BookOpenText, Volume2, Check, X, ArrowLeft, ArrowRight, Eye, EyeOff, Play, Pause } from 'lucide-react';
 import VoicePractice from '@/components/VoicePractice';
 import MarkComplete from '@/components/MarkComplete';
+import SocialShareButtons from '@/components/SocialShareButtons';
 import { useI18n } from '@/i18n';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
@@ -300,6 +301,10 @@ export function StoryReader() {
           {/* V2.9B: save story completion to progress */}
           <div className="mb-6 flex justify-center">
             <MarkComplete type="story" slug={story.id} score={score} />
+          </div>
+          {/* V3.0A: share */}
+          <div className="mb-6 flex justify-center">
+            <SocialShareButtons title={story.title_ar || story.title_zh} compact />
           </div>
           <div className="flex justify-center gap-3">
             <button onClick={() => { setQuizMode(false); setFinished(false); setQIndex(0); setPicked(null); setScore(0); }} className="btn-secondary text-sm">{t('stories.readAgain')}</button>

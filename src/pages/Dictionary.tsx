@@ -34,7 +34,7 @@ export default function Dictionary() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const saved = loadSaved();
-  const [hskFilter, setHskFilter] = useState<0 | 1 | 2>(0);   // 0 = all
+  const [hskFilter, setHskFilter] = useState<0 | 1 | 2 | 3>(0);   // 0 = all
   const [catFilter, setCatFilter] = useState<string>('all');
 
   useEffect(() => {
@@ -162,7 +162,7 @@ export default function Dictionary() {
       {/* V2.8A: HSK + category filters */}
       <div className="flex flex-wrap gap-2 mb-4" dir="rtl">
         <div className="flex gap-1 liquid-glass rounded-xl p-1">
-          {([0, 1, 2] as const).map(h => (
+          {([0, 1, 2, 3] as const).map(h => (
             <button key={h} onClick={() => setHskFilter(h)} className={`px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-colors ${hskFilter === h ? 'bg-[#FF3333] text-white' : 'text-[#a0a0a0] hover:text-white'}`}>
               {h === 0 ? 'الكل' : `HSK${h}`}
             </button>
@@ -174,6 +174,20 @@ export default function Dictionary() {
         </select>
         <span className="text-xs flex items-center px-2 font-arabic" style={{ color: 'var(--color-text-tertiary)' }}>{browse.length} كلمة</span>
       </div>
+
+      {/* V3.2: contextual CTA — jump from browsing a level to its practice test */}
+      {(hskFilter === 1 || hskFilter === 3) && (
+        <Link
+          to={hskFilter === 3 ? '/hsk3-simulation' : '/hsk1-simulation'}
+          className="liquid-glass rounded-xl p-3 mb-6 flex items-center justify-between hover:border-[#FF3333]/30 border border-transparent transition-colors"
+          dir="rtl"
+        >
+          <span className="text-sm font-arabic text-white">
+            جاهز تختبر مستوى HSK{hskFilter}؟ جرّب المحاكاة التدريبية الآن
+          </span>
+          <span className="text-xs text-[#FF3333] font-arabic shrink-0">ابدأ الاختبار ←</span>
+        </Link>
+      )}
 
       {/* V2.8A: browse grid — each card links to its word page */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-8" dir="rtl">

@@ -8,6 +8,7 @@ import JsonLd from '@/components/JsonLd';
 import { breadcrumbLd, definedTermLd } from '@/lib/structuredData';
 import { wordBySlug, dictionaryWords } from '@/data/dictionaryCore';
 import { findUsages } from '@/lib/wordUsages';
+import SocialShareButtons from '@/components/SocialShareButtons';
 import { trackEvent } from '@/lib/analytics';
 
 /** V2.8A /dictionary/:slug — individual reference page for one word. */
@@ -121,6 +122,11 @@ export default function DictionaryWord() {
           </section>
         )}
 
+
+        {/* V3.0A: share */}
+        <div className="mb-6">
+          <SocialShareButtons title={`${word.chinese} — ${word.arabic}`} compact />
+        </div>
 
         <Link to="/courses" className="btn-primary text-sm py-3 px-6 inline-flex font-arabic mt-2">تعلّم المزيد من الكلمات <ArrowRight size={15} /></Link>
       </motion.div>

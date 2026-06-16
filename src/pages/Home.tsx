@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import LeadCaptureBox from '@/components/LeadCaptureBox';
 import StartHere from '@/components/StartHere';
 import PinyinText from '@/components/PinyinText';
 import { stories } from '@/data/stories2';
@@ -997,6 +998,12 @@ export default function Home() {
       <ProgressPreviewSection />
       <TestimonialsSection />
       <FAQSection />
+      {/* V3.0A: email capture banner */}
+      <section className="section-padding">
+        <div className="max-w-[640px] mx-auto">
+          <LeadCaptureBox sourceType="homepage" />
+        </div>
+      </section>
       <CTASection />
     </>
   );

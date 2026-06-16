@@ -1,3 +1,4 @@
+import LeadCaptureBox from '@/components/LeadCaptureBox';
 import { Link } from 'react-router-dom';
 import { BookOpen, PenTool, Mic } from 'lucide-react';
 import { useI18n } from '@/i18n';
@@ -97,6 +98,11 @@ export default function Footer() {
               <li><Link to="#" className="text-[#a0a0a0] hover:text-white transition-colors text-sm">{t('footer.cookies')}</Link></li>
             </ul>
           </div>
+        </div>
+
+        {/* V3.0A: email capture in footer */}
+        <div className="mt-10 max-w-[520px]">
+          <LeadCaptureBox sourceType="footer" compact />
         </div>
 
         {/* Bottom bar */}

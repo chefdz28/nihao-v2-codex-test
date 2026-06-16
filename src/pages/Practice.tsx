@@ -96,6 +96,7 @@ export default function Practice() {
           { path: '/certificates', label: 'nav.certificates', icon: GraduationCap },
           { path: '/mistakes', label: 'nav.mistakes', icon: NotebookPen },
           { path: '/hsk1-simulation', label: 'nav.hsk1', icon: ClipboardList },
+          { path: '/hsk3-simulation', label: 'nav.hsk3', icon: ClipboardList },
           { path: '/teacher', label: 'nav.teacher', icon: School },
           { path: '/dictation', label: 'nav.dictation', icon: Headphones },
           { path: '/flashcards-print', label: 'nav.flashcardsPrint', icon: Layers },

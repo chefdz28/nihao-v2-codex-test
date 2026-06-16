@@ -9,6 +9,7 @@ import { firstIncompleteLesson, shuffle } from '@/lib/learning';
 import AudioButton from '@/components/AudioButton';
 import VoicePractice from '@/components/VoicePractice';
 import MarkComplete from '@/components/MarkComplete';
+import SocialShareButtons from '@/components/SocialShareButtons';
 import type { LessonRow, VocabRow, SentenceRow, QuizQuestionRow, QuizOption } from '@/types/supabase';
 
 type Step = 'words' | 'sentences' | 'quiz' | 'done';
@@ -248,6 +249,10 @@ export default function Daily() {
           {/* V2.9B: mark daily complete (slug = today's date) */}
           <div className="mb-6 flex justify-center">
             <MarkComplete type="daily" slug={new Date().toISOString().slice(0, 10)} score={questions.length > 0 ? score : undefined} />
+          </div>
+          {/* V3.0A: share */}
+          <div className="mb-6 flex justify-center">
+            <SocialShareButtons compact />
           </div>
 
           <div className="flex flex-wrap gap-3 justify-center">
