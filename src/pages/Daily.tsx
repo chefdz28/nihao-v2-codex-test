@@ -9,6 +9,7 @@ import { firstIncompleteLesson, shuffle } from '@/lib/learning';
 import AudioButton from '@/components/AudioButton';
 import VoicePractice from '@/components/VoicePractice';
 import MarkComplete from '@/components/MarkComplete';
+import DailyGoalCard from '@/components/DailyGoalCard';
 import SocialShareButtons from '@/components/SocialShareButtons';
 import type { LessonRow, VocabRow, SentenceRow, QuizQuestionRow, QuizOption } from '@/types/supabase';
 
@@ -125,6 +126,11 @@ export default function Daily() {
           {t('daily.lesson')}: <span className="text-white">{lesson.order_num}. {lang === 'ar' ? lesson.title_ar : lesson.title_en}</span>
         </p>
       </motion.div>
+
+      {/* V3.6: daily XP goal ring (encourages daily return) */}
+      <div className="mb-6">
+        <DailyGoalCard />
+      </div>
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 my-6">

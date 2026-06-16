@@ -14,6 +14,7 @@ import { usePinyinMode } from '@/hooks/usePinyinMode';
 import PinyinToggle from '@/components/PinyinToggle';
 import AuthGate from '@/components/AuthGate';
 import Seo from '@/components/Seo';
+import HskToolsNav from '@/components/HskToolsNav';
 
 const DECK = 'hsk3';
 const PREVIEW_LIMIT = 5; // guests can review this many cards before sign-in
@@ -163,6 +164,7 @@ export default function Hsk3Flashcards() {
       ) : (
         <div className="liquid-glass p-8 text-center font-arabic text-sm" style={{ color: 'var(--color-text-secondary)' }}>جارٍ التحميل…</div>
       )}
+      <HskToolsNav />
     </div>
   );
 }

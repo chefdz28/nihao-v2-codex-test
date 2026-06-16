@@ -4,6 +4,7 @@ import { Printer, RefreshCw, FileText } from 'lucide-react';
 import { hsk3Batch } from '@/data/dictionaryHsk3';
 import { trackEvent } from '@/lib/analytics';
 import Seo from '@/components/Seo';
+import HskToolsNav from '@/components/HskToolsNav';
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -134,6 +135,7 @@ export default function Hsk3Worksheet() {
         <Link to="/hsk3-simulation" className="text-[#a0a0a0] hover:text-white">اختبار HSK3</Link>
         <Link to="/dictionary" className="text-[#a0a0a0] hover:text-white">القاموس</Link>
       </div>
+      <HskToolsNav />
     </div>
   );
 }

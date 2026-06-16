@@ -30,6 +30,8 @@ export default function AdminQuizResults() {
     })();
   }, []);
 
+  const SLUG_LABEL: Record<string, string> = { 'hsk1-sim': 'محاكاة HSK1', 'hsk2-sim': 'محاكاة HSK2', 'hsk3-sim': 'محاكاة HSK3' };
+  const labelSlug = (slug: string) => SLUG_LABEL[slug] || slug;
   const fmt = (d: string | null) => d ? new Date(d).toISOString().slice(0, 10) : '—';
   const sorted = useMemo(() => [...rows].sort((a, b) => (b.completed_at || '').localeCompare(a.completed_at || '')), [rows]);
 
@@ -42,14 +44,13 @@ export default function AdminQuizResults() {
         <Link to="/admin/data" className="text-xs font-arabic text-[#a0a0a0] hover:text-white flex items-center gap-1"><ArrowLeft size={13} /> مركز البيانات</Link>
       </div>
 
-      {/* honest note about localStorage-only HSK results */}
-      <div className="liquid-glass rounded-xl p-4 mb-5 flex gap-3" style={{ borderColor: 'rgba(245,158,11,0.3)' }}>
-        <Info size={18} className="text-[#f59e0b] shrink-0 mt-0.5" />
+      {/* V3.6: HSK simulation results now sync to the server for logged-in users */}
+      <div className="liquid-glass rounded-xl p-4 mb-5 flex gap-3" style={{ borderColor: 'rgba(16,185,129,0.3)' }}>
+        <Info size={18} className="text-[#10b981] shrink-0 mt-0.5" />
         <p className="text-xs font-arabic leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-          النتائج المعروضة هنا هي نتائج الاختبارات المحفوظة على الخادم (نوع «quiz» في جدول التقدّم).
-          أما نتائج محاكاة HSK1/HSK2/HSK3 فتُحفظ حالياً في متصفّح كل متعلّم (localStorage)، لذا لا يمكن
-          عرض نتائج الأجهزة الأخرى من هنا. <span className="text-[#f59e0b]">مهمة مستقبلية:</span> مزامنة
-          نتائج اختبارات HSK المهمة إلى Supabase ليتمكّن الأدمن من رؤيتها مركزياً.
+          نتائج اختبارات الدروس ومحاكاة HSK1/HSK2/HSK3 تُحفظ على الخادم للمستخدمين المسجّلين (نوع «quiz»)،
+          فتظهر هنا مركزياً عبر الأجهزة. أما الزوّار غير المسجّلين فتُحفظ نتائجهم محلياً على أجهزتهم فقط
+          ولا يمكن عرضها هنا.
         </p>
       </div>
 
@@ -59,7 +60,7 @@ export default function AdminQuizResults() {
         <p className="font-arabic text-sm text-[#FF3333] text-center py-10">{error}</p>
       ) : sorted.length === 0 ? (
         <p className="font-arabic text-sm text-center py-10" style={{ color: 'var(--color-text-secondary)' }}>
-          لا توجد نتائج اختبارات على الخادم بعد. (نتائج محاكاة HSK محفوظة محلياً على أجهزة المتعلمين.)
+          لا توجد نتائج اختبارات على الخادم بعد. ستظهر هنا عند إكمال المستخدمين المسجّلين للاختبارات.
         </p>
       ) : (
         <div className="overflow-x-auto liquid-glass rounded-2xl">
@@ -76,7 +77,7 @@ export default function AdminQuizResults() {
               {sorted.map((r, i) => (
                 <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02]">
                   <td className="p-3 text-xs text-white" style={{ direction: 'ltr', textAlign: 'right' }}>{r.email || r.user_id.slice(0, 10)}</td>
-                  <td className="p-3 text-xs text-[#ddd]" style={{ direction: 'ltr', textAlign: 'right' }}>{r.content_slug}</td>
+                  <td className="p-3 text-xs text-[#ddd]" style={{ direction: 'ltr', textAlign: 'right' }}>{labelSlug(r.content_slug)}</td>
                   <td className="text-center p-3 text-white">{r.score ?? '—'}</td>
                   <td className="text-center p-3 text-xs text-[#a0a0a0]">{fmt(r.completed_at)}</td>
                 </tr>

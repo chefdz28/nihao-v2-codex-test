@@ -4,6 +4,9 @@ import { motion } from 'framer-motion';
 import { ClipboardList, Clock, ListChecks, BarChart3, ArrowLeft } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 import Seo from '@/components/Seo';
+import JsonLd from '@/components/JsonLd';
+import HskToolsNav from '@/components/HskToolsNav';
+import { courseLd, breadcrumbLd } from '@/lib/structuredData';
 
 const TESTS = [
   {
@@ -30,6 +33,8 @@ export default function HskTests() {
   return (
     <div className="max-w-[820px] mx-auto px-6 py-10">
       <Seo />
+      <JsonLd id="hsk-tests-course" data={courseLd({ name: 'اختبارات HSK التجريبية — HSK1 HSK2 HSK3', description: 'محاكاة تدريبية مجانية لمستويات HSK بالعربية: استماع وقراءة بمؤقّت ونتيجة فورية.', path: '/hsk-tests' })} />
+      <JsonLd id="hsk-tests-breadcrumb" data={breadcrumbLd([{ name: 'الرئيسية', path: '/' }, { name: 'اختبارات HSK', path: '/hsk-tests' }])} />
       <div className="text-center mb-8" dir="rtl">
         <ClipboardList size={40} className="text-[#FF3333] mx-auto mb-3" />
         <h1 className="font-display font-black text-3xl text-white mb-2">اختبارات HSK التجريبية</h1>
@@ -75,6 +80,7 @@ export default function HskTests() {
         <Link to="/dictionary" className="liquid-glass rounded-xl px-4 py-2 text-white hover:border-[#FF3333]/30 border border-transparent transition-colors">القاموس</Link>
         <Link to="/practice" className="text-[#a0a0a0] hover:text-white flex items-center gap-1"><ArrowLeft size={13} /> كل التمارين</Link>
       </div>
+      <HskToolsNav exclude={['/hsk-tests']} />
     </div>
   );
 }

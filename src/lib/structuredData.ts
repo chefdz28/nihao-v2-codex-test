@@ -87,3 +87,36 @@ export function definedTermLd(opts: { term: string; definition: string; path: st
     url: `${DOMAIN}${opts.path}`,
   };
 }
+
+// V3.5 — HSK practice simulation (Quiz). No fake results/ratings; describes the
+// free practice test so search engines can surface it for HSK-test queries.
+export function quizLd(opts: { name: string; description: string; path: string; numQuestions?: number }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Quiz',
+    name: opts.name,
+    description: opts.description,
+    url: `${DOMAIN}${opts.path}`,
+    educationalUse: 'Practice',
+    isAccessibleForFree: true,
+    learningResourceType: 'Practice problem set',
+    ...(opts.numQuestions ? { numberOfQuestions: opts.numQuestions } : {}),
+    about: { '@type': 'Thing', name: 'HSK Chinese proficiency' },
+    provider: { '@type': 'Organization', name: 'NiHao', url: DOMAIN },
+  };
+}
+
+// V3.5 — HSK tests hub / learning tool (Course-like, free).
+export function courseLd(opts: { name: string; description: string; path: string }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: opts.name,
+    description: opts.description,
+    url: `${DOMAIN}${opts.path}`,
+    inLanguage: ['ar', 'zh'],
+    isAccessibleForFree: true,
+    teaches: 'Mandarin Chinese (HSK)',
+    provider: { '@type': 'Organization', name: 'NiHao', url: DOMAIN },
+  };
+}

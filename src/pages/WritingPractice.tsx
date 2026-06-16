@@ -7,6 +7,7 @@ import { useAudio } from '@/hooks/useAudio';
 import { writingChars } from '@/data/writingChars';
 import { trackEvent } from '@/lib/analytics';
 import Seo from '@/components/Seo';
+import HskToolsNav from '@/components/HskToolsNav';
 
 /** V3.3 /writing-practice — original stroke-order + writing practice for common
  *  HSK1–HSK3 characters. Stroke animation via the existing StrokeOrderPlayer
@@ -108,6 +109,7 @@ export default function WritingPractice() {
         <Link to="/dictionary" className="text-[#a0a0a0] hover:text-white">القاموس</Link>
         <Link to="/practice" className="text-[#a0a0a0] hover:text-white">كل التمارين</Link>
       </div>
+      <HskToolsNav />
     </div>
   );
 }

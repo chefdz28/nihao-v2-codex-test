@@ -1,3 +1,74 @@
+# NiHao V3.6 — Unified Release: SEO + Internal Linking + Progress Sync + Growth
+
+Base: GitHub main 48c128f (V3.4.2 admin data visibility). This release UNIFIES
+the previously separate V3.5 (SEO/linking/sync) and V3.4.3 (scroll-to-top) work
+on top of the latest admin base, integrates HSK result sync WITH the admin panel,
+and adds growth features — so everything ships in ONE update. No redesign, no new
+dependencies, no new Supabase table/migration. All prior features preserved.
+
+## Folded in: V3.4.3 — scroll to top on route change
+- src/components/ScrollToTop.tsx mounted next to AnalyticsTracker. On pathname
+  change it scrolls to top (footer links etc. now open pages at the top); hash-
+  only navigation is ignored.
+
+## Folded in: V3.5 — SEO indexing, internal linking, progress sync
+- Structured data: new quizLd + courseLd builders; JsonLd + BreadcrumbList wired
+  into /hsk-tests (Course) and the HSK1/2/3 simulations (Quiz).
+- Internal linking: src/components/HskToolsNav.tsx cross-links every HSK tool;
+  added to the sim result screens and the flashcards/worksheet/writing pages.
+- SEO articles: 3 new (hsk2-mock-test, hsk1-mock-test, free-chinese-flashcards)
+  → 18 total, live at /blog/<slug>. sitemap regenerated to 701 URLs, 0 private.
+- SEARCH_CONSOLE_CHECKLIST.md included.
+- Progress sync: finishing an HSK1/2/3 simulation now also records
+  markCompleted('quiz', 'hskN-sim', score) to the existing student_progress
+  table, so logged-in users' HSK results sync across devices.
+
+## NEW integration bonus: HSK results now show in the admin panel
+Because HSK results sync to student_progress (above), the V3.4.2 admin Quiz
+Results page (/admin/quiz-results) now displays them with friendly labels
+(محاكاة HSK1/2/3). The old "local-only, future TODO" note is replaced with an
+accurate note: results sync for logged-in users; guests stay local. This closes
+the loop the two branches each half-built.
+
+## NEW growth feature: Daily XP goal ring
+- src/components/DailyGoalCard.tsx — a daily XP goal with an SVG progress ring,
+  encouraging a daily-return habit. 100% local (reuses the existing XP system, no
+  new table), goal is adjustable (20/30/50/80). Added to the Daily page and the
+  Dashboard. (Streaks already existed via computeStreak and are unchanged.)
+
+## Preserved (verified)
+V3.4.2 admin data pages + adminData lib + admin RPC migration; V3.4.1 GA4 head
+tag + analytics + simPinyin; V3.4 Google auth + AuthGate + PinyinToggle +
+usePinyinMode + useTestGate; V3.3 HSK tools; V3.2 HSK3; V3.0A social + lead
+capture; V2.9E performance (hero webp, video 548KB). GA4 head tag intact,
+AnalyticsTracker + ScrollToTop both mounted.
+
+## Changed / new files
+- NEW: src/components/ScrollToTop.tsx, src/components/HskToolsNav.tsx,
+  src/components/DailyGoalCard.tsx, src/data/hskSeoV35.ts,
+  SEARCH_CONSOLE_CHECKLIST.md
+- EDIT: src/App.tsx (ScrollToTop), src/lib/structuredData.ts (quizLd + courseLd),
+  src/data/seoSprint1b.ts (merge articles), src/pages/HskTests.tsx +
+  Hsk1/2/3Simulation.tsx (JSON-LD + HskToolsNav + HSK result sync),
+  src/pages/Hsk3Flashcards.tsx + Hsk3Worksheet.tsx + WritingPractice.tsx
+  (HskToolsNav), src/pages/AdminQuizResults.tsx (show synced HSK results),
+  src/pages/Daily.tsx + Dashboard.tsx (DailyGoalCard), public/sitemap.xml,
+  package.json
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 462KB. Deps unchanged. No new migration (HSK sync uses the
+existing student_progress table; admin RPCs come from V3.4.2's migration which
+must already be run).
+
+## Known limitations
+- Flashcard SRS is still local-only (HSK sim results now sync; SRS can follow the
+  same pattern later).
+- The daily goal "earned today" resets at local midnight per device (localStorage).
+- Indexing is gradual (days–weeks); this release does the structural SEO work.
+
+---
+
 # NiHao V3.4.2 — Complete Admin Data Visibility
 
 Base: GitHub main b0f79c2 (V3.4.1). Adds an admin-only data visibility layer. No

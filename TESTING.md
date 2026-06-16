@@ -1,3 +1,11 @@
+# V3.6 unified release checks
+- [ ] Footer link while scrolled → new page opens at top (ScrollToTop)
+- [ ] /hsk-tests Course JSON-LD; sims Quiz+Breadcrumb JSON-LD; HskToolsNav on tools
+- [ ] 3 new articles live; sitemap 701, 0 private
+- [ ] Logged-in HSK sim result syncs → appears in /admin/quiz-results (محاكاة HSK)
+- [ ] DailyGoalCard ring on /daily and /dashboard; goal adjustable
+- [ ] All V3.4.2 admin pages + RPCs intact; GA4 head tag intact
+- [ ] index ~462KB; deps unchanged; build passes
 # V3.4.2 admin data visibility checks
 - [ ] Admin can open /admin/data, /admin/students, /admin/progress, /admin/quiz-results, /admin/leads
 - [ ] Non-admin + logged-out are redirected (AdminRoute) and RPCs return no rows

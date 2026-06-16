@@ -4,6 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import Seo from './components/Seo';
 import AnalyticsTracker from './components/AnalyticsTracker';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -104,6 +105,7 @@ export default function App() {
   return (
     <Layout>
       <Seo />
+      <ScrollToTop />
       <AnalyticsTracker />
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center" dir="rtl"><div className="text-white font-arabic text-sm flex items-center gap-2"><span className="w-4 h-4 border-2 border-[#FF3333] border-t-transparent rounded-full animate-spin inline-block"></span> جاري التحميل...</div></div>}>
       <Routes>

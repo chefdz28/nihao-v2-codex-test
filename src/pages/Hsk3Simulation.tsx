@@ -7,6 +7,9 @@ import { useTestGate } from '@/hooks/useTestGate';
 import { usePinyinMode } from '@/hooks/usePinyinMode';
 import PinyinToggle from '@/components/PinyinToggle';
 import AuthGate from '@/components/AuthGate';
+import JsonLd from '@/components/JsonLd';
+import HskToolsNav from '@/components/HskToolsNav';
+import { quizLd, breadcrumbLd } from '@/lib/structuredData';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
 import PinyinAnswerOption from '@/components/PinyinAnswerOption';
@@ -14,6 +17,7 @@ import { HSK3_QUESTIONS, HSK3_PASS_PCT, HSK3_TIME_MINUTES, type Hsk3Q } from '@/
 import { recordMistake } from '@/lib/mistakes';
 import { awardXP } from '@/lib/gamification';
 import { loadHskResultsByLevel, saveHskResultByLevel } from '@/lib/hskResults';
+import { markCompleted } from '@/lib/studentProgress';
 
 
 /** V3.2 /hsk3-simulation — HSK3 PRACTICE simulation (clearly not official) */
@@ -59,6 +63,9 @@ export default function Hsk3Simulation() {
       const passed = (finalScore / HSK3_QUESTIONS.length) * 100 >= HSK3_PASS_PCT;
       const minutes = Math.round((Date.now() - startRef.current) / 60000);
       saveHskResultByLevel(3, { date: new Date().toISOString().slice(0, 10), score: finalScore, total: HSK3_QUESTIONS.length, passed, minutes });
+      // V3.6: sync result to student_progress (quiz) so logged-in users' HSK
+      // results appear across devices and in the admin Quiz Results page.
+      void markCompleted('quiz', 'hsk3-sim', finalScore);
       // wrong answers → mistake notebook
       prev.forEach((a, i) => {
         const qq = HSK3_QUESTIONS[i];
@@ -96,6 +103,8 @@ export default function Hsk3Simulation() {
     return (
       <div className="max-w-[640px] mx-auto px-6 py-10">
         {gateOpen && <AuthGate context={'hsk3_sim'} onClose={closeGate} />}
+        <JsonLd id="hsk3-quiz" data={quizLd({ name: 'محاكاة تدريبية لاختبار HSK3', description: 'محاكاة HSK3 مجانية بالعربية: استماع وقراءة بمؤقت ونتيجة فورية. ليست اختباراً رسمياً.', path: '/hsk3-simulation', numQuestions: 40 })} />
+        <JsonLd id="hsk3-breadcrumb" data={breadcrumbLd([{ name: 'الرئيسية', path: '/' }, { name: 'اختبارات HSK', path: '/hsk-tests' }, { name: 'HSK3', path: '/hsk3-simulation' }])} />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="liquid-glass p-8 text-center">
           <ClipboardList size={40} className="text-[#FF3333] mx-auto mb-4" />
           <h1 className="font-display font-black text-3xl text-white mb-2">{isAr ? 'محاكاة تدريبية لاختبار HSK3' : 'HSK3 Practice Simulation'}</h1>
@@ -166,6 +175,7 @@ export default function Hsk3Simulation() {
             })}
           </div>
         )}
+        <HskToolsNav exclude={['/hsk3-simulation']} />
       </div>
     );
   }

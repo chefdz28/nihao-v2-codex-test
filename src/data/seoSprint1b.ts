@@ -1,6 +1,7 @@
 // V2.6 SEO Sprint 1 — articles 6–10 + combined aggregator.
 import { seoSprint1, type SeoArticle } from '@/data/seoSprint1';
 import { hsk3Seo } from '@/data/hsk3Seo';
+import { hskSeoV35 } from '@/data/hskSeoV35';
 
 const TODAY = '2026-06-12';
 const LK = {
@@ -233,7 +234,7 @@ const part2: SeoArticle[] = [
   },
 ];
 
-export const seoSprint1All: SeoArticle[] = [...seoSprint1, ...part2, ...hsk3Seo];
+export const seoSprint1All: SeoArticle[] = [...seoSprint1, ...part2, ...hsk3Seo, ...hskSeoV35];
 
 export function seoArticleBySlug(slug: string): SeoArticle | undefined {
   return seoSprint1All.find(a => a.slug === slug);

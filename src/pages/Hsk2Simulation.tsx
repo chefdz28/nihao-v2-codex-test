@@ -7,6 +7,9 @@ import { useTestGate } from '@/hooks/useTestGate';
 import { usePinyinMode } from '@/hooks/usePinyinMode';
 import PinyinToggle from '@/components/PinyinToggle';
 import AuthGate from '@/components/AuthGate';
+import JsonLd from '@/components/JsonLd';
+import HskToolsNav from '@/components/HskToolsNav';
+import { quizLd, breadcrumbLd } from '@/lib/structuredData';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
 import PinyinAnswerOption from '@/components/PinyinAnswerOption';
@@ -14,6 +17,7 @@ import { HSK2_QUESTIONS, HSK2_PASS_PCT, HSK2_TIME_MINUTES, type Hsk2Q } from '@/
 import { recordMistake } from '@/lib/mistakes';
 import { awardXP } from '@/lib/gamification';
 import { loadHskResultsByLevel, saveHskResultByLevel } from '@/lib/hskResults';
+import { markCompleted } from '@/lib/studentProgress';
 import { trackEvent } from '@/lib/analytics';
 
 
@@ -61,6 +65,9 @@ export default function Hsk2Simulation() {
       const passed = (finalScore / HSK2_QUESTIONS.length) * 100 >= HSK2_PASS_PCT;
       const minutes = Math.round((Date.now() - startRef.current) / 60000);
       saveHskResultByLevel(2, { date: new Date().toISOString().slice(0, 10), score: finalScore, total: HSK2_QUESTIONS.length, passed, minutes });
+      // V3.6: sync result to student_progress (quiz) so logged-in users' HSK
+      // results appear across devices and in the admin Quiz Results page.
+      void markCompleted('quiz', 'hsk2-sim', finalScore);
       trackEvent('hsk2_sim_complete', { hsk_level: 2, passed });
       // wrong answers → mistake notebook
       prev.forEach((a, i) => {
@@ -99,6 +106,8 @@ export default function Hsk2Simulation() {
     return (
       <div className="max-w-[640px] mx-auto px-6 py-10">
         {gateOpen && <AuthGate context={'hsk2_sim'} onClose={closeGate} />}
+        <JsonLd id="hsk2-quiz" data={quizLd({ name: 'محاكاة تدريبية لاختبار HSK2', description: 'محاكاة HSK2 مجانية بالعربية: استماع وقراءة بمؤقت ونتيجة فورية. ليست اختباراً رسمياً.', path: '/hsk2-simulation', numQuestions: 36 })} />
+        <JsonLd id="hsk2-breadcrumb" data={breadcrumbLd([{ name: 'الرئيسية', path: '/' }, { name: 'اختبارات HSK', path: '/hsk-tests' }, { name: 'HSK2', path: '/hsk2-simulation' }])} />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="liquid-glass p-8 text-center">
           <ClipboardList size={40} className="text-[#FF3333] mx-auto mb-4" />
           <h1 className="font-display font-black text-3xl text-white mb-2">{isAr ? 'محاكاة تدريبية لاختبار HSK2' : 'HSK2 Practice Simulation'}</h1>
@@ -169,6 +178,7 @@ export default function Hsk2Simulation() {
             })}
           </div>
         )}
+        <HskToolsNav exclude={['/hsk2-simulation']} />
       </div>
     );
   }

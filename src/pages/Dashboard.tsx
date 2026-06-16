@@ -10,6 +10,7 @@ import { TodaysPlan, DailyMissions } from '@/components/TodaysPlan';
 import StartHere from '@/components/StartHere';
 import { getSummary, type ProgressSummary } from '@/lib/studentProgress';
 import ProgressPanel from '@/components/ProgressPanel';
+import DailyGoalCard from '@/components/DailyGoalCard';
 import type { QuizResult, UserProgressItem, LessonRow, LevelRow } from '@/types/supabase';
 
 export default function Dashboard() {
@@ -111,6 +112,11 @@ export default function Dashboard() {
 
         {/* V2.9B: student progress panel (counts, XP, recent activity, continue) */}
         <ProgressPanel />
+
+        {/* V3.6: daily XP goal ring */}
+        <div className="mb-8">
+          <DailyGoalCard />
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
