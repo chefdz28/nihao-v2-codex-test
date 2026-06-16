@@ -35,6 +35,11 @@ const Answers = lazy(() => import('./pages/Answers'));
 const AnswerPageView = lazy(() => import('./pages/Answers').then(m => ({ default: m.AnswerPageView })));
 const BestSite = lazy(() => import('./pages/BestSite'));
 const AdminContentDrafts = lazy(() => import('./pages/AdminContentDrafts'));
+const AdminDataCenter = lazy(() => import('./pages/AdminDataCenter'));
+const AdminStudents = lazy(() => import('./pages/AdminStudents'));
+const AdminProgress = lazy(() => import('./pages/AdminProgress'));
+const AdminLeads = lazy(() => import('./pages/AdminLeads'));
+const AdminQuizResults = lazy(() => import('./pages/AdminQuizResults'));
 const DictionaryWord = lazy(() => import('./pages/DictionaryWord'));
 const StudentDialogues = lazy(() => import('./pages/StudentDialogues'));
 const StudentDialogueView = lazy(() => import('./pages/StudentDialogues').then(m => ({ default: m.StudentDialogueView })));
@@ -167,6 +172,11 @@ export default function App() {
         {/* Admin only */}
         <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
         <Route path="/admin/content-drafts" element={<AdminRoute><AdminContentDrafts /></AdminRoute>} />
+        <Route path="/admin/data" element={<AdminRoute><AdminDataCenter /></AdminRoute>} />
+        <Route path="/admin/students" element={<AdminRoute><AdminStudents /></AdminRoute>} />
+        <Route path="/admin/progress" element={<AdminRoute><AdminProgress /></AdminRoute>} />
+        <Route path="/admin/leads" element={<AdminRoute><AdminLeads /></AdminRoute>} />
+        <Route path="/admin/quiz-results" element={<AdminRoute><AdminQuizResults /></AdminRoute>} />
       </Routes>
       </Suspense>
     </Layout>

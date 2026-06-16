@@ -7,7 +7,8 @@ import {
   Search, ChevronDown,
   Users, Settings,
   ArrowLeft, Download, HelpCircle, Loader2,
-  Play, CheckCircle2, AlertTriangle, RefreshCw, Eye
+  Play, CheckCircle2, AlertTriangle, RefreshCw, Eye,
+  Database, Activity, Mail
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -146,6 +147,26 @@ function OverviewTab() {
             <div className="font-display font-black text-2xl text-white">{loading ? '...' : stat.value}</div>
             <div className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>{stat.label}</div>
           </div>
+        ))}
+      </div>
+
+      {/* V3.4.2: admin data center navigation */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+        {[
+          { to: '/admin/data', label: 'مركز البيانات', en: 'Data Center', icon: Database },
+          { to: '/admin/students', label: 'الطلاب', en: 'Students', icon: Users },
+          { to: '/admin/progress', label: 'التقدّم', en: 'Progress', icon: Activity },
+          { to: '/admin/quiz-results', label: 'نتائج الاختبارات', en: 'Quiz Results', icon: HelpCircle },
+          { to: '/admin/leads', label: 'البريد', en: 'Leads', icon: Mail },
+          { to: '/admin/content-drafts', label: 'المسودات', en: 'Drafts', icon: FileText },
+        ].map((c, i) => (
+          <Link key={i} to={c.to} className="liquid-glass p-4 hover:border-[#FF3333]/30 border border-transparent transition-colors flex items-center gap-3" dir="rtl">
+            <c.icon size={18} className="text-[#FF3333]" />
+            <div>
+              <div className="font-display font-bold text-sm text-white font-arabic">{c.label}</div>
+              <div className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>{c.en}</div>
+            </div>
+          </Link>
         ))}
       </div>
 

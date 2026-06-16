@@ -1,3 +1,100 @@
+# NiHao V3.4.2 — Complete Admin Data Visibility
+
+Base: GitHub main b0f79c2 (V3.4.1). Adds an admin-only data visibility layer. No
+redesign, no service_role key in the frontend, no secrets in client code. All
+V3.4.1 / V3.4 / V3.3 / V3.2 / V3.0A / V2.9E features preserved.
+
+## New admin routes (all AdminRoute-gated, admin role required)
+- /admin/data — Data Center hub (overview counts + section cards)
+- /admin/students — student directory (email, name, provider, role, activity)
+- /admin/progress — student_progress viewer (filters + summary)
+- /admin/quiz-results — server-side quiz results + honest note about local-only HSK
+- /admin/leads — email/newsletter leads with CSV export
+(/admin/content-drafts unchanged)
+
+## Supabase data sources + security (migration added)
+NEW migration: supabase/migrations/20260616_admin_data_visibility.sql. It creates
+admin-only RPCs, each SECURITY DEFINER but gated by an `is_admin_caller()` check
+(EXISTS in user_roles with role='admin') as the FIRST statement — non-admins get
+zero rows. Granted to `authenticated` only, never anon. No service_role key.
+- get_admin_students() — joins auth.users (email, display_name from metadata,
+  provider from app metadata) + user_roles + a student_progress activity summary.
+- get_admin_progress(limit_n) — student_progress rows + the user's email.
+- get_admin_email_leads() — email_leads rows (table also already had an admin
+  SELECT RLS policy).
+- get_admin_overview() — counts: students, admins, leads, progress, completions
+  today, drafts.
+Only safe fields are returned (user_id, email, display_name, role, created_at,
+activity counts). NEVER returned: password hashes, provider/refresh tokens,
+metadata secrets, IPs, or auth internals. auth.users is never exposed to normal
+users — only through these admin-checked RPCs.
+
+src/lib/adminData.ts wraps the RPCs (fetchAdminStudents/Progress/Leads/Overview)
+and provides toCsv()/downloadCsv() (no external library).
+
+## What the admin can see
+Registered users (via user_roles) with email + display name + provider (google/
+email) + role + joined date + last activity + per-type completion counts +
+latest content; all student_progress rows; email leads; content drafts; overview
+counts.
+
+## What's NOT available (and why)
+HSK1/HSK2/HSK3 simulation results are stored in each learner's browser
+localStorage (this V3.4.1 base does not sync them), so they cannot be shown
+across devices. The Quiz Results page states this clearly and does NOT fake data;
+it shows server-side 'quiz' progress rows and flags a future TODO to sync HSK
+results to Supabase. (No new quiz table was added — not necessary.)
+
+## Admin UI / navigation
+Admin.tsx gained a row of clickable cards (Data Center, Students, Progress, Quiz
+Results, Leads, Drafts) in the existing black/red style. Each admin data page
+links back to the Data Center.
+
+## CSV export
+Students, Progress, and Leads pages each have a CSV export button implemented
+with a pure-JS Blob download — no external library. Export respects the current
+search/filters.
+
+## GA4 (no PII)
+New safe events: admin_data_view, admin_students_view, admin_leads_view,
+admin_progress_view, admin_export_csv. Params only carry section/count/filter_type
+— never email/name/user_id/answers. /admin stays excluded from tracking.
+
+## SEO / sitemap safety
+No admin routes in sitemap.xml (verified: /admin, /admin/data, /admin/students,
+/admin/leads, /admin/progress, /admin/quiz-results, /admin/content-drafts,
+/dashboard, /profile all absent). robots.txt / llms.txt unchanged.
+
+## Preserved (verified)
+V3.4.1 GA4 head tag (index.html) + analytics.ts + simPinyin; V3.4 Google auth +
+AuthGate + GoogleSignInButton + PinyinToggle + usePinyinMode + useTestGate; V3.3
+HSK tools; V3.2 HSK3; V3.0A social + lead capture; V2.9E performance (hero webp,
+video 548KB).
+
+## Changed / new files
+- NEW: supabase/migrations/20260616_admin_data_visibility.sql, src/lib/adminData.ts,
+  src/pages/AdminDataCenter.tsx, AdminStudents.tsx, AdminProgress.tsx,
+  AdminLeads.tsx, AdminQuizResults.tsx
+- EDIT: src/App.tsx (5 admin routes), src/pages/Admin.tsx (nav cards), package.json
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 461KB (admin pages are lazy chunks). Deps unchanged.
+
+## Manual step (one-time)
+Run the new migration in Supabase SQL editor:
+supabase/migrations/20260616_admin_data_visibility.sql (creates the admin RPCs).
+
+## Known limitations
+- HSK simulation results are local-only on this base (see above) — sync is a
+  future task.
+- "active/inactive" is approximated by last_activity; there's no separate session
+  table.
+- The admin pages depend on the migration being run; before that, the data pages
+  show a friendly "couldn't load / are you admin?" message.
+
+---
+
 # NiHao V3.4.1 — GA4 Head Tag Compatibility + HSK Simulation Pinyin Fix
 
 Base: GitHub main f67eb71 (V3.4). Two fixes in one build. No redesign, no new

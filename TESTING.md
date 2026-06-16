@@ -1,3 +1,13 @@
+# V3.4.2 admin data visibility checks
+- [ ] Admin can open /admin/data, /admin/students, /admin/progress, /admin/quiz-results, /admin/leads
+- [ ] Non-admin + logged-out are redirected (AdminRoute) and RPCs return no rows
+- [ ] Students show email/name/provider/role/activity; search/filter/sort work
+- [ ] Progress shows rows + summary; filters work
+- [ ] Leads show + CSV export works (no external lib)
+- [ ] Quiz Results explains HSK local-only honestly (no fake data)
+- [ ] No admin routes in sitemap; no service_role key; no secrets in package
+- [ ] GA4 admin events carry no PII; /admin excluded
+- [ ] Migration creates 5 admin-checked RPCs; build passes; index ~461KB
 # V3.4.1 GA4 head tag + sim pinyin checks
 - [ ] dist/index.html has static gtag src with the real ID; send_page_view:false
 - [ ] Google "Test your website" detects the tag; Realtime still works
