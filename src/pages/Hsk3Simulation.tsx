@@ -9,6 +9,7 @@ import PinyinToggle from '@/components/PinyinToggle';
 import AuthGate from '@/components/AuthGate';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
+import PinyinAnswerOption from '@/components/PinyinAnswerOption';
 import { HSK3_QUESTIONS, HSK3_PASS_PCT, HSK3_TIME_MINUTES, type Hsk3Q } from '@/data/hsk3sim';
 import { recordMistake } from '@/lib/mistakes';
 import { awardXP } from '@/lib/gamification';
@@ -191,12 +192,17 @@ export default function Hsk3Simulation() {
             <Volume2 size={24} className="text-white" />
           </button>
         )}
-        {q.chinese && <p className="font-chinese text-3xl text-white text-center mb-5">{q.chinese}</p>}
+        {q.chinese && (
+          <div className="text-center mb-5">
+            <p className="font-chinese text-3xl text-white">{q.chinese}</p>
+            {pinyinIsVisible(3) && q.pinyin && <PinyinText className="text-sm mt-1 block">{q.pinyin}</PinyinText>}
+          </div>
+        )}
         <div className="space-y-2">
           {q.options.map(opt => (
             <button key={opt} onClick={() => answer(opt)}
               className={`w-full text-left p-3 rounded-xl border font-chinese text-base transition-all ${answers[index] === opt ? 'border-[#FF3333]/60 bg-[#FF3333]/15 text-white' : 'border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06]'}`}>
-              {opt}
+              <PinyinAnswerOption option={opt} showPinyin={pinyinIsVisible(3)} />
             </button>
           ))}
         </div>

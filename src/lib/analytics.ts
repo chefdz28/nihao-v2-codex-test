@@ -1,8 +1,9 @@
 // NiHao — GA4 analytics helper. Lightweight, privacy-safe, production-only.
-// One GA4 tag (no GTM). The script is injected dynamically from here so it only
-// loads in production AND only when a Measurement ID is configured, and never
-// blocks first paint. No personal data is ever sent (no email/name/user id/
-// progress details/voice).
+// One GA4 tag (no GTM). As of V3.4.1 the gtag <script> + base config live in
+// index.html <head> (so Google's installer detects it). This helper reuses that
+// tag when present and only falls back to dynamic injection if it's missing.
+// The head tag uses send_page_view:false, so SPA route page views are sent
+// manually here (no double counting). No personal data is ever sent.
 const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined;
 
 let initialized = false;
@@ -17,26 +18,36 @@ function analyticsEnabled(): boolean {
   return Boolean(import.meta.env.PROD && GA_ID);
 }
 
-/** Inject the GA4 script once (async) and configure with manual page_view. */
+/** Has the static head tag already loaded gtag? */
+function headTagPresent(): boolean {
+  return typeof window !== 'undefined' && typeof window.gtag === 'function';
+}
+
+/**
+ * Idempotent init. If the index.html head tag is present (normal production),
+ * gtag + config already exist — we do nothing extra. If it's missing (e.g. a
+ * build without the env var at build time), we fall back to injecting the tag
+ * once so analytics still works. Either way this runs at most once.
+ */
 export function initAnalytics(): void {
   if (initialized || !analyticsEnabled()) return;
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
   initialized = true;
 
-  // dataLayer + gtag shim (no duplicate init — guarded by `initialized`)
+  // Head tag already set up dataLayer/gtag/config → reuse it, no duplicate.
+  if (headTagPresent()) return;
+
+  // Fallback: head tag absent → inject once (same config as the head tag).
   window.dataLayer = window.dataLayer || [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   window.gtag = function gtag(...args: any[]) { window.dataLayer.push(args); };
 
-  // async script, does not block first paint
   const s = document.createElement('script');
   s.async = true;
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   document.head.appendChild(s);
 
   window.gtag('js', new Date());
-  // send_page_view:false → we send page views manually on route change to avoid
-  // double counting in this SPA. anonymize_ip for privacy.
   window.gtag('config', GA_ID as string, {
     send_page_view: false,
     anonymize_ip: true,

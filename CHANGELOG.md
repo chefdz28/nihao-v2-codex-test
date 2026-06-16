@@ -1,3 +1,87 @@
+# NiHao V3.4.1 — GA4 Head Tag Compatibility + HSK Simulation Pinyin Fix
+
+Base: GitHub main f67eb71 (V3.4). Two fixes in one build. No redesign, no new
+dependencies, no GTM, no migration. All V3.4 (Google auth, AuthGate, smart
+pinyin), V3.3, V3.2, V3.0A, V2.9E features preserved.
+
+## FIX A — GA4 detectable by Google's tag tester
+**Reason:** GA4 was injected dynamically from React, so Google's "Test your
+website" installer (which reads the initial HTML/head) couldn't detect it, even
+though the tag was present in the built JS and returned 200.
+
+**Exact index.html implementation (head):**
+- A static, detectable async script:
+  `<script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>`
+- Followed by a guarded inline config that initializes dataLayer + gtag, calls
+  `gtag('js', new Date())` and `gtag('config', id, { send_page_view: false,
+  anonymize_ip: true })`. The guard skips config if the env var wasn't replaced
+  (e.g. a build without the var), so no broken request.
+- The Measurement ID comes from the Vite env var `%VITE_GA_MEASUREMENT_ID%`
+  (replaced at build time). No hardcoded ID/secret.
+
+**src/lib/analytics.ts (idempotent):** initAnalytics() now detects the head tag
+(`typeof window.gtag === 'function'`) and, if present, does NOTHING extra — no
+duplicate script, no duplicate config. If the head tag is missing it falls back
+to the old dynamic injection once. initAnalytics() runs at most once.
+
+**No duplicate page views:** the head tag uses `send_page_view: false`, so the
+static tag sends no automatic page views; AnalyticsTracker.tsx still sends manual
+page_view on each route change. Admin exclusion unchanged
+(`path.startsWith('/admin')`). No PII.
+
+## FIX B — Pinyin now shows under HSK simulation options
+**Reason:** simulation `options` are plain `string[]` (e.g. `['你好','再见',
+'谢谢']`) with NO per-option pinyin — only the question had a single `pinyin`
+field. So Chinese options rendered bare. Smart pinyin mode controlled a review
+line, not the options a learner actually reads.
+
+**Fix:**
+- src/lib/simPinyin.ts — builds a Chinese→pinyin map from the sim datasets
+  themselves (each question pairs its spoken/correct Chinese with pinyin) plus a
+  seed of common HSK1/HSK2 words, so options get pinyin without hand-editing
+  every option. `isChineseText()` ensures pinyin shows ONLY under Han-character
+  options (numbers / Arabic glosses / pinyin-string options are left as-is).
+  Coverage verified: 0 Chinese options missing pinyin in HSK1 and HSK2.
+- src/components/PinyinAnswerOption.tsx — renders the option with pinyin in
+  smaller muted text below, only when smart-pinyin says visible.
+- Wired into HSK1/HSK2/HSK3 answer options AND the big question prompt (with
+  `q.pinyin`), gated by `pinyinIsVisible(level)`.
+
+**Smart pinyin preserved (fresh localStorage / auto):** HSK1 show, HSK2 show,
+HSK3 hide. The PinyinToggle (إظهار/إخفاء/الوضع الذكي) on each simulation switches
+show/hide/auto and persists in `nihao:pinyin-mode`; turning it ON in HSK3 reveals
+pinyin. GA4 `pinyin_toggle` fires on change (mode + hsk_level, no PII).
+
+## Preserved (verified)
+V3.4 Google auth + AuthGate + GoogleSignInButton + PinyinToggle + usePinyinMode +
+useTestGate; V3.3 HSK tools; V3.2 HSK3; V3.0A social + lead; V2.9E performance;
+the GA4 helper; sitemap/robots/llms (all unchanged).
+
+## Changed / new files
+- NEW: src/lib/simPinyin.ts, src/components/PinyinAnswerOption.tsx
+- EDIT: index.html (GA4 head tag), src/lib/analytics.ts (idempotent + reuse head
+  tag), src/pages/Hsk1Simulation.tsx + Hsk2Simulation.tsx + Hsk3Simulation.tsx
+  (option + prompt pinyin), package.json
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 460KB (V3.4 was 459KB; +1KB). No .env/dist/node_modules/.git.
+Deps unchanged.
+
+## Routes tested (build-verified)
+/, /hsk1-simulation, /hsk2-simulation, /hsk3-simulation, /hsk-tests,
+/flashcards/hsk3, /dictionary, /login, /register, /admin/content-drafts (still
+excluded from GA), /sitemap.xml.
+
+## Known limitations
+- Google's tag tester needs the production build (with the env var set) deployed;
+  a build without VITE_GA_MEASUREMENT_ID intentionally skips the tag.
+- Pinyin for a few scrambled grammar-distractor options is approximate (reading
+  pinyin of a deliberately wrong word order) — acceptable for practice.
+- Pinyin preference is per-device (localStorage).
+
+---
+
 # NiHao V3.4 — Login Gate, Google Auth, and Smart Pinyin Mode
 
 Base: GitHub main 86de109 (V3.3). No redesign, no new dependencies, no Google

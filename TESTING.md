@@ -1,3 +1,12 @@
+# V3.4.1 GA4 head tag + sim pinyin checks
+- [ ] dist/index.html has static gtag src with the real ID; send_page_view:false
+- [ ] Google "Test your website" detects the tag; Realtime still works
+- [ ] No duplicate page_view (head false + SPA manual); /admin excluded
+- [ ] HSK1 options show pinyin by default (你好 nǐ hǎo); HSK2 too
+- [ ] HSK3 options hide pinyin by default; toggle ON reveals it
+- [ ] Clear nihao:pinyin-mode → HSK1/2 show, HSK3 hide
+- [ ] pinyin_toggle GA4 event on change (no PII)
+- [ ] index ~460KB; deps unchanged; V3.4/V3.3/V3.2 preserved; build passes
 # V3.4 auth gate + google + pinyin checks
 - [ ] Google button on /login and /register; email/password still works
 - [ ] (after enabling provider in Supabase) Google sign-in redirects + returns

@@ -3,6 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- V3.4.1: GA4 tag in <head> so Google's installer can detect it. The
+         Measurement ID comes from the Vite env var (replaced at build time).
+         send_page_view:false → the static tag sends NO automatic page views;
+         the SPA route page_view tracking stays in src/lib/analytics.ts /
+         AnalyticsTracker.tsx. No GTM, no duplicate tracking. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
+    <script>
+      (function () {
+        var id = '%VITE_GA_MEASUREMENT_ID%';
+        // skip config if the env var wasn't replaced at build time
+        if (!id || id.indexOf('VITE_') !== -1) return;
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { dataLayer.push(arguments); };
+        gtag('js', new Date());
+        gtag('config', id, { send_page_view: false, anonymize_ip: true });
+      })();
+    </script>
     <title>NiHao - Learn Chinese for Beginners | تعلم الصينية للمبتدئين</title>
     <meta name="description" content="Learn Chinese with NiHao - Interactive lessons with audio, Pinyin, Arabic & English translations for beginners. تعلم الصينية مع نهاو - دروس تفاعلية مع الصوت والبينيين والترجمات العربية والإنجليزية" />
     <meta property="og:title" content="NiHao - Learn Chinese the Easy Way" />
