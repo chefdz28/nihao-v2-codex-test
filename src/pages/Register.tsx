@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/contexts/AuthContext';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 export default function Register() {
   const { t } = useI18n();
@@ -90,6 +91,14 @@ export default function Register() {
               {authError}
             </div>
           )}
+
+          {/* V3.4: Google OAuth */}
+          <GoogleSignInButton className="mb-4" />
+          <div className="flex items-center gap-3 mb-4" aria-hidden="true">
+            <span className="h-px flex-1 bg-white/10" />
+            <span className="text-xs text-[#666] font-arabic">{t('auth.or')}</span>
+            <span className="h-px flex-1 bg-white/10" />
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>

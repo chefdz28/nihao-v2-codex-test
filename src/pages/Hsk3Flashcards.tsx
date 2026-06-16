@@ -9,9 +9,14 @@ import { wordSlug } from '@/data/dictionaryCore';
 import { due4, rate4, deckSummary, type SrsRating } from '@/lib/srs4';
 import { awardXP } from '@/lib/gamification';
 import { trackEvent } from '@/lib/analytics';
+import { useTestGate } from '@/hooks/useTestGate';
+import { usePinyinMode } from '@/hooks/usePinyinMode';
+import PinyinToggle from '@/components/PinyinToggle';
+import AuthGate from '@/components/AuthGate';
 import Seo from '@/components/Seo';
 
 const DECK = 'hsk3';
+const PREVIEW_LIMIT = 5; // guests can review this many cards before sign-in
 
 // Build a stable card list from the HSK3 dictionary batch.
 const CARDS = hsk3Batch.map(w => ({
@@ -35,6 +40,8 @@ const RATINGS: { key: SrsRating; label: string; cls: string }[] = [
 export default function Hsk3Flashcards() {
   const { play } = useAudio();
   const allIds = useMemo(() => CARDS.map(c => c.id), []);
+  const { isAuthenticated, gateOpen, closeGate, setGateOpen } = useTestGate();
+  const { mode: pinyinModeVal, setMode: setPinyinMode, isVisible: pinyinIsVisible } = usePinyinMode();
   const [queue, setQueue] = useState<string[]>(() => {
     const { due } = due4(DECK, CARDS.map(c => c.id));
     return due.length > 0 ? due : CARDS.map(c => c.id);
@@ -50,6 +57,11 @@ export default function Hsk3Flashcards() {
 
   const handleRate = (rating: SrsRating) => {
     if (!currentId) return;
+    // V3.4: guests get a free preview of PREVIEW_LIMIT cards, then sign-in gate
+    if (!isAuthenticated && reviewed >= PREVIEW_LIMIT) {
+      setGateOpen(true);
+      return;
+    }
     rate4(DECK, currentId, rating);
     trackEvent('hsk3_flashcard_review', { rating, hsk_level: 3 });
     setReviewed(r => {
@@ -77,6 +89,7 @@ export default function Hsk3Flashcards() {
   return (
     <div className="max-w-[560px] mx-auto px-6 py-8">
       <Seo />
+      {gateOpen && <AuthGate context="hsk3_flashcards" onClose={closeGate} guestLabel="تابع لاحقاً" />}
       <div className="flex items-center justify-between mb-4" dir="rtl">
         <h1 className="font-display font-black text-2xl text-white flex items-center gap-2">
           <Layers size={22} className="text-[#FF3333]" /> بطاقات HSK3
@@ -86,6 +99,11 @@ export default function Hsk3Flashcards() {
       <p className="text-xs font-arabic mb-5" dir="rtl" style={{ color: 'var(--color-text-secondary)' }}>
         راجع كلمات HSK3 بنظام التكرار المتباعد. قيّم كل بطاقة (أعِد / صعبة / جيدة / سهلة) ليختار النظام موعد المراجعة القادم. تقدّمك محفوظ على جهازك.
       </p>
+
+      {/* V3.4: smart pinyin toggle */}
+      <div className="flex justify-end mb-3">
+        <PinyinToggle mode={pinyinModeVal} onChange={setPinyinMode} hskLevel={3} compact />
+      </div>
 
       {/* progress bar */}
       <div className="flex items-center justify-between text-[11px] font-arabic mb-2" dir="rtl" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -119,7 +137,7 @@ export default function Hsk3Flashcards() {
                 <button onClick={() => setRevealed(true)} className="btn-secondary text-sm mx-auto font-arabic">إظهار المعنى</button>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <PinyinText className="text-lg block mb-1">{card.pinyin}</PinyinText>
+                  {pinyinIsVisible(3) && <PinyinText className="text-lg block mb-1">{card.pinyin}</PinyinText>}
                   <p className="font-arabic text-white text-lg mb-2" dir="rtl">{card.arabic}</p>
                   {card.example && (
                     <p className="text-sm mt-2" dir="rtl">

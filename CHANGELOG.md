@@ -1,3 +1,103 @@
+# NiHao V3.4 — Login Gate, Google Auth, and Smart Pinyin Mode
+
+Base: GitHub main 86de109 (V3.3). No redesign, no new dependencies, no Google
+SDK, no payment/premium, no voice storage, no new Supabase tables/migration. All
+V2.9E/V3.0A/V3.2/V3.3 features preserved.
+
+## Part 1 — Google login (Supabase OAuth)
+- src/contexts/AuthContext.tsx: added signInWithGoogle() using
+  supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo:
+  window.location.origin + '/dashboard' } }). No secrets/keys in the frontend.
+  Email/password login unchanged.
+- src/components/GoogleSignInButton.tsx: reusable "Continue with Google /
+  تسجيل الدخول بواسطة Google" button (inline SVG logo, no SDK) with loading +
+  error states. Added to /login and /register with an "or / أو" divider.
+- GA4: google_login_click.
+
+### Supabase setup needed to ENABLE Google login
+In the Supabase dashboard: Authentication → Providers → Google → enable, then add
+the Google OAuth Client ID + Secret there (created in Google Cloud Console, with
+the Supabase callback URL as an authorized redirect URI). Nothing else is needed
+in the app; no keys go in the frontend.
+
+## Part 2 — Login gate for tests
+- src/components/AuthGate.tsx + src/hooks/useTestGate.ts: a friendly, premium
+  gate shown only when a guest triggers a gated action (never a redirect on page
+  load — SEO/intro content stays visible). Buttons: Continue with Google, Login
+  with Email, Sign up, and an optional "continue as guest".
+- Gated: the Start button on HSK1/HSK2/HSK3 simulations (the intro screen is
+  still public; clicking Start requires login). HSK3 flashcards give guests a
+  5-card preview, then gate continued SRS review.
+- Public stays public: /, /dictionary, /stories, /dialogues, /blog,
+  /study-in-china, SEO pages, and /worksheets/hsk3 (printable).
+- After login the user returns to the intended route: gate passes
+  location.state.from, and AuthRoute now honors it instead of always going to
+  /dashboard.
+- GA4: auth_gate_view, test_login_required.
+
+## Part 3 — Smart pinyin mode
+- src/lib/pinyinMode.ts + src/hooks/usePinyinMode.ts + src/components/
+  PinyinToggle.tsx: preference persisted in localStorage 'nihao:pinyin-mode'
+  with values show | hide | auto (default auto). Auto = HSK1 show, HSK2 show,
+  HSK3 hide. Pinyin is NEVER removed from the data — only its visibility.
+- Applied to: HSK3 flashcards, the HSK1/HSK2/HSK3 simulation review pinyin, and
+  the dictionary browse grid (per-word HSK level). A visible toggle (إظهار
+  البينين / إخفاء البينين / الوضع الذكي) is shown on each. Writing practice keeps
+  pinyin always (it teaches writing).
+- GA4: pinyin_toggle { mode, hsk_level }.
+
+## Part 4 — HTTPS / canonical safety
+- Audited the whole codebase: ZERO http://cnihao.com or http://www.cnihao.com
+  references. Canonical (Seo.tsx) uses https://cnihao.com; sitemap/robots/llms
+  all https. No Cloudflare/.htaccess changes in code (per spec). The "Not Secure"
+  on http:// is a server/Cloudflare redirect concern, handled outside the app.
+
+## New GA4 events (all via existing helper, /admin excluded, no PII)
+auth_gate_view, google_login_click, test_login_required, pinyin_toggle.
+
+## Supabase / database
+No new tables, no migration. student_progress / email_leads / content_drafts
+untouched. Existing Supabase Auth only.
+
+## Performance
+- index JS = 459KB (V3.3 was 457KB; +2KB for the small auth/pinyin components).
+- AuthGate, PinyinToggle, GoogleSignInButton are lightweight; no Google SDK; OAuth
+  handled by Supabase. Lazy routes preserved. No HSK datasets on the homepage.
+- No new dependencies; deps unchanged.
+
+## Preserved (verified)
+hero webp + mobile webp, video 548KB, no root images/videos; analytics +
+AnalyticsTracker; SocialShareButtons + LeadCaptureBox + emailLeads; studentProgress
++ MarkComplete + ProgressPanel + Daily + Dashboard; HSK1/2/3 sims + HskTests +
+Hsk3Flashcards + Hsk3Worksheet + WritingPractice; sitemap (698, unchanged) +
+robots + llms (unchanged).
+
+## Changed / new files
+- NEW: src/components/GoogleSignInButton.tsx, src/components/AuthGate.tsx,
+  src/components/PinyinToggle.tsx, src/hooks/useTestGate.ts,
+  src/hooks/usePinyinMode.ts, src/lib/pinyinMode.ts
+- EDIT: src/contexts/AuthContext.tsx (signInWithGoogle), src/pages/Login.tsx +
+  src/pages/Register.tsx (Google button + divider), src/pages/Hsk1Simulation.tsx
+  + Hsk2Simulation.tsx + Hsk3Simulation.tsx (gate + pinyin toggle),
+  src/pages/Hsk3Flashcards.tsx (gate + pinyin), src/pages/Dictionary.tsx (pinyin
+  toggle), src/App.tsx (AuthRoute honors intended route), src/i18n/index.tsx
+  (auth.or), package.json
+
+## Build
+npm install && npm run build → passes on Node 18. No .env/dist/node_modules/.git.
+
+## Known limitations
+- Google login WON'T work until the provider is enabled in the Supabase dashboard
+  (Part 1 setup above). Until then the button shows a friendly error.
+- The gate is client-side UX (saving/XP require login); it is not a server-side
+  content lock — public pages and SEO remain fully crawlable by design.
+- Pinyin preference and the 5-card guest flashcard preview are per-device
+  (localStorage), not synced across devices.
+- The http:// "Not Secure" must be fixed at the server/Cloudflare redirect level
+  (force HTTPS), which is intentionally outside the app code.
+
+---
+
 # NiHao V3.3 — HSK Learning Agent Expansion
 
 Base: GitHub main 526f8f2 (V3.2). Six growth layers added, all original content,

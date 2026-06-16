@@ -5,6 +5,8 @@ import { BookA, Search, Volume2, Star, Loader2, Sparkles } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
+import PinyinToggle from '@/components/PinyinToggle';
+import { usePinyinMode } from '@/hooks/usePinyinMode';
 import { fetchVocabulary, fetchSentences } from '@/lib/dataService';
 import { stripTones } from '@/lib/pinyin';
 import { trackActivity } from '@/lib/gamification';
@@ -35,6 +37,7 @@ export default function Dictionary() {
   const [loading, setLoading] = useState(true);
   const saved = loadSaved();
   const [hskFilter, setHskFilter] = useState<0 | 1 | 2 | 3>(0);   // 0 = all
+  const { mode: pinyinModeVal, setMode: setPinyinMode, isVisible: pinyinIsVisible } = usePinyinMode();
   const [catFilter, setCatFilter] = useState<string>('all');
 
   useEffect(() => {
@@ -173,6 +176,7 @@ export default function Dictionary() {
           {dictionaryCategories.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         <span className="text-xs flex items-center px-2 font-arabic" style={{ color: 'var(--color-text-tertiary)' }}>{browse.length} كلمة</span>
+        <PinyinToggle mode={pinyinModeVal} onChange={setPinyinMode} hskLevel={hskFilter === 0 ? undefined : hskFilter} compact />
       </div>
 
       {/* V3.2: contextual CTA — jump from browsing a level to its practice test */}
@@ -195,7 +199,7 @@ export default function Dictionary() {
           <Link key={w.slug} to={`/dictionary/${w.slug}`} className="liquid-glass rounded-2xl p-4 text-center hover:border-[#FF3333]/30 border border-transparent transition-colors">
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FF3333]/15 text-[#FF3333] font-display font-bold inline-block mb-1">HSK{w.hsk}</span>
             <span className="font-chinese text-3xl text-white block mb-1">{w.chinese}</span>
-            <PinyinText className="text-center">{w.pinyin}</PinyinText>
+            {pinyinIsVisible(w.hsk as 1 | 2 | 3) && <PinyinText className="text-center">{w.pinyin}</PinyinText>}
             <span className="text-xs font-arabic text-white block mt-1">{w.arabic}</span>
           </Link>
         ))}

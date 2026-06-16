@@ -1,3 +1,14 @@
+# V3.4 auth gate + google + pinyin checks
+- [ ] Google button on /login and /register; email/password still works
+- [ ] (after enabling provider in Supabase) Google sign-in redirects + returns
+- [ ] Guest clicking Start on HSK1/2/3 sims → AuthGate (intro stays visible)
+- [ ] After login, returns to the test route (not always /dashboard)
+- [ ] HSK3 flashcards: 5-card guest preview then gate
+- [ ] Pinyin auto: HSK1 show, HSK2 show, HSK3 hide; toggle switches show/hide/auto
+- [ ] Pinyin preference persists (localStorage) across reloads
+- [ ] GA4: auth_gate_view, google_login_click, test_login_required, pinyin_toggle (no PII)
+- [ ] No http://cnihao anywhere; canonical https; sitemap/robots/llms unchanged
+- [ ] index ~459KB; deps unchanged; V2.9E/V3.0A/V3.2/V3.3 preserved; build passes
 # V3.3 HSK agent expansion checks
 - [ ] /flashcards/hsk3 — reveal + 4-button SRS; progress persists; +XP; GA4 review event
 - [ ] /hsk2-simulation — 36 Qs, 20-min timer, 60% pass, mistakes→notebook(hsk2)

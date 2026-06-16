@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Timer, Volume2, Check, X, ClipboardList, RotateCcw } from 'lucide-react';
 import { useI18n } from '@/i18n';
+import { useTestGate } from '@/hooks/useTestGate';
+import { usePinyinMode } from '@/hooks/usePinyinMode';
+import PinyinToggle from '@/components/PinyinToggle';
+import AuthGate from '@/components/AuthGate';
 import { useAudio } from '@/hooks/useAudio';
 import PinyinText from '@/components/PinyinText';
 import { HSK3_QUESTIONS, HSK3_PASS_PCT, HSK3_TIME_MINUTES, type Hsk3Q } from '@/data/hsk3sim';
@@ -16,6 +20,8 @@ export default function Hsk3Simulation() {
   const { t, lang } = useI18n();
   const { play } = useAudio();
   const isAr = lang === 'ar';
+  const { gateOpen, requireAuth, closeGate } = useTestGate();
+  const { mode: pinyinModeVal, setMode: setPinyinMode, isVisible: pinyinIsVisible } = usePinyinMode();
 
   const [phase, setPhase] = useState<'intro' | 'test' | 'result'>('intro');
   const [index, setIndex] = useState(0);
@@ -88,6 +94,7 @@ export default function Hsk3Simulation() {
     const past = loadHskResultsByLevel(3);
     return (
       <div className="max-w-[640px] mx-auto px-6 py-10">
+        {gateOpen && <AuthGate context={'hsk3_sim'} onClose={closeGate} />}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="liquid-glass p-8 text-center">
           <ClipboardList size={40} className="text-[#FF3333] mx-auto mb-4" />
           <h1 className="font-display font-black text-3xl text-white mb-2">{isAr ? 'محاكاة تدريبية لاختبار HSK3' : 'HSK3 Practice Simulation'}</h1>
@@ -102,7 +109,10 @@ export default function Hsk3Simulation() {
             <span>📖 20 {t('hsk.reading')}</span>
             <span>⏱ {HSK3_TIME_MINUTES} {t('hsk.minutes')}</span>
           </div>
-          <button onClick={start} className="btn-primary text-sm py-3 px-8">{t('hsk.start')}</button>
+          <div className="flex justify-center mb-5">
+            <PinyinToggle mode={pinyinModeVal} onChange={setPinyinMode} hskLevel={3} compact />
+          </div>
+          <button onClick={() => requireAuth(start)} className="btn-primary text-sm py-3 px-8">{t('hsk.start')}</button>
           {past.length > 0 && (
             <div className="mt-6 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
               {t('hsk.lastResult')}: {past[past.length - 1].score}/{past[past.length - 1].total} · {past[past.length - 1].date}
@@ -148,7 +158,7 @@ export default function Hsk3Simulation() {
                   <p className="text-xs mt-1">
                     {!ok && a && <span className="text-[#FF3333] font-chinese me-3">✗ {a}</span>}
                     <span className="text-[#10b981] font-chinese">✓ {qq.correct}</span>
-                    {qq.pinyin && <PinyinText inline className="ms-2">{qq.pinyin}</PinyinText>}
+                    {qq.pinyin && pinyinIsVisible(3) && <PinyinText inline className="ms-2">{qq.pinyin}</PinyinText>}
                   </p>
                 </div>
               );

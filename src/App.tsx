@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import Seo from './components/Seo';
@@ -59,8 +59,13 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 // Auth redirect - if logged in, redirect to dashboard
 function AuthRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="text-white">Loading...</div></div>;
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) {
+    // V3.4: return to the route the user was gated from, if any
+    const from = (location.state as { from?: string } | null)?.from;
+    return <Navigate to={from || '/dashboard'} replace />;
+  }
   return <>{children}</>;
 }
 
