@@ -1,3 +1,13 @@
+# V3.3 HSK agent expansion checks
+- [ ] /flashcards/hsk3 — reveal + 4-button SRS; progress persists; +XP; GA4 review event
+- [ ] /hsk2-simulation — 36 Qs, 20-min timer, 60% pass, mistakes→notebook(hsk2)
+- [ ] /hsk-tests — 3 level cards; in Header; GA4 page_view + card_click
+- [ ] /worksheets/hsk3 — generate + print; matching + quiz; GA4 generate/print
+- [ ] /writing-practice — stroke order (hanzi-writer) + printable grid; GA4 events
+- [ ] 5 HSK3 articles live at /blog/<slug> with internal links
+- [ ] No question overlap across HSK1/HSK2/HSK3 sims
+- [ ] index ~457KB; HSK data lazy (not on homepage); deps unchanged
+- [ ] V2.9D/E + V3.0A + V3.2 preserved; sitemap 698, 0 private; build passes
 # V3.2 HSK3 exercises & test checks
 - [ ] /hsk3-simulation runs: 40 questions (20 listening + 20 reading), 25-min timer
 - [ ] Score + pass/fail (60%); wrong answers go to Mistake Notebook (hsk3)

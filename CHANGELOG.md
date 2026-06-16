@@ -1,3 +1,99 @@
+# NiHao V3.3 — HSK Learning Agent Expansion
+
+Base: GitHub main 526f8f2 (V3.2). Six growth layers added, all original content,
+no redesign, no new dependencies, no external SDK, no paid/premium, no voice
+storage, no Supabase migration. Every new route is lazy-loaded. All V2.9D/E,
+V3.0A, V3.2 features preserved.
+
+## 1) HSK3 flashcards with SRS — /flashcards/hsk3
+- src/lib/srs4.ts — a lightweight 4-button SRS (Again/Hard/Good/Easy) in
+  localStorage, independent of the existing binary srs.ts (nothing existing
+  changes). Per-deck store, no database, no PII.
+- src/pages/Hsk3Flashcards.tsx — character + pinyin + Arabic + example, reveal
+  then rate; due-card queue; +5 XP every 10 reviews (existing gamification).
+  GA4: hsk3_flashcard_review { rating, hsk_level: 3 } — no PII.
+
+## 2) HSK2 simulation — /hsk2-simulation
+- src/data/hsk2sim.ts — 36 ORIGINAL questions (18 listening + 18 reading), mixed
+  types (multiple choice, meaning match, pinyin recognition, sentence
+  completion, listening-style prompts). Verified ZERO overlap with HSK1 and HSK3.
+- src/pages/Hsk2Simulation.tsx — same proven timed flow; 20-min timer, 60% pass,
+  results saved per-level, wrong answers → Mistake Notebook (source 'hsk2'),
+  +35 XP/day. GA4: hsk2_sim_start, hsk2_sim_complete.
+
+## 3) Unified HSK tests page — /hsk-tests
+- src/pages/HskTests.tsx — one hub with cards for HSK1/HSK2/HSK3 (level, time,
+  question count, difficulty, Start button, Arabic explanation). Now the single
+  Header entry (replaces the direct HSK3 link to avoid crowding). GA4:
+  hsk_tests_page_view, hsk_test_card_click { hsk_level }.
+
+## 4) HSK3 worksheet generator — /worksheets/hsk3
+- src/pages/Hsk3Worksheet.tsx — printable HSK3 sheet from the HSK3 dictionary:
+  vocabulary + writing lines, a matching section, and a short quiz. Regenerate
+  for a fresh sheet; CSS print styles, NO PDF dependency. GA4: worksheet_generate,
+  worksheet_print.
+
+## 5) Character writing / stroke practice — /writing-practice
+- src/data/writingChars.ts — 30 high-value HSK1–HSK3 characters (original Arabic
+  + stroke counts; no book scans).
+- src/pages/WritingPractice.tsx — animated stroke order via the EXISTING
+  StrokeOrderPlayer (hanzi-writer, already a dependency), pinyin, Arabic, stroke
+  count, a printable 田字格 practice grid, "write 3 times" prompt. GA4:
+  writing_practice_start, writing_character_view.
+
+## 6) HSK3 SEO content (5 Arabic articles)
+- src/data/hsk3Seo.ts — original Arabic-first articles: كلمات HSK3 بالعربي /
+  اختبار HSK3 التجريبي / كيف تستعد لاختبار HSK3 / الفرق بين HSK1 وHSK2 وHSK3 /
+  أهم كلمات HSK3 بعد HSK2. Merged into seoSprint1All, so each is live at
+  /blog/<slug> with the existing SEO article view + JSON-LD. Internal links to
+  /hsk3-simulation, /hsk2-simulation, /hsk-tests, /dictionary, /flashcards/hsk3.
+
+## Navigation / UX
+- Practice hub: added HSK2 sim, HSK tests, HSK3 flashcards, HSK3 worksheet,
+  writing practice.
+- Header: single "HSK Tests" entry (not crowded).
+- Dictionary: existing HSK3 → test CTA preserved.
+- Seo.tsx: AR/EN title + description for all 5 new public routes.
+
+## New GA4 events (all via the existing helper, /admin excluded, no PII)
+hsk3_flashcard_review, hsk2_sim_start, hsk2_sim_complete, hsk_tests_page_view,
+hsk_test_card_click, writing_practice_start, writing_character_view,
+worksheet_generate, worksheet_print.
+
+## Supabase
+No new tables, no migration. SRS uses localStorage; HSK results use the existing
+per-level localStorage pattern.
+
+## Performance
+- index JS = 457KB (V3.2 was 454KB; +3KB — all new pages/data are lazy chunks).
+- Largest new chunks: Hsk2Simulation ~13KB, WritingPractice ~7KB, Hsk3Flashcards
+  ~6KB, Hsk3Worksheet ~5KB, HskTests ~4KB. HSK3 dictionary data stays in the
+  lazy dictionaryCore chunk — NOT on the homepage (verified).
+- No new dependencies; deps unchanged.
+
+## Preserved (verified)
+hero webp + mobile webp, video 548KB, no root images/videos; analytics +
+AnalyticsTracker; SocialShareButtons + LeadCaptureBox + emailLeads +
+20260615_email_leads.sql; studentProgress + MarkComplete + ProgressPanel + Daily
++ Dashboard + XP; Hsk3Simulation + hsk3sim + dictionaryHsk3; sitemap/robots/llms.
+
+## Sitemap
+Regenerated → 698 URLs. New public entries: /hsk2-simulation, /hsk-tests,
+/flashcards/hsk3, /worksheets/hsk3, /writing-practice + 5 HSK3 articles. 0
+admin/dashboard/profile/draft/practice routes.
+
+## Build
+npm install && npm run build → passes on Node 18. No .env/dist/node_modules/.git.
+
+## Known limitations
+- Flashcard SRS and HSK results are local to the browser/device (localStorage);
+  they don't sync across devices (by design — no new DB).
+- Stroke-order animation needs network access (hanzi-writer fetches character
+  data from its CDN at runtime); offline it falls back to a friendly note.
+- HSK3 worksheet/writing rely on the browser print dialog (no server PDF).
+
+---
+
 # NiHao V3.2 — HSK3 Exercises & Test + Combined Release
 
 Base: latest work (V3.0A + V3.1 stacked on GitHub main 88056d7). This is the

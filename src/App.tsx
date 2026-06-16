@@ -23,6 +23,11 @@ const FlashcardsPrint = lazy(() => import('./pages/TeacherTools').then(m => ({ d
 const Dictation = lazy(() => import('./pages/TeacherTools').then(m => ({ default: m.Dictation })));
 const Hsk1Simulation = lazy(() => import('./pages/Hsk1Simulation'));
 const Hsk3Simulation = lazy(() => import('./pages/Hsk3Simulation'));
+const Hsk2Simulation = lazy(() => import('./pages/Hsk2Simulation'));
+const HskTests = lazy(() => import('./pages/HskTests'));
+const Hsk3Flashcards = lazy(() => import('./pages/Hsk3Flashcards'));
+const Hsk3Worksheet = lazy(() => import('./pages/Hsk3Worksheet'));
+const WritingPractice = lazy(() => import('./pages/WritingPractice'));
 const Report = lazy(() => import('./pages/Report'));
 const StudyInChina = lazy(() => import('./pages/StudyInChina'));
 const StudyInChinaArticle = lazy(() => import('./pages/StudyInChina').then(m => ({ default: m.StudyInChinaArticle })));
@@ -126,6 +131,11 @@ export default function App() {
         <Route path="/dictation" element={<Dictation />} />
         <Route path="/hsk1-simulation" element={<Hsk1Simulation />} />
         <Route path="/hsk3-simulation" element={<Hsk3Simulation />} />
+        <Route path="/hsk2-simulation" element={<Hsk2Simulation />} />
+        <Route path="/hsk-tests" element={<HskTests />} />
+        <Route path="/flashcards/hsk3" element={<Hsk3Flashcards />} />
+        <Route path="/worksheets/hsk3" element={<Hsk3Worksheet />} />
+        <Route path="/writing-practice" element={<WritingPractice />} />
         <Route path="/report" element={<Report />} />
         <Route path="/study-in-china" element={<StudyInChina />} />
         <Route path="/study-in-china/:slug" element={<StudyInChinaArticle />} />
