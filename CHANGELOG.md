@@ -1,3 +1,97 @@
+# NiHao V3.7 — AI Teacher Agent (deterministic, no paid AI API)
+
+Base: GitHub main 9e55f7b (V3.6). Adds a public "AI Teacher" experience at
+/ai-teacher built ENTIRELY from existing NiHao data — NO paid AI API, no OpenAI
+key, no backend secrets, no new dependency, no migration. All V3.6 features
+preserved.
+
+## How it works (deterministic "AI-like" teacher)
+The student picks a level (Beginner / HSK1 / HSK2 / HSK3) and a goal (daily words
+/ HSK test / pinyin / writing / review), then taps "ابدأ خطة اليوم". The engine
+src/lib/aiTeacher.ts → generateTeacherPlan({ level, goal, date }) returns a plan:
+title, recommendedMinutes, steps[], a 3-word mini lesson (hanzi + pinyin + Arabic
++ example), a 3-question multiple-choice quiz with instant feedback, and
+recommended internal routes. All content is selected/arranged from the existing
+dictionary, the HSK1/2/3 simulation banks, and lesson vocab — it ROTATES per day
+(deterministic day index) so it feels fresh without randomness or an API. A later
+V3.8 can swap in a real AI via a Supabase Edge Function without changing the UI.
+
+- Uses paid AI API? NO. 100% deterministic local logic over existing data.
+- For 'hsk_test'/'review' goals the quiz pulls real reading questions from the sim
+  banks; otherwise it builds "meaning of X" questions from the lesson words with
+  distractors. Verified: all 20 level×goal combos produce 3 words + 3 quiz, and
+  every quiz answer is among its choices.
+
+## Files created
+- src/lib/aiTeacher.ts — the deterministic engine (types + generateTeacherPlan)
+- src/components/AiTeacherAgent.tsx — level/goal selectors, generate, quiz wiring
+- src/components/AiTeacherPlanCard.tsx — plan (steps + mini lesson + links)
+- src/components/AiTeacherMiniQuiz.tsx — 3-Q quiz with instant feedback
+- src/pages/AiTeacher.tsx — hero + agent + JSON-LD + Seo + HskToolsNav
+
+## Files modified
+- src/App.tsx — lazy route /ai-teacher
+- src/components/Header.tsx — AI Teacher link in the Practice dropdown (+ i18n key nav.aiTeacher)
+- src/components/Footer.tsx — AI Teacher in the learning links
+- src/components/HskToolsNav.tsx — AI Teacher cross-link
+- src/components/Seo.tsx — /ai-teacher AR/EN title + description
+- src/pages/AdminQuizResults.tsx — friendly labels for ai-teacher-daily-plan / ai-teacher-mini-quiz
+- src/i18n/index.tsx — nav.aiTeacher (AR + EN)
+- public/sitemap.xml — adds https://cnihao.com/ai-teacher (702 URLs, 0 private)
+- public/llms.txt — lists the AI Teacher route
+- package.json
+
+## Progress saving (logged-in only, fail-silent)
+On generating a plan and on completing the mini quiz, logged-in users get a
+record via the existing studentProgress.markCompleted('quiz',
+'ai-teacher-daily-plan' | 'ai-teacher-mini-quiz', score?) — using the existing
+student_progress table, NO new migration. Guests are never blocked; saving is
+skipped for them and any failure is swallowed so the UI keeps working.
+
+## Admin visibility
+Because the activities are 'quiz' rows in student_progress, they appear in the
+V3.4.2 admin pages. /admin/quiz-results shows them with clear Arabic labels
+(خطة المعلم الذكي / اختبار المعلم الذكي).
+
+## GA4 events (no PII)
+ai_teacher_open, ai_teacher_plan_generated, ai_teacher_quiz_completed,
+ai_teacher_recommended_link_click. Params carry only level/goal/score/href —
+never email/name/user id. /admin stays excluded.
+
+## SEO / structured data
+- Seo.tsx: AR title "المعلم الذكي لتعلم الصينية | خطة يومية واختبار سريع | NiHao",
+  AR description as specified, EN fallback "AI Chinese Teacher for Arabic Speakers
+  | NiHao".
+- LearningResource + BreadcrumbList JSON-LD (no fake reviews/ratings).
+- sitemap + llms.txt updated. No admin routes added.
+
+## Pinyin / auth / mobile / a11y
+- Respects smart pinyin mode via usePinyinMode + PinyinToggle (Beginner/HSK1/HSK2
+  show, HSK3 hide by default, toggle available).
+- Public page; saving requires login; shows a login CTA when logged out.
+- Mobile-first RTL: stacking cards, large buttons, no horizontal overflow.
+- Semantic, keyboard-clickable buttons; aria-pressed on selectors; readable text.
+
+## Preserved (verified)
+V3.6 DailyGoalCard + ScrollToTop + HskToolsNav + HSK result sync + SEO articles;
+V3.4.2 admin data pages + RPC migration; V3.4.1 GA4 head tag + simPinyin; V3.4
+Google auth + AuthGate + PinyinToggle; V3.3 HSK tools; V3.2 HSK3; V3.0A social +
+lead; V2.9E performance (hero webp, video 548KB). GA4 head tag intact.
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 463KB (V3.6 was 462KB; the AI Teacher is a lazy chunk). Deps
+unchanged.
+
+## Known limitations
+- Deterministic, not a real language model: it arranges existing content rather
+  than generating new explanations. (V3.8 can add real AI via an Edge Function.)
+- HSK1 lesson words have no example sentences in the data, so a simple
+  "这是 X。" example is shown for those; HSK2/HSK3 use real examples.
+- Saved activity is per logged-in account; guests aren't saved by design.
+
+---
+
 # NiHao V3.6 — Unified Release: SEO + Internal Linking + Progress Sync + Growth
 
 Base: GitHub main 48c128f (V3.4.2 admin data visibility). This release UNIFIES

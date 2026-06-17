@@ -26,6 +26,7 @@ const Hsk1Simulation = lazy(() => import('./pages/Hsk1Simulation'));
 const Hsk3Simulation = lazy(() => import('./pages/Hsk3Simulation'));
 const Hsk2Simulation = lazy(() => import('./pages/Hsk2Simulation'));
 const HskTests = lazy(() => import('./pages/HskTests'));
+const AiTeacher = lazy(() => import('./pages/AiTeacher'));
 const Hsk3Flashcards = lazy(() => import('./pages/Hsk3Flashcards'));
 const Hsk3Worksheet = lazy(() => import('./pages/Hsk3Worksheet'));
 const WritingPractice = lazy(() => import('./pages/WritingPractice'));
@@ -145,6 +146,7 @@ export default function App() {
         <Route path="/hsk3-simulation" element={<Hsk3Simulation />} />
         <Route path="/hsk2-simulation" element={<Hsk2Simulation />} />
         <Route path="/hsk-tests" element={<HskTests />} />
+        <Route path="/ai-teacher" element={<AiTeacher />} />
         <Route path="/flashcards/hsk3" element={<Hsk3Flashcards />} />
         <Route path="/worksheets/hsk3" element={<Hsk3Worksheet />} />
         <Route path="/writing-practice" element={<WritingPractice />} />

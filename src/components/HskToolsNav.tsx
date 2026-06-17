@@ -4,6 +4,7 @@ import { ClipboardList, Layers, FileText, PenLine, BookOpen } from 'lucide-react
 interface Tool { path: string; label: string; icon: typeof BookOpen }
 
 const ALL: Tool[] = [
+  { path: '/ai-teacher', label: 'المعلم الذكي', icon: BookOpen },
   { path: '/hsk-tests', label: 'اختبارات HSK', icon: ClipboardList },
   { path: '/hsk1-simulation', label: 'محاكاة HSK1', icon: ClipboardList },
   { path: '/hsk2-simulation', label: 'محاكاة HSK2', icon: ClipboardList },

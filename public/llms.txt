@@ -16,6 +16,7 @@ Description: NiHao is a practical, Arabic-friendly platform for learning Mandari
 - /stories — short Chinese stories with Pinyin and Arabic/English
 - /study-in-china — guide to studying in China for Arab students
 - /answers — short Q&A about learning Chinese and studying in China
+- /ai-teacher — AI Teacher: a daily Chinese study plan, 3-word mini lesson, and quick quiz tailored to your level (Beginner/HSK1/HSK2/HSK3) and goal
 - /best-chinese-learning-site-arabic — how to choose a Chinese-learning site
 
 ## High-value guides (Study in China & Chinese learning)

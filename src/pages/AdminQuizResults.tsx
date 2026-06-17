@@ -30,7 +30,7 @@ export default function AdminQuizResults() {
     })();
   }, []);
 
-  const SLUG_LABEL: Record<string, string> = { 'hsk1-sim': 'محاكاة HSK1', 'hsk2-sim': 'محاكاة HSK2', 'hsk3-sim': 'محاكاة HSK3' };
+  const SLUG_LABEL: Record<string, string> = { 'hsk1-sim': 'محاكاة HSK1', 'hsk2-sim': 'محاكاة HSK2', 'hsk3-sim': 'محاكاة HSK3', 'ai-teacher-daily-plan': 'خطة المعلم الذكي', 'ai-teacher-mini-quiz': 'اختبار المعلم الذكي' };
   const labelSlug = (slug: string) => SLUG_LABEL[slug] || slug;
   const fmt = (d: string | null) => d ? new Date(d).toISOString().slice(0, 10) : '—';
   const sorted = useMemo(() => [...rows].sort((a, b) => (b.completed_at || '').localeCompare(a.completed_at || '')), [rows]);

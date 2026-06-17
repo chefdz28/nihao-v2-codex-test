@@ -59,6 +59,7 @@ export default function Footer() {
             <h4 className="font-display font-bold text-white mb-4">{t('footer.learning')}</h4>
             <ul className="space-y-3">
               {[
+                { path: '/ai-teacher', label: 'nav.aiTeacher', icon: BookOpen },
                 { path: '/courses', label: 'nav.courses', icon: BookOpen },
                 { path: '/pinyin', label: 'nav.pinyin', icon: BookOpen },
                 { path: '/essentials', label: 'nav.essentials', icon: BookOpen },

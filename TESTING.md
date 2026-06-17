@@ -1,3 +1,14 @@
+# V3.7 AI Teacher checks
+- [ ] /ai-teacher loads; hero + level/goal selectors render (RTL, mobile OK)
+- [ ] Beginner + Daily words → generate → plan + 3 words + 3-Q quiz appear
+- [ ] Quiz gives instant feedback; score shows; recommended links navigate
+- [ ] Logged-in: completing quiz saves ai-teacher-mini-quiz (fail-silent if not)
+- [ ] /admin/quiz-results shows AI Teacher activity with Arabic labels
+- [ ] Pinyin: Beginner/HSK1/HSK2 show, HSK3 hidden by default; toggle works
+- [ ] GA4: ai_teacher_open / plan_generated / quiz_completed / recommended_link_click (no PII)
+- [ ] sitemap has /ai-teacher, no /admin; GA head tag in index.html
+- [ ] /hsk-tests, /daily DailyGoalCard, /admin/data, footer ScrollToTop all still work
+- [ ] index ~463KB; deps unchanged; build passes
 # V3.6 unified release checks
 - [ ] Footer link while scrolled → new page opens at top (ScrollToTop)
 - [ ] /hsk-tests Course JSON-LD; sims Quiz+Breadcrumb JSON-LD; HskToolsNav on tools

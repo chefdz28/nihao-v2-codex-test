@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, PenTool, Mic, LogOut, User, LayoutDashboard, Settings, Layers, Sun, RotateCcw, Music2, Hash, MessagesSquare, Map, ChevronDown, Target, BookA, Award, ClipboardCheck, BookOpenText, GraduationCap, FileText, NotebookPen, School, Headphones, ClipboardList, FileBarChart } from 'lucide-react';
+import { Menu, X, BookOpen, PenTool, Mic, LogOut, User, LayoutDashboard, Settings, Layers, Sun, RotateCcw, Music2, Hash, MessagesSquare, Map, ChevronDown, Target, BookA, Award, ClipboardCheck, BookOpenText, GraduationCap, FileText, NotebookPen, School, Headphones, ClipboardList, FileBarChart, Sparkles } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -38,6 +38,7 @@ export default function Header() {
     { path: '/contact', label: 'nav.contact' },
   ];
   const practiceLinks = [
+    { path: '/ai-teacher', label: 'nav.aiTeacher', icon: Sparkles },
     { path: '/tones', label: 'nav.tones', icon: Music2 },
     { path: '/numbers', label: 'nav.numbers', icon: Hash },
     { path: '/dialogues', label: 'nav.dialogues', icon: MessagesSquare },
