@@ -9,7 +9,7 @@ import { markCompleted } from '@/lib/studentProgress';
 import { searchKnowledge, type KnowledgeResult } from '@/lib/aiTeacherKnowledge';
 import { trackEvent } from '@/lib/analytics';
 import {
-  generateTeacherPlan, detectIntent, LEVEL_LABEL,
+  generateTeacherPlan, detectIntent, extractKnowledgeQuery, LEVEL_LABEL,
   type TeacherLevel, type TeacherGoal, type TeacherPlan, type TeacherRoute,
 } from '@/lib/aiTeacher';
 
@@ -71,17 +71,21 @@ export default function AiTeacherChat() {
     const useLevel: TeacherLevel = intent.level || level;
     if (intent.level && intent.level !== level) setLevel(intent.level);
 
-    if (intent.action === 'help') {
-      // V3.8: search NiHao's local data before falling back
-      const results = searchKnowledge(text, 5);
+    // V3.8.1 — high-priority knowledge search (meaning/translation/single word/Chinese)
+    if (intent.action === 'search' || intent.action === 'help') {
+      const target = extractKnowledgeQuery(text);
+      const results = searchKnowledge(target, 5);
       trackEvent('ai_teacher_knowledge_search', { hits: results.length });
       if (results.length > 0) {
         const top = results[0];
         let intro = 'وجدت لك هذا في بيانات NiHao:';
         if (top.type === 'word' && top.chinese) {
-          intro = `${top.chinese}${top.pinyin ? ` (${top.pinyin})` : ''} تعني «${top.arabic}». إليك التفاصيل وكلمات قريبة:`;
+          // direct, natural answer for a strong word match
+          intro = `${target} بالصينية هي ${top.chinese}، وتُنطق ${top.pinyin || ''}، ومعناها «${top.arabic}».`;
         } else if (top.type === 'grammar') {
           intro = 'هذي قاعدة نحوية مرتبطة بسؤالك:';
+        } else if (top.type === 'story') {
+          intro = 'وجدت قصة مناسبة:';
         }
         push({ role: 'teacher', type: 'knowledgeResults', text: intro, results });
         return;

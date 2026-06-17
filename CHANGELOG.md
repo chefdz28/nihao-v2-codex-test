@@ -1,3 +1,66 @@
+# NiHao V3.8.1 — AI Teacher Intent Priority Fix
+
+Base: GitHub main c9d3b05 (V3.8). Fixes the AI Teacher routing so direct
+meaning/search questions go to the local knowledge search BEFORE plan/quiz/words
+generation. Still NO API, no secrets, no migration. Everything from V3.8 and
+earlier preserved.
+
+## The bug
+"ايش معنى كلمة قط" returned a daily-words PLAN instead of the meaning of قط,
+because the word "كلمة" matched the daily-words intent. (A bare "قط" already
+worked.)
+
+## The fix (src/lib/aiTeacher.ts)
+1. New high-priority 'search' action in detectIntent(), evaluated BEFORE
+   plan/quiz/words. It triggers on:
+   - meaning/translation phrases: معنى / ما معنى / ايش معنى / وش معنى / ماذا يعني
+     / ترجمة / كيف أقول / بالصيني / معناها — and English meaning / what does /
+     translate / how do I say / how to say.
+   - any message containing Chinese characters (unless it's clearly a quiz/plan).
+   - a single short token ("قط", "شكرا", "你好", "mao").
+   - topic word searches like "كلمات HSK1 عن الأكل" (كلمات + عن/about).
+2. Daily-words intent now triggers ONLY for clear plural/today patterns
+   (أعطني كلمات / كلمات اليوم / كلمات جديدة / 3 كلمات / words today / new words),
+   never for a bare "كلمة". So meaning wins over daily words.
+3. New helper extractKnowledgeQuery(raw): strips filler ("ايش معنى كلمة قط" →
+   "قط", "كيف أقول شكرا بالصيني" → "شكرا", "ما معنى 你好" → "你好",
+   "اشرح لي 的" → "的"); Chinese substring always wins.
+
+## Chat behavior (src/components/AiTeacherChat.tsx)
+- The new 'search' action (and the existing 'help' fallback) both run the
+  knowledge search on the extracted query.
+- Strong word match → a direct natural answer:
+  "قط بالصينية هي 猫، وتُنطق māo، ومعناها «قطة»." + a result card (Chinese /
+  pinyin / Arabic / HSK badge / link).
+- No match → the deterministic fallback message + chips (unchanged).
+- Plan/quiz/pinyin/writing/review commands are unchanged: "أعطني كلمات اليوم"
+  still returns the daily plan; "اختبرني HSK1" still returns the quiz.
+
+## Intent verification (all pass)
+ايش معنى كلمة قط → search ✓ · ما معنى 你好 → search ✓ · كيف أقول شكرا بالصيني →
+search ✓ · معنى كلمة ماء → search ✓ · قط → search ✓ · كلمات HSK1 عن الأكل →
+search ✓ · أعطني كلمات اليوم → words (plan) ✓ · اختبرني HSK1 → quiz ✓ ·
+أعطني خطة اليوم → plan ✓ · اشرح لي pinyin → pinyin ✓ · 你好 → search ✓.
+
+## GA4 (unchanged, no PII)
+ai_teacher_knowledge_search, ai_teacher_knowledge_result_click,
+ai_teacher_chat_message, ai_teacher_plan_generated, ai_teacher_quiz_completed,
+ai_teacher_prompt_clicked.
+
+## Files
+- EDIT: src/lib/aiTeacher.ts (detectIntent priority + 'search' action +
+  extractKnowledgeQuery), src/components/AiTeacherChat.tsx (handle 'search' +
+  extracted query + direct answer), package.json.
+- PRESERVED: aiTeacherKnowledge.ts, chat UI, plan/quiz logic, admin, GA4,
+  Google login, smart pinyin, HSK tools.
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 463 KB (unchanged). AiTeacher lazy chunk ≈ 26 KB. Deps
+unchanged.
+
+---
+
 # NiHao V3.8 — AI Teacher Knowledge Search (Local RAG)
 
 Base: GitHub main 317bc42 (V3.7.1). Upgrades the AI Teacher chat to SEARCH

@@ -1,3 +1,13 @@
+# V3.8.1 intent priority checks (manual)
+- [ ] "ايش معنى كلمة قط" → 猫 māo قطة (knowledge search, NOT a daily plan)
+- [ ] "ما معنى 你好" → 你好 result
+- [ ] "كيف أقول شكرا بالصيني" → 谢谢 result
+- [ ] "معنى كلمة ماء" → water word result
+- [ ] "قط" (single word) → 猫 result
+- [ ] "كلمات HSK1 عن الأكل" → topic search (food words)
+- [ ] "أعطني كلمات اليوم" → daily plan (unchanged)
+- [ ] "اختبرني HSK1" → quiz (unchanged)
+- [ ] index 463KB, AiTeacher chunk ~26KB, deps unchanged, build passes
 # V3.8 AI Teacher knowledge search checks
 - [ ] /ai-teacher opens (chat)
 - [ ] "معنى 你好" → teacher explains + word card linking to /dictionary/...

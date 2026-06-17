@@ -199,7 +199,7 @@ export function generateTeacherPlan(input: {
 // V3.7.1 — deterministic intent detection for the chat UI. Maps a free-text
 // message (Arabic or English) to a level + goal + action. NO AI/API — pure
 // keyword matching. Returns what the teacher should do next.
-export type TeacherAction = 'plan' | 'words' | 'quiz' | 'pinyin' | 'writing' | 'tones' | 'review' | 'help';
+export type TeacherAction = 'search' | 'plan' | 'words' | 'quiz' | 'pinyin' | 'writing' | 'tones' | 'review' | 'help';
 
 export interface TeacherIntent {
   level?: TeacherLevel;
@@ -210,25 +210,75 @@ export interface TeacherIntent {
 export function detectIntent(raw: string): TeacherIntent {
   const s = (raw || '').toLowerCase();
   const has = (...subs: string[]) => subs.some(x => s.includes(x));
+  const hasChinese = /[\u3400-\u9FFF]/.test(raw || '');
+  const wordCount = (raw || '').trim().split(/\s+/).filter(Boolean).length;
 
-  // level
+  // level (detected regardless of action)
   let level: TeacherLevel | undefined;
   if (has('hsk1', 'hsk 1', 'اتش اس كي 1', 'اچ اس كي 1', 'مستوى 1', 'المستوى الأول')) level = 'hsk1';
   else if (has('hsk2', 'hsk 2', 'مستوى 2', 'المستوى الثاني')) level = 'hsk2';
   else if (has('hsk3', 'hsk 3', 'مستوى 3', 'المستوى الثالث')) level = 'hsk3';
-  else if (has('مبتدئ', 'beginner', 'بداية', 'جديد')) level = 'beginner';
+  else if (has('مبتدئ', 'beginner', 'بداية')) level = 'beginner';
 
-  // action + goal (order matters: most specific first)
+  // ---- HIGH PRIORITY: meaning / translation / search intent (V3.8.1) ----
+  // These must win over plan/words so "ايش معنى كلمة قط" → search, not a plan.
+  const meaningPhrase = has(
+    'معنى', 'ما معنى', 'ايش معنى', 'وش معنى', 'يعني ايش', 'ماذا يعني', 'وش يعني', 'ايش يعني',
+    'ترجمة', 'ترجم', 'كيف أقول', 'كيف اقول', 'كيف نقول', 'بالصيني', 'بالصينية',
+    'اشرح كلمة', 'معناها', 'معناه',
+    'meaning', 'what does', 'what is', 'translate', 'how do i say', 'how to say',
+  );
+  // a clear DAILY-WORDS request (plural / today / count) — NOT a bare "كلمة"
+  const dailyWordsPhrase = has(
+    'أعطني كلمات', 'اعطني كلمات', 'هات كلمات', 'كلمات اليوم', 'كلمات جديدة',
+    '3 كلمات', '٣ كلمات', 'ثلاث كلمات', 'words today', 'new words', 'give me words',
+  );
+  // topic word search like "كلمات HSK1 عن الأكل" → search, not a plan
+  const topicWordSearch = has('كلمات') && has(' عن ', 'حول', 'about') && !dailyWordsPhrase;
+
+  // If it's clearly a meaning/translation question, or a topic word search,
+  // or contains Chinese, or is a single short token → search the knowledge base.
+  if (meaningPhrase || topicWordSearch) return { level, goal: undefined, action: 'search' };
+  if (hasChinese && !has('اختبر', 'اختبار', 'quiz', 'test', 'محاكاة', 'خطة', 'plan')) {
+    return { level, goal: undefined, action: 'search' };
+  }
+  if (wordCount === 1 && !dailyWordsPhrase && !has('hsk', 'مستوى', 'مبتدئ', 'بينين', 'pinyin', 'خطة', 'plan', 'اختبار', 'quiz', 'كتابة', 'مراجعة', 'نغمات')) {
+    return { level, goal: undefined, action: 'search' };
+  }
+
+  // ---- action + goal (specific commands) ----
   if (has('بينين', 'pinyin', 'البينين')) return { level, goal: 'pinyin', action: 'pinyin' };
   if (has('نغم', 'نبرة', 'tone', 'tones', 'النغمات')) return { level, goal: 'pinyin', action: 'tones' };
-  if (has('كتابة', 'اكتب', 'writing', 'write', 'أحرف', 'حروف')) return { level, goal: 'writing', action: 'writing' };
+  if (has('كتابة', 'اكتب', 'writing', 'write', 'أحرف')) return { level, goal: 'writing', action: 'writing' };
   if (has('مراجعة', 'أخطاء', 'اخطائي', 'mistakes', 'review', 'راجع')) return { level, goal: 'review', action: 'review' };
   if (has('اختبر', 'اختبار', 'امتحان', 'quiz', 'test', 'محاكاة')) return { level, goal: 'hsk_test', action: 'quiz' };
-  if (has('كلمات', 'كلمة', 'words', 'word', 'مفردات', 'vocab')) return { level, goal: 'daily_words', action: 'words' };
+  // daily words ONLY for clear plural/today patterns (not a bare "كلمة")
+  if (dailyWordsPhrase) return { level, goal: 'daily_words', action: 'words' };
   if (has('خطة', 'plan', 'اليوم', 'today', 'برنامج')) return { level, goal: undefined, action: 'plan' };
 
   // a bare level with no action → give a plan for that level
   if (level) return { level, goal: undefined, action: 'plan' };
 
+  // anything else → let the caller search the knowledge base, then fall back
   return { action: 'help' };
+}
+
+// V3.8.1 — pull the real search target out of a natural phrase. Drops meaning/
+// filler words so "ايش معنى كلمة قط" → "قط", "كيف أقول شكرا بالصيني" → "شكرا",
+// "ما معنى 你好" → "你好". If Chinese is present, it wins.
+export function extractKnowledgeQuery(raw: string): string {
+  const zh = (raw.match(/[\u3400-\u9FFF]+/g) || []).join('');
+  if (zh) return zh;
+  let s = ' ' + (raw || '').trim() + ' ';
+  const PHRASES = [
+    'ايش معنى', 'وش معنى', 'ما معنى', 'ماذا يعني', 'وش يعني', 'ايش يعني', 'يعني ايش',
+    'معنى كلمة', 'معنى حرف', 'اشرح كلمة', 'اشرح لي', 'معنى', 'معناها', 'معناه',
+    'كيف أقول', 'كيف اقول', 'كيف نقول', 'ترجمة', 'ترجم لي', 'ترجم',
+    'بالصينية', 'بالصيني', 'كلمة', 'حرف',
+    'what does', 'what is', 'how do i say', 'how to say', 'meaning of', 'meaning', 'translate',
+  ];
+  for (const p of PHRASES) s = s.replace(new RegExp('\\s' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s', 'gi'), ' ');
+  // drop trailing/leading filler particles
+  s = s.replace(/\s(عن|لي|من|في|the|a|in|of)\s/gi, ' ');
+  return s.trim() || (raw || '').trim();
 }
