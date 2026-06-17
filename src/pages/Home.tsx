@@ -5,6 +5,7 @@ import PinyinText from '@/components/PinyinText';
 import { stories } from '@/data/stories2';
 import { hsk1FullLessons } from '@/data/hsk1-full';
 import { Link } from 'react-router-dom';
+import { trackEvent } from '@/lib/analytics';
 import { motion } from 'framer-motion';
 import {
   BookOpen, Volume2, Image, PenTool, Headphones, ClipboardCheck,
@@ -297,15 +298,15 @@ function FeaturesSection() {
   const { t } = useI18n();
 
   const features = [
-    { icon: BookOpen, title: 'features.lessons.title', desc: 'features.lessons.desc', tint: 'rgba(255,51,51,0.03)' },
-    { icon: Volume2, title: 'features.audio.title', desc: 'features.audio.desc', tint: 'rgba(59,130,246,0.03)' },
-    { icon: Image, title: 'features.visual.title', desc: 'features.visual.desc', tint: 'rgba(16,185,129,0.03)' },
-    { icon: PenTool, title: 'features.writing.title', desc: 'features.writing.desc', tint: 'rgba(139,92,246,0.03)' },
-    { icon: Headphones, title: 'features.listening.title', desc: 'features.listening.desc', tint: 'rgba(245,158,11,0.03)' },
-    { icon: ClipboardCheck, title: 'features.quizzes.title', desc: 'features.quizzes.desc', tint: 'rgba(255,51,51,0.03)' },
-    { icon: Mic, title: 'features.pronunciation.title', desc: 'features.pronunciation.desc', tint: 'rgba(236,72,153,0.03)' },
-    { icon: TrendingUp, title: 'features.progress.title', desc: 'features.progress.desc', tint: 'rgba(6,182,212,0.03)' },
-    { icon: Award, title: 'features.certificates.title', desc: 'features.certificates.desc', tint: 'rgba(245,158,11,0.03)' },
+    { icon: BookOpen, title: 'features.lessons.title', desc: 'features.lessons.desc', tint: 'rgba(255,51,51,0.03)', route: '/courses' },
+    { icon: Volume2, title: 'features.audio.title', desc: 'features.audio.desc', tint: 'rgba(59,130,246,0.03)', route: '/pronunciation' },
+    { icon: Image, title: 'features.visual.title', desc: 'features.visual.desc', tint: 'rgba(16,185,129,0.03)', route: '/vocabulary' },
+    { icon: PenTool, title: 'features.writing.title', desc: 'features.writing.desc', tint: 'rgba(139,92,246,0.03)', route: '/writing-practice' },
+    { icon: Headphones, title: 'features.listening.title', desc: 'features.listening.desc', tint: 'rgba(245,158,11,0.03)', route: '/dialogues' },
+    { icon: ClipboardCheck, title: 'features.quizzes.title', desc: 'features.quizzes.desc', tint: 'rgba(255,51,51,0.03)', route: '/hsk-tests' },
+    { icon: Mic, title: 'features.pronunciation.title', desc: 'features.pronunciation.desc', tint: 'rgba(236,72,153,0.03)', route: '/pronunciation' },
+    { icon: TrendingUp, title: 'features.progress.title', desc: 'features.progress.desc', tint: 'rgba(6,182,212,0.03)', route: '/dashboard' },
+    { icon: Award, title: 'features.certificates.title', desc: 'features.certificates.desc', tint: 'rgba(245,158,11,0.03)', route: '/certificates' },
   ];
 
   return (
@@ -335,17 +336,23 @@ function FeaturesSection() {
         {features.map((f, i) => (
           <motion.div
             key={f.title}
-            className="liquid-glass p-6 group cursor-default"
-            style={{ background: f.tint }}
             variants={fadeInUp}
             custom={i}
             whileHover={{ y: -4 }}
           >
-            <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
-              <f.icon size={28} className="text-[#FF3333]" />
-            </div>
-            <h3 className="font-display font-bold text-xl text-white mb-2">{t(f.title)}</h3>
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{t(f.desc)}</p>
+            <Link
+              to={f.route}
+              aria-label={t(f.title)}
+              onClick={() => trackEvent('homepage_feature_click', { route: f.route })}
+              className="liquid-glass p-6 group cursor-pointer block h-full rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-[#FF3333]/50 transition-colors hover:border-[#FF3333]/20"
+              style={{ background: f.tint }}
+            >
+              <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                <f.icon size={28} className="text-[#FF3333]" />
+              </div>
+              <h3 className="font-display font-bold text-xl text-white mb-2">{t(f.title)}</h3>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{t(f.desc)}</p>
+            </Link>
           </motion.div>
         ))}
       </motion.div>

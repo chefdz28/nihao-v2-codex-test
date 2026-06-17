@@ -1,3 +1,13 @@
+# V3.8.3 navigation + clickable cards checks
+- [ ] Homepage: each of the 9 feature cards opens the mapped page
+- [ ] Cards show pointer cursor + keyboard focus ring; fine on mobile
+- [ ] Training dropdown shows 6 labeled groups; no overflow on mobile
+- [ ] Dropdown ends with "كل أدوات التدريب" → /practice
+- [ ] /practice shows sectioned tools hub; every card routes correctly
+- [ ] Footer links still work; AI Teacher still works; admin still works
+- [ ] ScrollToTop still scrolls on navigation
+- [ ] GA4 homepage_feature_click / training_menu_click / practice_tool_click fire
+- [ ] index ~466KB, deps unchanged, build passes
 # V3.8.2 exact-meaning filter checks
 - [ ] "ايش معنى كلمة قط" → only 猫 card (no 火车/火车站/件/才)
 - [ ] "قط" → only 猫

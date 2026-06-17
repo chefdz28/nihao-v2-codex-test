@@ -1,3 +1,76 @@
+# NiHao V3.8.3 — Navigation Cleanup + Clickable Feature Cards
+
+Base: GitHub main 33b814d (V3.8.2). Makes every homepage feature card clickable,
+reorganizes the Training dropdown into grouped sections, and turns /practice into
+a sectioned tools hub. No redesign, no API, no migration, no new deps. All
+V3.8.2 and earlier features preserved.
+
+## Part 1 — Homepage feature cards now clickable (src/pages/Home.tsx)
+Each of the 9 feature cards is now wrapped in <Link> (cursor-pointer,
+focus-visible ring, aria-label, GA4). Route mapping:
+- دروس تفاعلية → /courses
+- النطق الصوتي → /pronunciation
+- التعلم المرئي → /vocabulary
+- تمرين الكتابة → /writing-practice
+- تمارين الاستماع → /dialogues
+- اختبارات → /hsk-tests
+- ذكاء النطق → /pronunciation
+- تتبع التقدم → /dashboard
+- الشهادات → /certificates
+Same visual design kept; cards stack fine on mobile.
+
+## Part 2 — Training dropdown grouped (src/components/Header.tsx)
+The old flat 21-item list is now 6 labeled groups in a multi-column popover
+(desktop) and labeled sections (mobile), ending with a "كل أدوات التدريب" →
+/practice link:
+- البداية: المعلم الذكي, اليومي, المسار, المهام
+- المهارات: البينين, النغمات, النطق, الكتابة, الإملاء
+- الاختبارات: اختبارات HSK, محاكاة HSK1/2/3, اختبار المستوى
+- المراجعة: المراجعة, دفتر الأخطاء, البطاقات, بطاقات HSK3, أوراق العمل
+- المحتوى: القاموس, الحوارات, القصص, الأساسيات
+- أدوات المعلم: حزمة المعلم, التقرير, الشهادات
+The desktop popover is width-capped (max-w-[92vw]) so it never overflows on
+mobile/tablet.
+
+## Part 3 — /practice as the full tools hub (src/pages/Practice.tsx)
+The quick-tools grid is now grouped into clear sections: ابدأ هنا / مهارات اللغة
+/ اختبارات HSK / مراجعة وتقدم / محتوى وقاموس / أدوات المعلم. Every card is a Link
+with aria-label + focus ring + GA4. The existing writing/listening/flashcards
+modules below are untouched.
+
+## Part 4 — Route validation
+Every link used in Header / Home / Practice was checked against App.tsx — all
+resolve to existing routes (no broken links). Note: /teacher-tools has no real
+page (TeacherTools.tsx only exports the print/dictation widgets used by
+/flashcards-print and /dictation), so per the "no fake links" rule it is NOT
+linked; teacher tools route to /teacher (the lesson-pack page) and
+/flashcards-print instead.
+
+## Part 5 — GA4 (no PII)
+Added: homepage_feature_click, training_menu_click, practice_tool_click (param:
+route only). All existing events kept.
+
+## Files
+- EDIT: src/pages/Home.tsx (clickable feature cards + GA4 import)
+- EDIT: src/components/Header.tsx (grouped Training menu desktop + mobile + GA4)
+- EDIT: src/pages/Practice.tsx (sectioned tools hub + GA4)
+- EDIT: src/i18n/index.tsx (added nav.flashcardsHsk3 AR+EN)
+- EDIT: package.json
+- PRESERVED: AI Teacher + V3.8.2 exact-meaning filter, ScrollToTop, admin, GA4
+  head tag, Google login, smart pinyin, all routes.
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 466 KB (was 463 KB; +3 KB for the grouped nav data). Deps
+unchanged.
+
+## Notes
+- One pre-existing lint warning remains in Header.tsx (setState in the
+  route-change effect that closes the mobile menu) — not introduced here.
+- Black/red premium identity unchanged.
+
+---
+
 # NiHao V3.8.2 — AI Teacher Exact Meaning Result Filter
 
 Base: GitHub main 22e88d3 (V3.8.1). For direct meaning/translation questions the

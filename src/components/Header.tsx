@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, BookOpen, PenTool, Mic, LogOut, User, LayoutDashboard, Settings, Layers, Sun, RotateCcw, Music2, Hash, MessagesSquare, Map, ChevronDown, Target, BookA, Award, ClipboardCheck, BookOpenText, GraduationCap, FileText, NotebookPen, School, Headphones, ClipboardList, FileBarChart, Sparkles } from 'lucide-react';
 import { useI18n } from '@/i18n';
+import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
@@ -37,34 +38,54 @@ export default function Header() {
     { path: '/blog', label: 'nav.blog' },
     { path: '/contact', label: 'nav.contact' },
   ];
-  const practiceLinks = [
-    { path: '/ai-teacher', label: 'nav.aiTeacher', icon: Sparkles },
-    { path: '/tones', label: 'nav.tones', icon: Music2 },
-    { path: '/numbers', label: 'nav.numbers', icon: Hash },
-    { path: '/dialogues', label: 'nav.dialogues', icon: MessagesSquare },
-    { path: '/path', label: 'nav.path', icon: Map },
-    { path: '/pronunciation', label: 'nav.pronunciation', icon: Mic },
-    { path: '/review', label: 'nav.review', icon: RotateCcw },
-    { path: '/daily', label: 'nav.daily', icon: Sun },
-    { path: '/missions', label: 'nav.missions', icon: Target },
-    { path: '/dictionary', label: 'nav.dictionary', icon: BookA },
-    { path: '/achievements', label: 'nav.achievements', icon: Award },
-    { path: '/placement-test', label: 'nav.placement', icon: ClipboardCheck },
-    { path: '/stories', label: 'nav.stories', icon: BookOpenText },
-    { path: '/worksheets', label: 'nav.worksheets', icon: FileText },
-    { path: '/certificates', label: 'nav.certificates', icon: GraduationCap },
-    { path: '/mistakes', label: 'nav.mistakes', icon: NotebookPen },
-    { path: '/hsk1-simulation', label: 'nav.hsk1', icon: ClipboardList },
-    { path: '/hsk-tests', label: 'nav.hskTests', icon: ClipboardList },
-    { path: '/teacher', label: 'nav.teacher', icon: School },
-    { path: '/dictation', label: 'nav.dictation', icon: Headphones },
-    { path: '/report', label: 'nav.report', icon: FileBarChart },
+  // V3.8.3 — grouped Training menu (clearer than one long flat list)
+  const practiceGroups = [
+    { heading: 'البداية', items: [
+      { path: '/ai-teacher', label: 'nav.aiTeacher', icon: Sparkles },
+      { path: '/daily', label: 'nav.daily', icon: Sun },
+      { path: '/path', label: 'nav.path', icon: Map },
+      { path: '/missions', label: 'nav.missions', icon: Target },
+    ] },
+    { heading: 'المهارات', items: [
+      { path: '/pinyin', label: 'nav.pinyin', icon: Hash },
+      { path: '/tones', label: 'nav.tones', icon: Music2 },
+      { path: '/pronunciation', label: 'nav.pronunciation', icon: Mic },
+      { path: '/writing-practice', label: 'nav.writing', icon: PenTool },
+      { path: '/dictation', label: 'nav.dictation', icon: Headphones },
+    ] },
+    { heading: 'الاختبارات', items: [
+      { path: '/hsk-tests', label: 'nav.hskTests', icon: ClipboardList },
+      { path: '/hsk1-simulation', label: 'nav.hsk1', icon: ClipboardList },
+      { path: '/hsk2-simulation', label: 'nav.hsk2', icon: ClipboardList },
+      { path: '/hsk3-simulation', label: 'nav.hsk3', icon: ClipboardList },
+      { path: '/placement-test', label: 'nav.placement', icon: ClipboardCheck },
+    ] },
+    { heading: 'المراجعة', items: [
+      { path: '/review', label: 'nav.review', icon: RotateCcw },
+      { path: '/mistakes', label: 'nav.mistakes', icon: NotebookPen },
+      { path: '/flashcards', label: 'nav.flashcards', icon: Layers },
+      { path: '/flashcards/hsk3', label: 'nav.flashcardsHsk3', icon: Layers },
+      { path: '/worksheets/hsk3', label: 'nav.worksheets', icon: FileText },
+    ] },
+    { heading: 'المحتوى', items: [
+      { path: '/dictionary', label: 'nav.dictionary', icon: BookA },
+      { path: '/dialogues', label: 'nav.dialogues', icon: MessagesSquare },
+      { path: '/stories', label: 'nav.stories', icon: BookOpenText },
+      { path: '/essentials', label: 'nav.essentials', icon: BookOpen },
+    ] },
+    { heading: 'أدوات المعلم', items: [
+      { path: '/teacher', label: 'nav.teacher', icon: School },
+      { path: '/report', label: 'nav.report', icon: FileBarChart },
+      { path: '/certificates', label: 'nav.certificates', icon: GraduationCap },
+    ] },
   ];
+  const practiceLinks = practiceGroups.flatMap(g => g.items);
   // extra tools kept in the mobile menu
   const moreLinks = [
     { path: '/practice', label: 'nav.practice', icon: PenTool },
     { path: '/vocabulary', label: 'nav.vocabulary', icon: BookOpen },
-    { path: '/flashcards', label: 'nav.flashcards', icon: Layers },
+    { path: '/numbers', label: 'nav.numbers', icon: Hash },
+    { path: '/achievements', label: 'nav.achievements', icon: Award },
   ];
   const isPracticeActive = practiceLinks.some(l => isActive(l.path));
 
@@ -117,18 +138,33 @@ export default function Header() {
               {t('nav.practiceMenu')} <ChevronDown size={14} className={`transition-transform ${practiceOpen ? 'rotate-180' : ''}`} />
             </button>
             {practiceOpen && (
-              <div className="absolute top-full mt-2 start-0 min-w-[230px] liquid-glass-strong rounded-2xl p-2 shadow-2xl border border-white/10">
-                {practiceLinks.map(link => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-display font-semibold transition-colors ${
-                      isActive(link.path) ? 'text-[#FF3333] bg-[#FF3333]/10' : 'text-[#c0c0c0] hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    <link.icon size={16} /> {t(link.label)}
-                  </Link>
-                ))}
+              <div className="absolute top-full mt-2 start-0 w-[560px] max-w-[92vw] liquid-glass-strong rounded-2xl p-4 shadow-2xl border border-white/10">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
+                  {practiceGroups.map(group => (
+                    <div key={group.heading}>
+                      <p className="px-2 mb-1 text-[11px] font-display font-bold uppercase tracking-wide" style={{ color: 'var(--color-text-tertiary)' }}>{group.heading}</p>
+                      {group.items.map(link => (
+                        <Link
+                          key={link.path}
+                          to={link.path}
+                          onClick={() => trackEvent('training_menu_click', { route: link.path })}
+                          className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] font-display font-semibold transition-colors ${
+                            isActive(link.path) ? 'text-[#FF3333] bg-[#FF3333]/10' : 'text-[#c0c0c0] hover:text-white hover:bg-white/5'
+                          }`}
+                        >
+                          <link.icon size={15} className="shrink-0" /> <span className="truncate">{t(link.label)}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  to="/practice"
+                  onClick={() => trackEvent('training_menu_click', { route: '/practice' })}
+                  className="mt-3 pt-3 border-t border-white/10 flex items-center justify-center gap-2 text-sm font-display font-bold text-[#FF3333] hover:bg-[#FF3333]/5 rounded-lg py-2"
+                >
+                  <PenTool size={15} /> كل أدوات التدريب
+                </Link>
               </div>
             )}
           </div>
@@ -244,16 +280,25 @@ export default function Header() {
           ))}
           <hr className="border-white/10 my-2" />
           <p className="px-4 text-xs font-display font-semibold uppercase" style={{ color: 'var(--color-text-tertiary)' }}>{t('nav.practiceMenu')}</p>
-          {practiceLinks.map(link => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-3 px-4 rounded-lg hover:bg-white/5 transition-colors"
-            >
-              <link.icon size={18} />
-              <span className="font-display font-semibold">{t(link.label)}</span>
-            </Link>
+          {practiceGroups.map(group => (
+            <div key={group.heading}>
+              <p className="px-4 pt-2 text-[11px] font-display font-bold" style={{ color: 'var(--color-text-tertiary)' }}>{group.heading}</p>
+              {group.items.map(link => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => trackEvent('training_menu_click', { route: link.path })}
+                  className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-2.5 px-4 rounded-lg hover:bg-white/5 transition-colors"
+                >
+                  <link.icon size={18} />
+                  <span className="font-display font-semibold">{t(link.label)}</span>
+                </Link>
+              ))}
+            </div>
           ))}
+          <Link to="/practice" onClick={() => trackEvent('training_menu_click', { route: '/practice' })} className="flex items-center gap-3 text-[#FF3333] py-3 px-4 rounded-lg hover:bg-[#FF3333]/5 transition-colors font-display font-bold">
+            <PenTool size={18} /> كل أدوات التدريب
+          </Link>
           <hr className="border-white/10 my-2" />
           {moreLinks.map(link => (
             <Link

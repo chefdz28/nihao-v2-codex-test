@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PenTool, Headphones, BookOpen, Loader2, Music4, BookOpenCheck, Music2, Hash, MessagesSquare, Map, Mic, RotateCcw, Sun, Target, BookA, Award, ClipboardCheck, BookOpenText, GraduationCap, FileText, NotebookPen, School, ClipboardList, FileBarChart, Layers } from 'lucide-react';
+import { PenTool, Headphones, BookOpen, Loader2, Music4, BookOpenCheck, Music2, Hash, MessagesSquare, Map, Mic, RotateCcw, Sun, Target, BookA, Award, ClipboardCheck, BookOpenText, GraduationCap, FileText, NotebookPen, School, ClipboardList, FileBarChart, Layers, Sparkles } from 'lucide-react';
 import StartHere from '@/components/StartHere';
+import { trackEvent } from '@/lib/analytics';
 import { useI18n } from '@/i18n';
 import { fetchLessons, fetchVocabulary, fetchSentences } from '@/lib/dataService';
 import WritingPad from '@/components/WritingPad';
@@ -75,48 +76,67 @@ export default function Practice() {
       {/* V2.1: pinyin-first beginner flow */}
       <div className="mb-8"><StartHere compact /></div>
 
-      {/* V2.0.6: quick access to every learning tool */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-10">
-        {[
-          { path: '/pinyin', label: 'nav.pinyin', icon: Music4 },
-          { path: '/essentials', label: 'nav.essentials', icon: BookOpenCheck },
-          { path: '/tones', label: 'nav.tones', icon: Music2 },
-          { path: '/numbers', label: 'nav.numbers', icon: Hash },
-          { path: '/dialogues', label: 'nav.dialogues', icon: MessagesSquare },
-          { path: '/path', label: 'nav.path', icon: Map },
-          { path: '/pronunciation', label: 'nav.pronunciation', icon: Mic },
-          { path: '/review', label: 'nav.review', icon: RotateCcw },
+      {/* V3.8.3: full tools hub, grouped into clear sections */}
+      {[
+        { heading: 'ابدأ هنا', tools: [
+          { path: '/ai-teacher', label: 'nav.aiTeacher', icon: Sparkles },
           { path: '/daily', label: 'nav.daily', icon: Sun },
+          { path: '/path', label: 'nav.path', icon: Map },
           { path: '/missions', label: 'nav.missions', icon: Target },
           { path: '/placement-test', label: 'nav.placement', icon: ClipboardCheck },
-          { path: '/dictionary', label: 'nav.dictionary', icon: BookA },
-          { path: '/achievements', label: 'nav.achievements', icon: Award },
-          { path: '/stories', label: 'nav.stories', icon: BookOpenText },
-          { path: '/worksheets', label: 'nav.worksheets', icon: FileText },
-          { path: '/certificates', label: 'nav.certificates', icon: GraduationCap },
-          { path: '/mistakes', label: 'nav.mistakes', icon: NotebookPen },
-          { path: '/hsk1-simulation', label: 'nav.hsk1', icon: ClipboardList },
-          { path: '/hsk3-simulation', label: 'nav.hsk3', icon: ClipboardList },
-          { path: '/hsk2-simulation', label: 'nav.hsk2', icon: ClipboardList },
+        ] },
+        { heading: 'مهارات اللغة', tools: [
+          { path: '/pinyin', label: 'nav.pinyin', icon: Music4 },
+          { path: '/tones', label: 'nav.tones', icon: Music2 },
+          { path: '/pronunciation', label: 'nav.pronunciation', icon: Mic },
+          { path: '/writing-practice', label: 'nav.writingPractice', icon: NotebookPen },
+          { path: '/numbers', label: 'nav.numbers', icon: Hash },
+          { path: '/dictation', label: 'nav.dictation', icon: Headphones },
+        ] },
+        { heading: 'اختبارات HSK', tools: [
           { path: '/hsk-tests', label: 'nav.hskTests', icon: ClipboardCheck },
+          { path: '/hsk1-simulation', label: 'nav.hsk1', icon: ClipboardList },
+          { path: '/hsk2-simulation', label: 'nav.hsk2', icon: ClipboardList },
+          { path: '/hsk3-simulation', label: 'nav.hsk3', icon: ClipboardList },
+        ] },
+        { heading: 'مراجعة وتقدم', tools: [
+          { path: '/review', label: 'nav.review', icon: RotateCcw },
+          { path: '/mistakes', label: 'nav.mistakes', icon: NotebookPen },
           { path: '/flashcards/hsk3', label: 'nav.hsk3Flash', icon: Layers },
           { path: '/worksheets/hsk3', label: 'nav.hsk3Sheet', icon: FileText },
-          { path: '/writing-practice', label: 'nav.writingPractice', icon: NotebookPen },
+          { path: '/achievements', label: 'nav.achievements', icon: Award },
+          { path: '/certificates', label: 'nav.certificates', icon: GraduationCap },
+        ] },
+        { heading: 'محتوى وقاموس', tools: [
+          { path: '/dictionary', label: 'nav.dictionary', icon: BookA },
+          { path: '/dialogues', label: 'nav.dialogues', icon: MessagesSquare },
+          { path: '/stories', label: 'nav.stories', icon: BookOpenText },
+          { path: '/essentials', label: 'nav.essentials', icon: BookOpenCheck },
+        ] },
+        { heading: 'أدوات المعلم', tools: [
           { path: '/teacher', label: 'nav.teacher', icon: School },
-          { path: '/dictation', label: 'nav.dictation', icon: Headphones },
-          { path: '/flashcards-print', label: 'nav.flashcardsPrint', icon: Layers },
           { path: '/report', label: 'nav.report', icon: FileBarChart },
-        ].map(card => (
-          <Link
-            key={card.path}
-            to={card.path}
-            className="liquid-glass p-4 text-center rounded-2xl border border-transparent hover:border-[#FF3333]/30 transition-colors group"
-          >
-            <card.icon size={22} className="mx-auto mb-2 text-[#FF3333] group-hover:scale-110 transition-transform" />
-            <span className="text-xs font-display font-semibold text-white block">{t(card.label)}</span>
-          </Link>
-        ))}
-      </div>
+          { path: '/flashcards-print', label: 'nav.flashcardsPrint', icon: Layers },
+        ] },
+      ].map(section => (
+        <div key={section.heading} className="mb-8">
+          <h2 className="font-display font-bold text-lg text-white mb-3">{section.heading}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {section.tools.map(card => (
+              <Link
+                key={card.path}
+                to={card.path}
+                aria-label={t(card.label)}
+                onClick={() => trackEvent('practice_tool_click', { route: card.path })}
+                className="liquid-glass p-4 text-center rounded-2xl border border-transparent hover:border-[#FF3333]/30 transition-colors group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#FF3333]/50"
+              >
+                <card.icon size={22} className="mx-auto mb-2 text-[#FF3333] group-hover:scale-110 transition-transform" />
+                <span className="text-xs font-display font-semibold text-white block">{t(card.label)}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
 
       {/* Lesson selector */}
       <div className="mb-6">
