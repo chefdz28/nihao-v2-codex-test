@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
-import AiTeacherAgent from '@/components/AiTeacherAgent';
+import AiTeacherChat from '@/components/AiTeacherChat';
 import Seo from '@/components/Seo';
 import JsonLd from '@/components/JsonLd';
 import HskToolsNav from '@/components/HskToolsNav';
@@ -24,18 +23,15 @@ export default function AiTeacher() {
         { name: 'المعلم الذكي', path: '/ai-teacher' },
       ])} />
 
-      {/* hero */}
-      <div className="text-center mb-8" dir="rtl">
-        <div className="w-14 h-14 rounded-2xl bg-[#FF3333]/15 flex items-center justify-center mx-auto mb-4">
-          <Sparkles size={26} className="text-[#FF3333]" />
-        </div>
-        <h1 className="font-display font-black text-3xl text-white mb-2">المعلم الذكي لتعلّم الصينية</h1>
+      {/* compact hero (the chat has its own header) */}
+      <div className="text-center mb-6" dir="rtl">
+        <h1 className="font-display font-black text-2xl text-white mb-1">المعلم الذكي لتعلّم الصينية</h1>
         <p className="text-sm font-arabic" style={{ color: 'var(--color-text-secondary)' }}>
           احصل على خطة يومية، كلمات، اختبار سريع، وروابط مناسبة لمستواك.
         </p>
       </div>
 
-      <AiTeacherAgent />
+      <AiTeacherChat />
 
       <HskToolsNav />
     </div>

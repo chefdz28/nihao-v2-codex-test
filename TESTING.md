@@ -1,3 +1,13 @@
+# V3.7.1 AI Teacher chat checks
+- [ ] /ai-teacher shows a chat (header + teacher bubble + input), not a form
+- [ ] Level chips switch level; suggested prompt chips send messages
+- [ ] Typing "اختبرني HSK1" → student bubble + teacher quiz card inside chat
+- [ ] "أعطني 3 كلمات جديدة" → mini lesson card; "اشرح لي pinyin" → explanation + links
+- [ ] Quiz completion shows score; logged-in saves ai-teacher-quiz-<level>
+- [ ] Mobile RTL: input sticky, no overflow; auto-scrolls to newest
+- [ ] GA4: ai_teacher_chat_message + ai_teacher_prompt_clicked fire (no PII)
+- [ ] No API/secrets; index ~463KB; deps unchanged; build passes
+- [ ] V3.7 engine + DailyGoalCard + admin + GA head tag intact
 # V3.7 AI Teacher checks
 - [ ] /ai-teacher loads; hero + level/goal selectors render (RTL, mobile OK)
 - [ ] Beginner + Daily words → generate → plan + 3 words + 3-Q quiz appear

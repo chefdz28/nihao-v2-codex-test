@@ -195,3 +195,40 @@ export function generateTeacherPlan(input: {
     recommendedRoutes: routes,
   };
 }
+
+// V3.7.1 — deterministic intent detection for the chat UI. Maps a free-text
+// message (Arabic or English) to a level + goal + action. NO AI/API — pure
+// keyword matching. Returns what the teacher should do next.
+export type TeacherAction = 'plan' | 'words' | 'quiz' | 'pinyin' | 'writing' | 'tones' | 'review' | 'help';
+
+export interface TeacherIntent {
+  level?: TeacherLevel;
+  goal?: TeacherGoal;
+  action: TeacherAction;
+}
+
+export function detectIntent(raw: string): TeacherIntent {
+  const s = (raw || '').toLowerCase();
+  const has = (...subs: string[]) => subs.some(x => s.includes(x));
+
+  // level
+  let level: TeacherLevel | undefined;
+  if (has('hsk1', 'hsk 1', 'اتش اس كي 1', 'اچ اس كي 1', 'مستوى 1', 'المستوى الأول')) level = 'hsk1';
+  else if (has('hsk2', 'hsk 2', 'مستوى 2', 'المستوى الثاني')) level = 'hsk2';
+  else if (has('hsk3', 'hsk 3', 'مستوى 3', 'المستوى الثالث')) level = 'hsk3';
+  else if (has('مبتدئ', 'beginner', 'بداية', 'جديد')) level = 'beginner';
+
+  // action + goal (order matters: most specific first)
+  if (has('بينين', 'pinyin', 'البينين')) return { level, goal: 'pinyin', action: 'pinyin' };
+  if (has('نغم', 'نبرة', 'tone', 'tones', 'النغمات')) return { level, goal: 'pinyin', action: 'tones' };
+  if (has('كتابة', 'اكتب', 'writing', 'write', 'أحرف', 'حروف')) return { level, goal: 'writing', action: 'writing' };
+  if (has('مراجعة', 'أخطاء', 'اخطائي', 'mistakes', 'review', 'راجع')) return { level, goal: 'review', action: 'review' };
+  if (has('اختبر', 'اختبار', 'امتحان', 'quiz', 'test', 'محاكاة')) return { level, goal: 'hsk_test', action: 'quiz' };
+  if (has('كلمات', 'كلمة', 'words', 'word', 'مفردات', 'vocab')) return { level, goal: 'daily_words', action: 'words' };
+  if (has('خطة', 'plan', 'اليوم', 'today', 'برنامج')) return { level, goal: undefined, action: 'plan' };
+
+  // a bare level with no action → give a plan for that level
+  if (level) return { level, goal: undefined, action: 'plan' };
+
+  return { action: 'help' };
+}

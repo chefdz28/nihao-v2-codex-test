@@ -1,3 +1,89 @@
+# NiHao V3.7.1 — AI Teacher Chat UI
+
+Base: GitHub main e19fcee (V3.7). Converts /ai-teacher from a form/plan generator
+into a chat-style conversation, keeping the SAME deterministic engine — NO API,
+no OpenAI, no secrets, no Edge Function, no migration. All V3.7 + earlier
+features preserved.
+
+## What changed
+/ai-teacher now looks and behaves like a chat with the teacher:
+- A chat header (avatar + "المعلم الذكي" + status "جاهز لمساعدتك في تعلّم الصينية").
+- An opening teacher bubble welcoming the student.
+- Level quick-chips (مبتدئ / HSK1 / HSK2 / HSK3) shown compactly above the thread
+  instead of a big static form.
+- A chat input at the bottom (RTL): placeholder "اسأل المعلم الذكي… مثال: أعطني
+  كلمات HSK1 اليوم".
+- Suggested prompt chips: أعطني خطة اليوم / اختبرني HSK1 / اشرح لي pinyin / أعطني
+  3 كلمات جديدة / دربني على النغمات / راجع أخطائي.
+- Typing or tapping a chip appends a student bubble, then the teacher replies with
+  a bubble and (where relevant) a plan card or a mini-quiz card INSIDE the
+  conversation.
+
+## How replies are generated (still deterministic, no API)
+- NEW src/lib/aiTeacher.ts → detectIntent(text): pure keyword matching (Arabic +
+  English) → { level?, goal?, action }. Examples: "اختبرني HSK1" → quiz+hsk1;
+  "اشرح لي pinyin" → pinyin; "أعطني 3 كلمات جديدة" → words; "راجع أخطائي" → review.
+- The chat maps the intent to an existing generateTeacherPlan(level, goal) call
+  and renders the right card:
+  - words/plan → AiTeacherPlanCard (3-word mini lesson + steps + links)
+  - quiz/review → AiTeacherMiniQuiz (instant feedback)
+  - pinyin/tones/writing → a short Arabic explanation + links to /pinyin, /tones,
+    /writing-practice, etc.
+  - anything unsupported → a helpful "choose one" reply with tool links.
+
+## Progress sync (unchanged behavior, fail-silent for guests)
+- On plan generation: markCompleted('quiz', 'ai-teacher-plan-<level>').
+- On quiz completion: markCompleted('quiz', 'ai-teacher-quiz-<level>', score).
+- Guests are never blocked; saving is skipped/failed silently. These still appear
+  in the admin Quiz Results page.
+
+## GA4 events (no PII)
+ai_teacher_open, ai_teacher_plan_generated, ai_teacher_quiz_completed,
+ai_teacher_prompt_clicked, and new ai_teacher_chat_message. Params carry only
+level/goal/score — never personal data.
+
+## Files
+- NEW: src/components/AiTeacherChat.tsx
+- EDIT: src/lib/aiTeacher.ts (detectIntent + TeacherIntent/TeacherAction),
+  src/pages/AiTeacher.tsx (renders AiTeacherChat; slimmer hero), package.json
+- PRESERVED (not removed): src/components/AiTeacherAgent.tsx, AiTeacherPlanCard.tsx,
+  AiTeacherMiniQuiz.tsx (reused by the chat), HskToolsNav.tsx, AdminQuizResults.tsx.
+
+## Mobile / RTL / a11y
+- Flex column chat; input is sticky at the bottom; no horizontal overflow; bubbles
+  cap at ~85-92% width. Semantic buttons, aria-label on input/send, aria-pressed
+  on level chips. Auto-scrolls to the newest message.
+
+## SEO
+/ai-teacher title/description, sitemap, and llms.txt unchanged.
+
+## Preserved (verified)
+V3.7 engine + page; V3.6 DailyGoalCard + ScrollToTop + HSK sync; V3.4.2 admin data
++ RPC migration; V3.4.1 GA4 head tag + simPinyin; V3.4 Google auth + AuthGate +
+PinyinToggle; V3.3 HSK tools; V3.2 HSK3; social + lead; performance. GA head tag
+intact.
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 463KB (the chat is a lazy chunk; size unchanged). Deps
+unchanged.
+
+## Confirmations
+- No API / no secrets added: YES (deterministic keyword logic only).
+- /ai-teacher now appears as a chat: YES.
+- Quick chips + suggested prompts work: YES.
+- Typed messages work (Enter or send button): YES.
+- Plan and quiz appear inside the chat as teacher cards: YES.
+- Build passes: YES.
+
+## Known limitations
+- Intent detection is keyword-based, not a language model; very free-form
+  questions fall back to a helpful "choose one" reply. (A real AI chat can come
+  later via a Supabase Edge Function, as a paid-tier feature.)
+- Chat history is in-memory only (not stored in Supabase), per spec.
+
+---
+
 # NiHao V3.7 — AI Teacher Agent (deterministic, no paid AI API)
 
 Base: GitHub main 9e55f7b (V3.6). Adds a public "AI Teacher" experience at
