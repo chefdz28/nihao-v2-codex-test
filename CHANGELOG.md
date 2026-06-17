@@ -1,3 +1,70 @@
+# NiHao V3.8.2 — AI Teacher Exact Meaning Result Filter
+
+Base: GitHub main 22e88d3 (V3.8.1). For direct meaning/translation questions the
+AI Teacher now shows ONLY the strongest result instead of a list of loosely
+related cards. Topic searches still show 3–5 cards. No API, no secrets, no
+migration.
+
+## The problem
+"ايش معنى كلمة قط" answered correctly ("قط … 猫 … قطة") but ALSO showed unrelated
+cards (火车 قطار, 火车站, 件, 才) because every candidate shared the base score and
+the chars/gloss partially overlapped. Confusing for a direct lookup.
+
+## The fix (src/lib/aiTeacherKnowledge.ts)
+Two new exported helpers:
+- isDirectMeaningQuery(raw): true for معنى / ما معنى / ايش معنى / وش معنى / ماذا
+  يعني / ترجمة / كيف أقول / بالصيني (and EN: meaning / what does / translate / how
+  do I say / how to say), or a single bare token. Topic searches ("كلمات … عن …")
+  return false.
+- filterKnowledgeResultsForIntent(raw, target, results): for direct-meaning intent
+  it re-ranks by exactness — exact Chinese match, exact pinyin match, and an
+  Arabic-gloss closeness score (so "قطة" beats "قطار"/"محطة القطار" for target
+  "قط") — then returns just the top card. A 2nd card is added ONLY when both the
+  top and the second are EXACT matches of the same type (a real synonym pair),
+  never a partial/loosely-related word. For topic/other intent it returns all
+  results (still capped at 5 by the caller).
+
+The chat (src/components/AiTeacherChat.tsx) runs searchKnowledge() then
+filterKnowledgeResultsForIntent() before rendering the cards.
+
+## Verified
+- ايش معنى كلمة قط → only 猫 (قطة) ✓ (no 火车/火车站/件/才)
+- قط → only 猫 ✓
+- ما معنى 你好 → only 你好 ✓
+- كيف أقول شكرا بالصيني → only 谢谢 ✓
+- معنى كلمة ماء → only 水 ✓
+- كلمات HSK1 عن الأكل → 5 food words ✓ (multiple)
+- كلمات HSK2 عن الوقت → 5 time words ✓ (multiple)
+- أعطني كلمات اليوم → daily plan (unchanged) ✓
+- اختبرني HSK1 → quiz (unchanged) ✓
+
+## Files
+- EDIT: src/lib/aiTeacherKnowledge.ts (isDirectMeaningQuery +
+  filterKnowledgeResultsForIntent), src/components/AiTeacherChat.tsx (apply
+  filter), package.json.
+- PRESERVED: chat UI, plan/quiz logic, detectIntent + extractKnowledgeQuery,
+  GA4, admin, Google login, smart pinyin, HSK tools.
+
+## GA4 / build
+GA4 events unchanged (no PII). Build passes on Node 18. index JS = 463 KB
+(unchanged). AiTeacher lazy chunk ≈ 28 KB. Deps unchanged.
+
+## Next phase (planned) — V3.9 "AI Teacher answer card + examples"
+A focused follow-up to make direct answers richer WITHOUT any API:
+1. Word answer card upgrade: show the dictionary example sentence(s) for the
+   matched word (zh + pinyin + Arabic) under the card, with a TTS play button,
+   reusing existing dictionary example data.
+2. "كلمات قريبة" row: 2–3 related words from the word's existing `related` slugs
+   (already in dictionaryCore) shown as small chips below the exact answer — this
+   keeps the single-card focus while still letting the learner explore.
+3. Grammar answer: when the top match is a grammar point, render its pattern +
+   short Arabic explanation + one example, linking to the lesson.
+4. "هل تقصد؟" disambiguation: when the top two are both partial (no exact match),
+   show a one-line "هل تقصد: X أو Y؟" chip row instead of guessing.
+All deterministic, local data only; the AiTeacher chunk stays lazy.
+
+---
+
 # NiHao V3.8.1 — AI Teacher Intent Priority Fix
 
 Base: GitHub main c9d3b05 (V3.8). Fixes the AI Teacher routing so direct

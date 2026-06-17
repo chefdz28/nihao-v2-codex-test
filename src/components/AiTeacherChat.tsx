@@ -6,7 +6,7 @@ import { usePinyinMode } from '@/hooks/usePinyinMode';
 import AiTeacherPlanCard from '@/components/AiTeacherPlanCard';
 import AiTeacherMiniQuiz from '@/components/AiTeacherMiniQuiz';
 import { markCompleted } from '@/lib/studentProgress';
-import { searchKnowledge, type KnowledgeResult } from '@/lib/aiTeacherKnowledge';
+import { searchKnowledge, filterKnowledgeResultsForIntent, type KnowledgeResult } from '@/lib/aiTeacherKnowledge';
 import { trackEvent } from '@/lib/analytics';
 import {
   generateTeacherPlan, detectIntent, extractKnowledgeQuery, LEVEL_LABEL,
@@ -74,7 +74,9 @@ export default function AiTeacherChat() {
     // V3.8.1 — high-priority knowledge search (meaning/translation/single word/Chinese)
     if (intent.action === 'search' || intent.action === 'help') {
       const target = extractKnowledgeQuery(text);
-      const results = searchKnowledge(target, 5);
+      const raw = searchKnowledge(target, 5);
+      // V3.8.2 — for direct meaning questions, show only the strongest result(s)
+      const results = filterKnowledgeResultsForIntent(text, target, raw);
       trackEvent('ai_teacher_knowledge_search', { hits: results.length });
       if (results.length > 0) {
         const top = results[0];

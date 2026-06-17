@@ -202,3 +202,72 @@ export function searchKnowledge(query: string, limit = 5): KnowledgeResult[] {
   }
   return out;
 }
+
+// V3.8.2 — exact-meaning result filtering. Direct meaning/translation questions
+// (and bare single-word queries) should show ONLY the strongest result, not a
+// list of loosely-related cards. Topic searches keep multiple results.
+
+const MEANING_PHRASES = [
+  'معنى', 'ما معنى', 'ايش معنى', 'وش معنى', 'ماذا يعني', 'وش يعني', 'ايش يعني', 'يعني ايش',
+  'ترجمة', 'ترجم', 'كيف أقول', 'كيف اقول', 'كيف نقول', 'بالصيني', 'بالصينية', 'معناها', 'معناه',
+  'meaning', 'what does', 'what is', 'translate', 'how do i say', 'how to say',
+];
+
+/** True when the message is a direct "what does X mean / how do I say X" question,
+ *  or a single bare token — cases where one exact answer is expected. */
+export function isDirectMeaningQuery(raw: string): boolean {
+  const s = (raw || '').toLowerCase();
+  if (MEANING_PHRASES.some(p => s.includes(p))) return true;
+  // topic searches ("كلمات ... عن ...") are NOT direct-meaning
+  if (s.includes('كلمات') && (s.includes(' عن ') || s.includes('حول') || s.includes('about'))) return false;
+  // single short token (one word, no spaces) → treat as a direct lookup
+  const wc = (raw || '').trim().split(/\s+/).filter(Boolean).length;
+  if (wc === 1) return true;
+  return false;
+}
+
+/** For direct-meaning intent, reduce results to the strongest 1–2 (top result +
+ *  an optional near-equal same-type synonym). For topic/other intent, return as-is
+ *  (still capped by the caller's limit). Also re-ranks so an EXACT match on the
+ *  target (Arabic gloss / Chinese / pinyin) is preferred over partial ones. */
+export function filterKnowledgeResultsForIntent(
+  raw: string,
+  target: string,
+  results: KnowledgeResult[],
+): KnowledgeResult[] {
+  if (results.length === 0) return results;
+  if (!isDirectMeaningQuery(raw)) return results; // topic search → keep all
+
+  const tnorm = norm(target);
+  const tHasChinese = /[\u3400-\u9FFF]/.test(target);
+
+  // exactness boost: exact Arabic gloss / exact Chinese / exact pinyin beats partial
+  const scored = results.map(r => {
+    let bonus = 0;
+    let exact = false;
+    const ar = norm(r.arabic || '');
+    if (ar === tnorm) { bonus += 1000; exact = true; }
+    else if (tnorm && (ar.includes(tnorm) || tnorm.includes(ar))) {
+      bonus += 300;
+      // closeness: the nearer the gloss length is to the target, the better
+      // (so "قطة" beats "قطار"/"محطة القطار" for target "قط")
+      bonus += Math.max(0, 40 - Math.abs(ar.length - tnorm.length) * 10);
+    }
+    if (tHasChinese && r.chinese && r.chinese === target) { bonus += 1200; exact = true; }
+    if (r.pinyin && stripTones(r.pinyin.toLowerCase()).replace(/\s/g, '') === tnorm.replace(/\s/g, '')) { bonus += 800; exact = true; }
+    // for direct meaning, prefer single words over articles/stories
+    if (r.type === 'word') bonus += 50;
+    return { r, eff: r.score + bonus, exact };
+  }).sort((a, b) => b.eff - a.eff);
+
+  const top = scored[0];
+  const out: KnowledgeResult[] = [top.r];
+  // Direct-meaning questions expect ONE answer. Only add a 2nd card when BOTH the
+  // top and the second are EXACT matches of the same type (a real synonym pair) —
+  // never a partial/loosely-related word. This keeps "قط" → only 猫, not 火车.
+  const second = scored[1];
+  if (second && top.exact && second.exact && second.r.type === top.r.type && second.eff >= top.eff * 0.9) {
+    out.push(second.r);
+  }
+  return out;
+}

@@ -1,3 +1,13 @@
+# V3.8.2 exact-meaning filter checks
+- [ ] "ايش معنى كلمة قط" → only 猫 card (no 火车/火车站/件/才)
+- [ ] "قط" → only 猫
+- [ ] "ما معنى 你好" → only 你好
+- [ ] "كيف أقول شكرا بالصيني" → only 谢谢
+- [ ] "معنى كلمة ماء" → only 水
+- [ ] "كلمات HSK1 عن الأكل" → 3–5 food words
+- [ ] "كلمات HSK2 عن الوقت" → 3–5 time words
+- [ ] "أعطني كلمات اليوم" → daily plan; "اختبرني HSK1" → quiz
+- [ ] index 463KB, AiTeacher chunk ~28KB, deps unchanged, build passes
 # V3.8.1 intent priority checks (manual)
 - [ ] "ايش معنى كلمة قط" → 猫 māo قطة (knowledge search, NOT a daily plan)
 - [ ] "ما معنى 你好" → 你好 result
