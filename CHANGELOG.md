@@ -1,3 +1,89 @@
+# NiHao V3.8 — AI Teacher Knowledge Search (Local RAG)
+
+Base: GitHub main 317bc42 (V3.7.1). Upgrades the AI Teacher chat to SEARCH
+NiHao's own learning data and answer from it — still NO paid AI API, no OpenAI,
+no secrets, no Edge Function, no migration. All V3.7.1 + earlier features
+preserved (chat UI, deterministic plan/quiz, fallback).
+
+## What's new: a local knowledge engine
+NEW src/lib/aiTeacherKnowledge.ts — indexes and searches the existing local data
+(dictionary HSK1/2/3, grammar fallback, articles + SEO articles, stories). Pure
+local logic: it normalizes the query (strips pinyin tone marks + Arabic
+diacritics, normalizes alef/ya/ta-marbuta), pulls any Chinese substring, detects
+an HSK level constraint, and scores each source. searchKnowledge(query, limit)
+returns the top 3–5 results, each with: type (word/grammar/article/story),
+title, chinese, pinyin, arabic, english, hsk, route, and a relevance score.
+
+Topic queries work without a tagging system: a small Arabic synonym map expands
+topics like "الأكل" / "الوقت" / "السفر" and matches them against each word's
+Arabic gloss. Filler words ("كيف أقول … بالصيني") are stripped so the key term
+still matches (e.g. "كيف أقول شكرا بالصيني" → 谢谢).
+
+## Chat integration
+When a message isn't a plan/quiz/pinyin/writing command, the chat now:
+1. Calls searchKnowledge(text).
+2. If results found → a teacher bubble (e.g. "你好 (nǐ hǎo) تعني «مرحباً». إليك
+   التفاصيل وكلمات قريبة:") plus a new knowledgeResults card list inside the
+   chat. Each card shows hanzi + pinyin (respecting smart pinyin) + Arabic + HSK
+   badge + type badge, and links to the dictionary word / lesson / article /
+   story when a route exists ("افتح →").
+3. If nothing matches → the deterministic fallback is kept: "لم أجد نتيجة دقيقة
+   في بيانات NiHao، لكن أقدر أساعدك بهذه الخيارات:" + prompt chips (خطة اليوم /
+   اختبار HSK / القاموس / تدريب الكتابة / البينين).
+
+Plan/quiz/pinyin/tones/writing commands still use the existing V3.7/V3.7.1 logic
+unchanged (e.g. "أريد اختبار HSK2" → HSK2 quiz; "أعطني خطة اليوم" → plan).
+
+New message type: knowledgeResults (alongside text / plan / quiz / links).
+
+## Bundle size (kept off the main bundle)
+The knowledge engine is imported only by AiTeacherChat, which is on the lazy
+/ai-teacher route, so the main index bundle is UNCHANGED at 463 KB. The lazy
+AiTeacher chunk grew from ~12 KB to ~22 KB gzip 8.4 KB — acceptable and only
+loaded when the page is opened. (Verified the engine is NOT in index-*.js.)
+
+## GA4 (no PII)
+Kept: ai_teacher_open, ai_teacher_plan_generated, ai_teacher_quiz_completed,
+ai_teacher_prompt_clicked, ai_teacher_chat_message. Added:
+ai_teacher_knowledge_search (param: hits count) and
+ai_teacher_knowledge_result_click (param: result type). No personal data.
+
+## Progress sync
+Unchanged: ai-teacher-plan-<level> on plan, ai-teacher-quiz-<level> on quiz
+(logged-in, fail-silent). We intentionally do NOT sync every search to avoid
+spamming student_progress.
+
+## Files
+- NEW: src/lib/aiTeacherKnowledge.ts
+- EDIT: src/components/AiTeacherChat.tsx (search + knowledgeResults card + improved
+  fallback), package.json
+- PRESERVED: src/lib/aiTeacher.ts (detectIntent + engine), AiTeacherPlanCard,
+  AiTeacherMiniQuiz, AiTeacherAgent, AiTeacher.tsx, HskToolsNav, AdminQuizResults.
+
+## Examples verified
+معنى 你好 → 你好; كيف أقول شكرا بالصيني → 谢谢; كلمات HSK1 عن الأكل → food words;
+كلمات HSK2 عن الوقت → 时间…; اشرح لي 的 → 的; أعطني جملة عن السفر → 护照/飞机.
+All 6 return results; plan/quiz commands still generate plans/quizzes.
+
+## Preserved (verified)
+Chat UI; deterministic plan/quiz + fallback; V3.6 DailyGoalCard + ScrollToTop +
+HSK sync; V3.4.2 admin + RPC migration; GA4 head tag; Google auth; smart pinyin;
+HSK tools; sitemap/llms /ai-teacher unchanged.
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 463 KB (unchanged). AiTeacher lazy chunk ≈ 22 KB. Deps
+unchanged.
+
+## Known limitations
+- Keyword/score search, not a language model: very free-form or out-of-data
+  questions fall back to the helpful chips. Topic coverage depends on the Arabic
+  synonym map (extendable). A real AI answer can come later via a Supabase Edge
+  Function (paid tier).
+- Searches aren't synced to student_progress (by design).
+
+---
+
 # NiHao V3.7.1 — AI Teacher Chat UI
 
 Base: GitHub main e19fcee (V3.7). Converts /ai-teacher from a form/plan generator

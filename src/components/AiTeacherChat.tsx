@@ -6,6 +6,7 @@ import { usePinyinMode } from '@/hooks/usePinyinMode';
 import AiTeacherPlanCard from '@/components/AiTeacherPlanCard';
 import AiTeacherMiniQuiz from '@/components/AiTeacherMiniQuiz';
 import { markCompleted } from '@/lib/studentProgress';
+import { searchKnowledge, type KnowledgeResult } from '@/lib/aiTeacherKnowledge';
 import { trackEvent } from '@/lib/analytics';
 import {
   generateTeacherPlan, detectIntent, LEVEL_LABEL,
@@ -17,14 +18,16 @@ type Msg =
   | { id: number; role: 'teacher' | 'student'; type: 'text'; text: string }
   | { id: number; role: 'teacher'; type: 'plan'; plan: TeacherPlan }
   | { id: number; role: 'teacher'; type: 'quiz'; plan: TeacherPlan }
-  | { id: number; role: 'teacher'; type: 'links'; text: string; links: TeacherRoute[] };
+  | { id: number; role: 'teacher'; type: 'links'; text: string; links: TeacherRoute[] }
+  | { id: number; role: 'teacher'; type: 'knowledgeResults'; text: string; results: KnowledgeResult[] };
 
 // same union without the id (distributes correctly, unlike Omit<Msg,'id'>)
 type MsgInput =
   | { role: 'teacher' | 'student'; type: 'text'; text: string }
   | { role: 'teacher'; type: 'plan'; plan: TeacherPlan }
   | { role: 'teacher'; type: 'quiz'; plan: TeacherPlan }
-  | { role: 'teacher'; type: 'links'; text: string; links: TeacherRoute[] };
+  | { role: 'teacher'; type: 'links'; text: string; links: TeacherRoute[] }
+  | { role: 'teacher'; type: 'knowledgeResults'; text: string; results: KnowledgeResult[] };
 
 const SUGGESTIONS = [
   'أعطني خطة اليوم',
@@ -39,6 +42,10 @@ const LEVEL_CHIPS: { key: TeacherLevel; label: string }[] = [
   { key: 'beginner', label: 'مبتدئ' }, { key: 'hsk1', label: 'HSK1' },
   { key: 'hsk2', label: 'HSK2' }, { key: 'hsk3', label: 'HSK3' },
 ];
+
+const TYPE_LABEL: Record<string, string> = {
+  word: 'كلمة', grammar: 'قاعدة', article: 'مقال', story: 'قصة', lesson: 'درس', writing: 'كتابة',
+};
 
 let MID = 0;
 const nid = () => ++MID;
@@ -65,14 +72,30 @@ export default function AiTeacherChat() {
     if (intent.level && intent.level !== level) setLevel(intent.level);
 
     if (intent.action === 'help') {
+      // V3.8: search NiHao's local data before falling back
+      const results = searchKnowledge(text, 5);
+      trackEvent('ai_teacher_knowledge_search', { hits: results.length });
+      if (results.length > 0) {
+        const top = results[0];
+        let intro = 'وجدت لك هذا في بيانات NiHao:';
+        if (top.type === 'word' && top.chinese) {
+          intro = `${top.chinese}${top.pinyin ? ` (${top.pinyin})` : ''} تعني «${top.arabic}». إليك التفاصيل وكلمات قريبة:`;
+        } else if (top.type === 'grammar') {
+          intro = 'هذي قاعدة نحوية مرتبطة بسؤالك:';
+        }
+        push({ role: 'teacher', type: 'knowledgeResults', text: intro, results });
+        return;
+      }
+      // no match → deterministic fallback
       push({
         role: 'teacher', type: 'links',
-        text: 'أقدر أساعدك بهذي الأشياء — اختر واحدة أو اكتب طلبك:',
+        text: 'لم أجد نتيجة دقيقة في بيانات NiHao، لكن أقدر أساعدك بهذه الخيارات:',
         links: [
           { label: 'خطة اليوم', href: '#خطة' },
           { label: 'اختبار HSK', href: '/hsk-tests' },
           { label: 'القاموس', href: '/dictionary' },
           { label: 'تدريب الكتابة', href: '/writing-practice' },
+          { label: 'البينين', href: '/pinyin' },
         ],
       });
       return;
@@ -204,6 +227,31 @@ export default function AiTeacherChat() {
                 {m.type === 'quiz' && (
                   <div className="liquid-glass rounded-2xl rounded-tl-sm p-4">
                     <AiTeacherMiniQuiz quiz={m.plan.quiz} onComplete={(s) => onQuizComplete(s, m.plan.level)} />
+                  </div>
+                )}
+                {m.type === 'knowledgeResults' && (
+                  <div className="liquid-glass rounded-2xl rounded-tl-sm p-4">
+                    <p className="text-sm font-arabic text-white mb-3">{m.text}</p>
+                    <div className="space-y-2">
+                      {m.results.map((r, ri) => {
+                        const card = (
+                          <div className="bg-white/[0.03] border border-white/10 rounded-xl p-3 hover:border-[#FF3333]/30 transition-colors">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {r.chinese && <span className="font-chinese text-lg text-white">{r.chinese}</span>}
+                              {r.pinyin && pinyinIsVisible((r.hsk as 1 | 2 | 3) || 1) && <span className="text-xs text-[#FF6666]" style={{ direction: 'ltr' }}>{r.pinyin}</span>}
+                              {!r.chinese && <span className="text-sm font-arabic text-white">{r.title}</span>}
+                              {r.hsk && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/5 text-[#a0a0a0]">HSK{r.hsk}</span>}
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#FF3333]/10 text-[#FF6666] font-arabic">{TYPE_LABEL[r.type]}</span>
+                            </div>
+                            {r.arabic && <p className="text-xs font-arabic mt-1" style={{ color: 'var(--color-text-secondary)' }}>{r.arabic}</p>}
+                            {r.route && <span className="text-[11px] text-[#FF6666] font-arabic mt-1 inline-flex items-center gap-1">افتح <ArrowLeft size={11} /></span>}
+                          </div>
+                        );
+                        return r.route ? (
+                          <Link key={ri} to={r.route} onClick={() => trackEvent('ai_teacher_knowledge_result_click', { type: r.type })}>{card}</Link>
+                        ) : <div key={ri}>{card}</div>;
+                      })}
+                    </div>
                   </div>
                 )}
               </div>

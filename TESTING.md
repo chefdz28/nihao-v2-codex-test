@@ -1,3 +1,14 @@
+# V3.8 AI Teacher knowledge search checks
+- [ ] /ai-teacher opens (chat)
+- [ ] "معنى 你好" → teacher explains + word card linking to /dictionary/...
+- [ ] "كيف أقول شكرا بالصيني" → 谢谢 card
+- [ ] "كلمات HSK1 عن الأكل" → food word cards; "كلمات HSK2 عن الوقت" → time words
+- [ ] "اشرح لي 的" → grammar/word result
+- [ ] "اختبرني HSK1" / "أعطني خطة اليوم" → still quiz/plan (existing logic)
+- [ ] No match → fallback message + chips
+- [ ] Result links navigate; mobile RTL, no overflow, auto-scroll
+- [ ] GA4 ai_teacher_knowledge_search + result_click fire (no PII)
+- [ ] index 463KB (unchanged), engine in lazy chunk not main; deps unchanged; build passes
 # V3.7.1 AI Teacher chat checks
 - [ ] /ai-teacher shows a chat (header + teacher bubble + input), not a form
 - [ ] Level chips switch level; suggested prompt chips send messages
