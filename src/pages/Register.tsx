@@ -11,6 +11,7 @@ export default function Register() {
   const { signUp } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [role, setRole] = useState<'student' | 'teacher'>('student');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -31,7 +32,7 @@ export default function Register() {
 
     setLoading(true);
     try {
-      await signUp(form.email, form.password, form.name);
+      await signUp(form.email, form.password, form.name, role === 'teacher');
       setSuccess(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Registration failed';
@@ -101,6 +102,32 @@ export default function Register() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">نوع الحساب</label>
+              <div className="grid grid-cols-2 gap-2" dir="rtl">
+                <button
+                  type="button"
+                  onClick={() => setRole('student')}
+                  aria-pressed={role === 'student'}
+                  className={`py-3 rounded-xl text-sm font-display font-bold border transition-colors ${role === 'student' ? 'bg-[#FF3333] text-white border-[#FF3333]' : 'bg-white/[0.03] text-white border-white/10 hover:bg-white/[0.06]'}`}
+                >
+                  🎓 طالب
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('teacher')}
+                  aria-pressed={role === 'teacher'}
+                  className={`py-3 rounded-xl text-sm font-display font-bold border transition-colors ${role === 'teacher' ? 'bg-[#FF3333] text-white border-[#FF3333]' : 'bg-white/[0.03] text-white border-white/10 hover:bg-white/[0.06]'}`}
+                >
+                  👨‍🏫 معلّم
+                </button>
+              </div>
+              {role === 'teacher' && (
+                <p className="text-xs font-arabic mt-2" style={{ color: 'var(--color-text-tertiary)' }} dir="rtl">
+                  كمعلّم، تقدر تربط طلابك وتتابع تقدّمهم من لوحة المعلّم.
+                </p>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-white mb-2">Full Name</label>
               <input

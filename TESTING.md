@@ -1,3 +1,15 @@
+# V3.9 Teacher Dashboard (phase 1) checks
+- [ ] Run migration 20260617_teacher_dashboard.sql in Supabase
+- [ ] Register → choose معلّم → account gets teacher role
+- [ ] Header shows "لوحة المعلّم" for teachers; dashboard shows CTA card
+- [ ] /teacher-dashboard: add a registered student's email → linked
+- [ ] Adding a non-existent email → "لا يوجد حساب بهذا البريد"
+- [ ] Student row shows progress counts; "عرض" opens activity drawer
+- [ ] Remove unlinks; CSV export downloads
+- [ ] A student (non-teacher) sees the "for teachers" message, no data
+- [ ] Teacher A cannot see Teacher B's students (RLS); RPCs deny non-teachers
+- [ ] /teacher-dashboard not in sitemap; admin pages still work
+- [ ] index ~468KB, deps unchanged, build passes
 # V3.8.3 navigation + clickable cards checks
 - [ ] Homepage: each of the 9 feature cards opens the mapped page
 - [ ] Cards show pointer cursor + keyboard focus ring; fine on mobile

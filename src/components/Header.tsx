@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
   const { lang, t, setLang } = useI18n();
-  const { user, isAuthenticated, isAdmin, signOut } = useAuth();
+  const { user, isAuthenticated, isAdmin, isTeacher, signOut } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [practiceOpen, setPracticeOpen] = useState(false); // V2.0.6: Practice dropdown
@@ -218,6 +218,16 @@ export default function Header() {
                   <Settings size={14} /> Admin
                 </Link>
               )}
+              {isTeacher && !isAdmin && (
+                <Link
+                  to="/teacher-dashboard"
+                  className={`font-display font-semibold text-sm px-4 py-2 rounded-lg border transition-all flex items-center gap-2 ${
+                    isActive('/teacher-dashboard') ? 'text-[#FF3333] border-[#FF3333]/50' : 'text-[#a0a0a0] border-white/10 hover:text-white hover:border-[#FF3333]/50'
+                  }`}
+                >
+                  <School size={14} /> لوحة المعلّم
+                </Link>
+              )}
               <Link
                 to="/dashboard"
                 className={`font-display font-semibold text-sm px-4 py-2 rounded-lg border transition-all flex items-center gap-2 ${
@@ -320,6 +330,11 @@ export default function Header() {
               <Link to="/profile" className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-3 px-4 rounded-lg hover:bg-white/5 transition-colors">
                 <User size={18} /> Profile
               </Link>
+              {isTeacher && !isAdmin && (
+                <Link to="/teacher-dashboard" className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-3 px-4 rounded-lg hover:bg-white/5 transition-colors">
+                  <School size={18} /> لوحة المعلّم
+                </Link>
+              )}
               {isAdmin && (
                 <Link to="/admin" className="flex items-center gap-3 text-[#c0c0c0] hover:text-white py-3 px-4 rounded-lg hover:bg-white/5 transition-colors">
                   <Settings size={18} /> Admin Panel

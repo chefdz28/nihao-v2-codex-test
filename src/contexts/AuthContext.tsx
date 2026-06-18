@@ -7,20 +7,22 @@ export interface AuthUser {
   email: string;
   fullName: string;
   avatarUrl?: string;
-  role: 'admin' | 'student';
+  role: 'admin' | 'teacher' | 'student';
   isAdmin: boolean;
+  isTeacher: boolean;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, asTeacher?: boolean) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isTeacher: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,7 +45,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .select('role')
         .eq('user_id', supabaseUser.id);
 
-      const role = roles?.find(r => r.role === 'admin') ? 'admin' : 'student';
+      const isAdmin = !!roles?.find(r => r.role === 'admin');
+      const isTeacher = !!roles?.find(r => r.role === 'teacher');
+      const role: 'admin' | 'teacher' | 'student' = isAdmin ? 'admin' : isTeacher ? 'teacher' : 'student';
 
       return {
         id: supabaseUser.id,
@@ -51,7 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fullName: profile?.full_name || supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'Student',
         avatarUrl: profile?.avatar_url || undefined,
         role,
-        isAdmin: role === 'admin',
+        isAdmin,
+        isTeacher,
       };
     } catch {
       return {
@@ -60,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fullName: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'Student',
         role: 'student',
         isAdmin: false,
+        isTeacher: false,
       };
     }
   }, []);
@@ -100,18 +106,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [buildAuthUser]);
 
-  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = useCallback(async (email: string, password: string, fullName: string, asTeacher = false) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: { full_name: fullName, signup_role: asTeacher ? 'teacher' : 'student' } },
     });
     if (error) throw error;
+    // If the user chose "teacher" and a session exists (email confirmation off),
+    // grant the teacher role now. Otherwise it can be granted on first sign-in.
+    if (asTeacher && data.session?.user) {
+      try { await supabase.rpc('set_my_role_teacher'); } catch { /* fail-silent */ }
+    }
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    // honor a deferred "teacher" choice made at sign-up (email-confirmation flow)
+    if (data.user?.user_metadata?.signup_role === 'teacher') {
+      try { await supabase.rpc('set_my_role_teacher'); } catch { /* fail-silent */ }
+    }
   }, []);
 
   // V3.4: Google OAuth via Supabase (provider must be enabled in Supabase
@@ -142,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       isAuthenticated: !!user,
       isAdmin: user?.isAdmin || false,
+      isTeacher: user?.isTeacher || false,
     }}>
       {children}
     </AuthContext.Provider>

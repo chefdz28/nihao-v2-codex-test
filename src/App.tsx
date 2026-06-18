@@ -27,6 +27,7 @@ const Hsk3Simulation = lazy(() => import('./pages/Hsk3Simulation'));
 const Hsk2Simulation = lazy(() => import('./pages/Hsk2Simulation'));
 const HskTests = lazy(() => import('./pages/HskTests'));
 const AiTeacher = lazy(() => import('./pages/AiTeacher'));
+const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard'));
 const Hsk3Flashcards = lazy(() => import('./pages/Hsk3Flashcards'));
 const Hsk3Worksheet = lazy(() => import('./pages/Hsk3Worksheet'));
 const WritingPractice = lazy(() => import('./pages/WritingPractice'));
@@ -168,6 +169,7 @@ export default function App() {
 
         {/* Protected student routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/teacher-dashboard" element={<ProtectedRoute><TeacherDashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/results" element={<ProtectedRoute><Results /></ProtectedRoute>} />
         <Route path="/review" element={<ProtectedRoute><Review /></ProtectedRoute>} />

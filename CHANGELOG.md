@@ -1,3 +1,79 @@
+# NiHao V3.9 — Teacher Dashboard (Phase 1: role + students + reports)
+
+Base: GitHub main 5281189 (V3.8.3). Adds the first phase of the Teacher
+Dashboard: a role choice at sign-up (طالب / معلّم), a teacher role, a
+teacher↔student link, and a /teacher-dashboard where a teacher links their own
+students and tracks each student's progress. Safe Supabase model (RLS + RPCs, no
+service_role in the frontend). No paid AI, no secrets. All V3.8.x features
+preserved.
+
+## ⚠️ Requires a migration
+Run supabase/migrations/20260617_teacher_dashboard.sql in Supabase BEFORE/at
+deploy. It is idempotent. Until it runs, the teacher pages simply show no data
+(fail-silent).
+
+## What it adds
+1. Sign-up role choice (src/pages/Register.tsx): 🎓 طالب / 👨‍🏫 معلّم. Choosing
+   معلّم grants the 'teacher' role via the set_my_role_teacher RPC (immediately if
+   a session exists, otherwise on first sign-in via signup_role metadata).
+2. Auth (src/contexts/AuthContext.tsx): AuthUser.role is now
+   'admin' | 'teacher' | 'student', plus isTeacher. signUp(email, pw, name,
+   asTeacher?) and signIn honor the teacher choice. No role escalation: the RPC
+   only ever sets the CALLER's own row to 'teacher'.
+3. /teacher-dashboard (src/pages/TeacherDashboard.tsx, lazy, protected): add a
+   student by email, see each linked student's progress summary (total / quizzes
+   / lessons), open a per-student activity drawer, remove a link, export CSV.
+   Students who aren't teachers see a friendly "this is for teachers" message.
+4. teacherData.ts: typed wrappers over the RPCs + pure-JS CSV (no new deps).
+5. Nav: a "لوحة المعلّم" link in the header (desktop + mobile) and a CTA card on
+   the dashboard — shown only to teachers/admins.
+
+## Security model (mirrors the V3.4.2 admin RPCs)
+- supabase/migrations/20260617_teacher_dashboard.sql:
+  * teacher_students(teacher_id, student_id) link table with RLS — a teacher can
+    only see/insert/delete their OWN links; a student can read links pointing to
+    them.
+  * RPCs are SECURITY DEFINER but each FIRST checks is_teacher_caller(), and
+    every query is scoped to teacher_id = auth.uid(). get_teacher_student_progress
+    additionally verifies the student is linked to the caller.
+  * Granted to `authenticated` only — never anon, never service_role. Only safe
+    fields returned (email, display name, progress counts) — no auth internals.
+
+## GA4 (no PII)
+teacher_dashboard_view, teacher_add_student (param: result), teacher_view_student,
+teacher_remove_student, teacher_export_csv (param: count). All existing events
+kept.
+
+## Files
+- NEW: supabase/migrations/20260617_teacher_dashboard.sql, src/lib/teacherData.ts,
+  src/pages/TeacherDashboard.tsx
+- EDIT: src/contexts/AuthContext.tsx (teacher role + isTeacher + signUp role),
+  src/pages/Register.tsx (role selector), src/App.tsx (lazy protected route),
+  src/components/Header.tsx (teacher nav link), src/pages/Dashboard.tsx (CTA card),
+  src/components/Seo.tsx (meta), package.json
+- PRESERVED: AI Teacher + V3.8.2 filter + V3.8.3 nav, admin pages + RPCs,
+  ScrollToTop, GA4 head tag, Google login, smart pinyin, all routes.
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 468 KB (was 466 KB; +2 KB for auth/nav). TeacherDashboard is
+a lazy 11 KB chunk. Deps unchanged. /teacher-dashboard is NOT in the sitemap
+(private).
+
+## Next phases (planned)
+- Phase 2 (assignments): assignments table + RPCs; teacher assigns a lesson/sim to
+  a student; student sees assignments on their dashboard.
+- Phase 3 (feedback/points): teacher_feedback table; teacher grants points + a
+  note; student sees it. Same RLS+RPC pattern.
+
+## Known limitations
+- A teacher links students by an email that already has a NiHao account (the RPC
+  returns not_found otherwise) — no invite emails are sent (no email service).
+- Pre-existing AuthContext react-refresh lint warning remains (useAuth +
+  AuthProvider in one file) — not introduced here.
+
+---
+
 # NiHao V3.8.3 — Navigation Cleanup + Clickable Feature Cards
 
 Base: GitHub main 33b814d (V3.8.2). Makes every homepage feature card clickable,

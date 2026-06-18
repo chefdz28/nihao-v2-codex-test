@@ -15,7 +15,7 @@ import type { QuizResult, UserProgressItem, LessonRow, LevelRow } from '@/types/
 
 export default function Dashboard() {
   const { t } = useI18n();
-  const { user } = useAuth();
+  const { user, isTeacher, isAdmin } = useAuth();
   const [progress, setProgress] = useState<UserProgressItem[]>([]);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [levels, setLevels] = useState<LevelRow[]>([]);
@@ -109,6 +109,19 @@ export default function Dashboard() {
           </h1>
           <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.subtitle')}</p>
         </div>
+
+        {(isTeacher || isAdmin) && (
+          <Link to="/teacher-dashboard" className="liquid-glass rounded-2xl p-4 mb-6 flex items-center gap-3 hover:border-[#FF3333]/30 border border-transparent transition-colors" dir="rtl">
+            <div className="w-10 h-10 rounded-xl bg-[#FF3333]/15 flex items-center justify-center shrink-0">
+              <GraduationCap size={20} className="text-[#FF3333]" />
+            </div>
+            <div className="flex-1">
+              <p className="font-display font-bold text-white text-sm font-arabic">لوحة المعلّم</p>
+              <p className="text-xs font-arabic" style={{ color: 'var(--color-text-tertiary)' }}>اربط طلابك وتابع تقدّمهم</p>
+            </div>
+            <ArrowRight size={16} className="text-[#FF3333]" />
+          </Link>
+        )}
 
         {/* V2.9B: student progress panel (counts, XP, recent activity, continue) */}
         <ProgressPanel />
