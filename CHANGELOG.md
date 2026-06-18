@@ -1,3 +1,117 @@
+# NiHao V3.13 — Flashcard game redesigned (multiple-choice, beginner-friendly)
+
+Base: V3.12 (assignments + game restored). This release REPLACES the original
+self-assessment flashcard mechanic with a real multiple-choice quiz that is far
+better suited to absolute beginners, and re-themes it to the NiHao black/red
+identity. The teacher assignments feature (V3.10) is untouched and still present.
+
+## Why the change
+The old game asked the learner to self-grade ("أعرفها / ما أعرفها" then "صح /
+خطأ"). For Arabic beginners this had two problems: (1) no real challenge or
+feedback — you judge yourself and can collect XP without learning; (2) it felt
+punishing — every "ما أعرفها" cost a life, which is normal for a beginner who
+doesn't know the words yet, so the first session felt like failure. It also used
+a light gray theme that clashed with the site.
+
+## New mechanic (src/pages/games/FlashcardPage.tsx + src/hooks/useFlashcardGame.ts)
+- A Chinese character (+ pinyin + a tap-to-hear button; it also auto-plays) is
+  shown with FOUR Arabic options. Tap one →
+  - correct: option turns green with a check, +10 XP (+5 every 3rd in a combo),
+    +1 coin; a "صحيح!" line appears.
+  - wrong: your option turns red, the correct one turns green, and the correct
+    Arabic is shown — immediate, clear feedback (the real teaching moment).
+- Then a "التالي" button (or "إنهاء الجلسة" on the last one). 10 questions/session.
+- NO lives / no game-over: beginners are never punished out of a session. Combo
+  resets on a wrong answer but you always continue.
+- Distractors are pulled from other cards, preferring the SAME category, so wrong
+  options are believable but never duplicate the answer (verified: every question
+  has 4 unique options and the correct answer is always present).
+- Result screen (themed): XP, coins, accuracy with correct/total, best combo, and
+  "جلسة جديدة".
+
+## Theming
+Rebuilt with NiHao tokens (liquid-glass cards, #FF3333 red, black bg, font-display
+/ font-arabic, RTL). The old gray pages and the four old subcomponents
+(Flashcard/GameHUD/ProgressBar/ResultScreen) were removed — the page is now
+self-contained.
+
+## Data / SRS / cost — unchanged & safe
+- Still reads the flashcards table (hsk_level = 1), still records
+  user_card_progress via the existing SRS (useSRS), still writes game_sessions and
+  upserts user_profiles XP/coins. The SRS now also surfaces which cards to study;
+  the full card list feeds the distractor pool.
+- TTS remains window.speechSynthesis (zh-CN) only — no paid API, no secrets.
+- The two flashcard migrations are unchanged; if you already ran them, nothing new
+  to run. Tables and RLS are identical.
+
+## What's removed vs V3.12
+- src/components/games/flashcard/{Flashcard,GameHUD,ProgressBar,ResultScreen}.tsx
+  (logic folded into the new page).
+- Unused GameState/GameAction/DailyMission types trimmed from types/flashcard.ts.
+
+## Verification
+- Build passes on Node 18; index JS = 470 KB (unchanged). The game is a lazy
+  ~14 KB chunk (smaller than before). Lint clean on all game files.
+- Both features confirmed present: redesigned FlashcardPage + TeacherStudentManage
+  + StudentAssignmentsCard. Deps unchanged. /games/flashcard stays out of sitemap.
+- GA4: flashcard_game_view, flashcard_game_complete (xp, accuracy, maxCombo).
+
+## Deploy
+Built on the current main, so safe with rsync --delete. No new SQL needed if the
+flashcard + teacher migrations were already run.
+
+---
+
+# NiHao V3.12 — Restore teacher assignments (V3.10) alongside the flashcard game
+
+Base: GitHub main d333e04 (V3.11). This is a RECOVERY release. When V3.11 (built
+on V3.9) was deployed with `rsync --delete`, it removed the V3.10 assignments
+files that had been pushed in between (ff7a24f). The Supabase tables were never
+touched — only the frontend files were deleted from the live site. V3.12 restores
+all of V3.10 on top of the current V3.11 main, so the site has BOTH the teacher
+assignments/feedback feature AND the flashcard game.
+
+## What it restores (V3.10, on top of V3.11)
+- src/components/TeacherStudentManage.tsx — teacher's assign-tasks + grant-points
+  panel inside the student drawer on /teacher-dashboard.
+- src/components/StudentAssignmentsCard.tsx — "واجباتي من المعلّم" card on the
+  student dashboard (assignments + points; renders nothing if empty).
+- src/lib/teacherData.ts — re-adds the assignment/feedback RPC wrappers + types on
+  top of the V3.9 base.
+- src/pages/TeacherDashboard.tsx — re-adds <TeacherStudentManage/> in the drawer.
+- src/pages/Dashboard.tsx — re-adds <StudentAssignmentsCard/> before ProgressPanel.
+- supabase/migrations/20260619_teacher_assignments_feedback.sql — restored (the
+  tables already exist in Supabase if you ran it before; the migration is
+  idempotent, so re-running is safe/no-op).
+
+## What stays from V3.11
+The flashcard game (/games/flashcard), its two migrations, the 3D-flip CSS, the
+nav link, and Seo entry are all unchanged.
+
+## Verification
+- Build passes on Node 18; index JS = 470 KB (unchanged). Lint clean on all merged
+  files (only the pre-existing AuthContext/Header warnings remain).
+- Both feature sets confirmed present: TeacherStudentManage + StudentAssignmentsCard
+  (assignments) and FlashcardPage (game).
+- GA4 events present for both: teacher_create_assignment, teacher_give_feedback,
+  student_complete_assignment, flashcard_game_view, flashcard_game_complete.
+- Deps unchanged. /teacher-dashboard and /games/flashcard both stay out of the
+  sitemap.
+
+## No new SQL needed if you already ran everything
+If you previously ran 20260617 (teacher dashboard), 20260619_teacher_assignments_
+feedback, 20260619_flashcard_game, and 20260619_flashcard_seed, you do NOT need to
+run anything new — V3.12 is a pure frontend restore. If any of those were not run,
+run them now (all idempotent).
+
+## How to avoid this in future
+Always build each release on the LATEST pushed main. Because deploys use
+`rsync --delete`, any file not present in the package gets removed from the live
+site — so a package built on an older commit silently deletes newer files. V3.12
+is built on d333e04 (the current main), so it is safe.
+
+---
+
 # NiHao V3.11 — Flashcard Blitz game (/games/flashcard)
 
 Base: GitHub main 2344e33 (V3.9). Adds a fast HSK1 flashcard game (Anki+Duolingo

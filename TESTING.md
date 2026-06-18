@@ -1,3 +1,17 @@
+# V3.13 redesigned game checks
+- [ ] /games/flashcard shows a character + pinyin + 4 Arabic options (RTL, dark theme)
+- [ ] Audio auto-plays + tap speaker replays (Web Speech zh-CN)
+- [ ] Correct tap → green + XP/coins/combo; wrong tap → red + shows correct answer
+- [ ] No lives / never kicked out; combo resets on wrong but play continues
+- [ ] 10 questions → themed result (XP, coins, accuracy, best combo) → جلسة جديدة
+- [ ] Every question has 4 distinct options incl. the right one
+- [ ] Teacher assignments (V3.10) still work; index 470KB; deps unchanged; build passes
+# V3.12 recovery checks (assignments restored + game intact)
+- [ ] /teacher-dashboard → open a student → الواجبات + النقاط tabs work again
+- [ ] Student dashboard shows "واجباتي من المعلّم" when assignments exist
+- [ ] /games/flashcard still works (game intact)
+- [ ] No new SQL needed if 20260617 + the three 20260619 files were already run
+- [ ] index 470KB, deps unchanged, build passes; both features live
 # V3.11 Flashcard Blitz checks
 - [ ] Run 20260619_flashcard_game.sql then 20260619_flashcard_seed.sql in Supabase
 - [ ] Sign in, open /games/flashcard (also via Training → المراجعة → لعبة البطاقات)
