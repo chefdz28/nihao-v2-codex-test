@@ -1,71 +1,78 @@
-# NiHao V3.10 — Teacher Dashboard (Phase 2+3: assignments + points)
+# NiHao V3.11 — Flashcard Blitz game (/games/flashcard)
 
-Base: GitHub main 2344e33 (V3.9). Completes the Teacher Dashboard: a teacher can
-ASSIGN tasks (lesson / HSK sim / words / custom) to a linked student and GRANT
-points + notes; the student sees "واجباتي من المعلّم" on their dashboard, opens
-each task, marks it done, and sees their points. Safe Supabase model (RLS + RPCs,
-no service_role in the frontend). No paid AI, no secrets. All V3.9 and earlier
-preserved.
+Base: GitHub main 2344e33 (V3.9). Adds a fast HSK1 flashcard game (Anki+Duolingo
+style): a 3D-flip card shows the Chinese character; the student taps أعرفها /
+ما أعرفها, then confirms صح / خطأ, earning XP + coins + combos across a 10-card
+session, ending on a result screen (XP, coins, accuracy, best combo). Pronunciation
+uses the free Web Speech API (zh-CN) — no paid API, no secrets. The route is
+auth-gated and a lazy chunk. All existing features preserved.
 
-## ⚠️ Requires a migration
-Run supabase/migrations/20260619_teacher_assignments_feedback.sql in Supabase
-(AFTER the phase-1 migration 20260617). Idempotent. Until it runs, the new
-panels simply show nothing (fail-silent).
+NOTE: this release is built on V3.9 main; it does not contain the still-unpushed
+V3.10 (assignments). Deploy order is up to you — see "Deploy ordering" below.
+
+## ⚠️ Requires two SQL files (run in Supabase, in order)
+1. supabase/migrations/20260619_flashcard_game.sql — tables + RLS. IMPORTANT:
+   NiHao has no pre-existing user_profiles table, so this migration CREATES a
+   lightweight public.user_profiles (id + total_xp/coins/lives/streak/level) with
+   RLS, plus flashcards, user_card_progress, game_sessions. (The original game
+   pack assumed user_profiles already existed and referenced daily_missions /
+   user_badges — those unused tables were dropped to keep NiHao lean.)
+2. supabase/migrations/20260619_flashcard_seed.sql — 50 HSK1 words. The game reads
+   flashcards WHERE hsk_level = 1, so the seed is REQUIRED for content to appear.
+
+Until both run, the game page loads but shows "لا توجد بطاقات متاحة".
 
 ## What it adds
-1. Teacher side (src/components/TeacherStudentManage.tsx, shown inside the student
-   drawer on /teacher-dashboard): two tabs —
-   - الواجبات: one-tap presets (محاكاة HSK1/2/3, درس اليوم, كتابة, القاموس) or a
-     custom assignment (title + optional route); list with done/pending state;
-     delete.
-   - النقاط: grant points + an optional note; running total + history.
-2. Student side (src/components/StudentAssignmentsCard.tsx, on /dashboard): shows
-   "واجباتي من المعلّم" only if the student has any — each task with teacher name,
-   an "افتح" link when a route is set, and a "تم" button to mark done; plus total
-   points and recent feedback notes. Renders nothing for students with no
-   assignments (no clutter).
-3. teacherData.ts: typed wrappers for all new RPCs.
+- Game files (copied from the provided pack, adapted for NiHao):
+  src/types/flashcard.ts, src/hooks/useSRS.ts, src/hooks/useFlashcardGame.ts,
+  src/components/games/flashcard/{ProgressBar,GameHUD,Flashcard,ResultScreen}.tsx,
+  src/pages/games/FlashcardPage.tsx.
+- Route: /games/flashcard (lazy, ProtectedRoute — the game needs a signed-in user
+  for Supabase progress). FlashcardPage is a named export, loaded via
+  lazy(() => import(...).then(m => ({ default: m.FlashcardPage }))).
+- 3D-flip CSS added to src/index.css (.perspective-1000 / .transform-style-3d /
+  .backface-hidden / .rotate-y-180).
+- Nav: "لعبة البطاقات" link in the Training → المراجعة group (Gamepad2 icon) +
+  i18n nav.flashcardGame (AR + EN). Seo meta for the route.
 
-## Security model (same as phase 1)
-supabase/migrations/20260619_teacher_assignments_feedback.sql:
-- assignments + teacher_feedback tables with RLS — a teacher manages only their
-  OWN rows (teacher_id = auth.uid()); a student can read rows addressed to them
-  and may only UPDATE their own assignment to mark it done.
-- All RPCs are SECURITY DEFINER but verify is_teacher_caller() and
-  is_my_student() (the student must be linked to the calling teacher) before any
-  write/read; student RPCs scope to auth.uid().
-- Granted to authenticated only — never anon / service_role. No auth internals
-  exposed (only display name + the safe task/points fields).
+## Fixes applied during integration (vs the raw pack)
+- user_profiles save changed from update-only (which silently saved nothing for
+  users with no profile row) to read-then-upsert(onConflict:id), so XP/coins/lives
+  persist on first play.
+- .single() → .maybeSingle() on the profile read (no row is not an error).
+- Removed two unused symbols (GameHUD `streak`, useFlashcardGame `Flashcard`
+  import) so the strict build passes.
+
+## Security / cost
+- All game tables RLS-protected, scoped to auth.uid(); flashcards are public-read.
+  authenticated only — no service_role, no secrets in the frontend.
+- TTS is window.speechSynthesis (zh-CN) only — no network, no paid API.
 
 ## GA4 (no PII)
-Added: teacher_create_assignment (param: result), teacher_delete_assignment,
-teacher_give_feedback (param: result), student_complete_assignment. All existing
-events kept.
-
-## Files
-- NEW: supabase/migrations/20260619_teacher_assignments_feedback.sql,
-  src/components/TeacherStudentManage.tsx, src/components/StudentAssignmentsCard.tsx
-- EDIT: src/lib/teacherData.ts (assignment + feedback wrappers + types),
-  src/pages/TeacherDashboard.tsx (manage panel in drawer),
-  src/pages/Dashboard.tsx (student assignments card), package.json
-- PRESERVED: phase-1 teacher dashboard, AI Teacher + filters, admin, ScrollToTop,
-  GA4 head tag, Google login, smart pinyin, all routes.
+flashcard_game_view, flashcard_game_complete (params: xp, accuracy, maxCombo).
+All existing events kept.
 
 ## Build
 `VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
-Node 18. index JS = 468 KB (unchanged; new code is in the lazy TeacherDashboard
-≈16 KB and Dashboard ≈21 KB chunks). Deps unchanged. /teacher-dashboard stays
-out of the sitemap (private).
+Node 18. index JS = 470 KB (+2 KB for nav/i18n/Seo). The game is a lazy ~17 KB
+chunk. Deps unchanged (lucide-react was already installed). /games/flashcard is
+NOT in the sitemap (auth-gated).
 
-## The full teacher loop is now complete
-link a student (V3.9) → assign a task → student opens it & marks done → teacher
-grants points + a note → student sees points. All deterministic, no AI, no cost.
+## Deploy ordering (your call)
+- This package is V3.9 + the game. If you deploy it as-is, run the two flashcard
+  SQL files. V3.10 (assignments) remains a separate unpushed package.
+- If you prefer V3.10 first: deploy V3.10 (run its SQL), then I can rebase the
+  game onto that main and re-package — tell me and I'll do it.
+
+## Design note
+The game keeps its own light Tailwind styling (bg-gray-50) from the pack rather
+than NiHao's black/red theme, per the "don't change the design" instruction. If
+you want it re-themed to match NiHao, that's a quick follow-up.
 
 ## Known limitations
-- Assignments reference existing routes/tools; there's no per-assignment
-  auto-grading — "done" is student-marked (the teacher still sees real progress
-  via the V3.9 report).
-- A teacher can only assign to students already linked to them (phase 1).
+- HSK1 only (the seed is HSK1; the loader filters hsk_level = 1).
+- "Lives recover every 30 min" is represented in state/UI; there's no server-side
+  cron — lives reset per session load.
 
 ---
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, PenTool, Mic, LogOut, User, LayoutDashboard, Settings, Layers, Sun, RotateCcw, Music2, Hash, MessagesSquare, Map, ChevronDown, Target, BookA, Award, ClipboardCheck, BookOpenText, GraduationCap, FileText, NotebookPen, School, Headphones, ClipboardList, FileBarChart, Sparkles } from 'lucide-react';
+import { Menu, X, BookOpen, PenTool, Mic, LogOut, User, LayoutDashboard, Settings, Layers, Sun, RotateCcw, Music2, Hash, MessagesSquare, Map, ChevronDown, Target, BookA, Award, ClipboardCheck, BookOpenText, GraduationCap, FileText, NotebookPen, School, Headphones, ClipboardList, FileBarChart, Sparkles, Gamepad2 } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,6 +65,7 @@ export default function Header() {
       { path: '/mistakes', label: 'nav.mistakes', icon: NotebookPen },
       { path: '/flashcards', label: 'nav.flashcards', icon: Layers },
       { path: '/flashcards/hsk3', label: 'nav.flashcardsHsk3', icon: Layers },
+      { path: '/games/flashcard', label: 'nav.flashcardGame', icon: Gamepad2 },
       { path: '/worksheets/hsk3', label: 'nav.worksheets', icon: FileText },
     ] },
     { heading: 'المحتوى', items: [

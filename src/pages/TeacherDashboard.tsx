@@ -8,7 +8,6 @@ import {
 } from '@/lib/teacherData';
 import { trackEvent } from '@/lib/analytics';
 import Seo from '@/components/Seo';
-import TeacherStudentManage from '@/components/TeacherStudentManage';
 
 const ADD_MSG: Record<AddStudentResult, string> = {
   linked: 'تم ربط الطالب بنجاح ✅',
@@ -211,7 +210,6 @@ export default function TeacherDashboard() {
                 ))}
               </div>
             )}
-            <TeacherStudentManage studentId={selected.student_id} />
           </div>
         </div>
       )}

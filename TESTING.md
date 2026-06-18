@@ -1,13 +1,13 @@
-# V3.10 assignments + points checks
-- [ ] Run migration 20260619_teacher_assignments_feedback.sql (after 20260617)
-- [ ] Teacher: open a student → الواجبات tab → tap a preset → appears in list
-- [ ] Add a custom assignment (title + /route) → appears
-- [ ] النقاط tab → grant points + note → total updates
-- [ ] Student dashboard shows "واجباتي من المعلّم" with the task + teacher name
-- [ ] Student taps "افتح" (route opens) and "تم" (marks done; turns green)
-- [ ] Student sees total points + feedback note
-- [ ] A non-linked student gets nothing; teacher B can't assign to teacher A's student (RLS)
-- [ ] index 468KB, deps unchanged, build passes; /teacher-dashboard not in sitemap
+# V3.11 Flashcard Blitz checks
+- [ ] Run 20260619_flashcard_game.sql then 20260619_flashcard_seed.sql in Supabase
+- [ ] Sign in, open /games/flashcard (also via Training → المراجعة → لعبة البطاقات)
+- [ ] Card shows Chinese; أعرفها flips to pinyin+Arabic+audio; ما أعرفها loses a life
+- [ ] صح adds XP/coin/combo; خطأ loses a life; combo bonus every 5
+- [ ] 10-card session → result screen (XP, coins, accuracy, best combo)
+- [ ] Audio plays (Web Speech zh-CN); out-of-lives keeps playing without XP
+- [ ] After a session, user_profiles row exists with accumulated total_xp/coins
+- [ ] Not signed in → redirected by ProtectedRoute; route not in sitemap
+- [ ] index ~470KB, deps unchanged, build passes; existing pages still work
 # V3.9 Teacher Dashboard (phase 1) checks
 - [ ] Run migration 20260617_teacher_dashboard.sql in Supabase
 - [ ] Register → choose معلّم → account gets teacher role

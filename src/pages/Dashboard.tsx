@@ -10,7 +10,6 @@ import { TodaysPlan, DailyMissions } from '@/components/TodaysPlan';
 import StartHere from '@/components/StartHere';
 import { getSummary, type ProgressSummary } from '@/lib/studentProgress';
 import ProgressPanel from '@/components/ProgressPanel';
-import StudentAssignmentsCard from '@/components/StudentAssignmentsCard';
 import DailyGoalCard from '@/components/DailyGoalCard';
 import type { QuizResult, UserProgressItem, LessonRow, LevelRow } from '@/types/supabase';
 
@@ -123,8 +122,6 @@ export default function Dashboard() {
             <ArrowRight size={16} className="text-[#FF3333]" />
           </Link>
         )}
-
-        <StudentAssignmentsCard />
 
         {/* V2.9B: student progress panel (counts, XP, recent activity, continue) */}
         <ProgressPanel />
