@@ -1,3 +1,13 @@
+# V3.10 assignments + points checks
+- [ ] Run migration 20260619_teacher_assignments_feedback.sql (after 20260617)
+- [ ] Teacher: open a student → الواجبات tab → tap a preset → appears in list
+- [ ] Add a custom assignment (title + /route) → appears
+- [ ] النقاط tab → grant points + note → total updates
+- [ ] Student dashboard shows "واجباتي من المعلّم" with the task + teacher name
+- [ ] Student taps "افتح" (route opens) and "تم" (marks done; turns green)
+- [ ] Student sees total points + feedback note
+- [ ] A non-linked student gets nothing; teacher B can't assign to teacher A's student (RLS)
+- [ ] index 468KB, deps unchanged, build passes; /teacher-dashboard not in sitemap
 # V3.9 Teacher Dashboard (phase 1) checks
 - [ ] Run migration 20260617_teacher_dashboard.sql in Supabase
 - [ ] Register → choose معلّم → account gets teacher role

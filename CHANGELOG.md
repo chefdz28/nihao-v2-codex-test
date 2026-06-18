@@ -1,3 +1,74 @@
+# NiHao V3.10 — Teacher Dashboard (Phase 2+3: assignments + points)
+
+Base: GitHub main 2344e33 (V3.9). Completes the Teacher Dashboard: a teacher can
+ASSIGN tasks (lesson / HSK sim / words / custom) to a linked student and GRANT
+points + notes; the student sees "واجباتي من المعلّم" on their dashboard, opens
+each task, marks it done, and sees their points. Safe Supabase model (RLS + RPCs,
+no service_role in the frontend). No paid AI, no secrets. All V3.9 and earlier
+preserved.
+
+## ⚠️ Requires a migration
+Run supabase/migrations/20260619_teacher_assignments_feedback.sql in Supabase
+(AFTER the phase-1 migration 20260617). Idempotent. Until it runs, the new
+panels simply show nothing (fail-silent).
+
+## What it adds
+1. Teacher side (src/components/TeacherStudentManage.tsx, shown inside the student
+   drawer on /teacher-dashboard): two tabs —
+   - الواجبات: one-tap presets (محاكاة HSK1/2/3, درس اليوم, كتابة, القاموس) or a
+     custom assignment (title + optional route); list with done/pending state;
+     delete.
+   - النقاط: grant points + an optional note; running total + history.
+2. Student side (src/components/StudentAssignmentsCard.tsx, on /dashboard): shows
+   "واجباتي من المعلّم" only if the student has any — each task with teacher name,
+   an "افتح" link when a route is set, and a "تم" button to mark done; plus total
+   points and recent feedback notes. Renders nothing for students with no
+   assignments (no clutter).
+3. teacherData.ts: typed wrappers for all new RPCs.
+
+## Security model (same as phase 1)
+supabase/migrations/20260619_teacher_assignments_feedback.sql:
+- assignments + teacher_feedback tables with RLS — a teacher manages only their
+  OWN rows (teacher_id = auth.uid()); a student can read rows addressed to them
+  and may only UPDATE their own assignment to mark it done.
+- All RPCs are SECURITY DEFINER but verify is_teacher_caller() and
+  is_my_student() (the student must be linked to the calling teacher) before any
+  write/read; student RPCs scope to auth.uid().
+- Granted to authenticated only — never anon / service_role. No auth internals
+  exposed (only display name + the safe task/points fields).
+
+## GA4 (no PII)
+Added: teacher_create_assignment (param: result), teacher_delete_assignment,
+teacher_give_feedback (param: result), student_complete_assignment. All existing
+events kept.
+
+## Files
+- NEW: supabase/migrations/20260619_teacher_assignments_feedback.sql,
+  src/components/TeacherStudentManage.tsx, src/components/StudentAssignmentsCard.tsx
+- EDIT: src/lib/teacherData.ts (assignment + feedback wrappers + types),
+  src/pages/TeacherDashboard.tsx (manage panel in drawer),
+  src/pages/Dashboard.tsx (student assignments card), package.json
+- PRESERVED: phase-1 teacher dashboard, AI Teacher + filters, admin, ScrollToTop,
+  GA4 head tag, Google login, smart pinyin, all routes.
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 468 KB (unchanged; new code is in the lazy TeacherDashboard
+≈16 KB and Dashboard ≈21 KB chunks). Deps unchanged. /teacher-dashboard stays
+out of the sitemap (private).
+
+## The full teacher loop is now complete
+link a student (V3.9) → assign a task → student opens it & marks done → teacher
+grants points + a note → student sees points. All deterministic, no AI, no cost.
+
+## Known limitations
+- Assignments reference existing routes/tools; there's no per-assignment
+  auto-grading — "done" is student-marked (the teacher still sees real progress
+  via the V3.9 report).
+- A teacher can only assign to students already linked to them (phase 1).
+
+---
+
 # NiHao V3.9 — Teacher Dashboard (Phase 1: role + students + reports)
 
 Base: GitHub main 5281189 (V3.8.3). Adds the first phase of the Teacher
