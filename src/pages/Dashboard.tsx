@@ -105,11 +105,15 @@ export default function Dashboard() {
     <div className="max-w-[1400px] mx-auto px-6 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         {/* Welcome */}
-        <div className="mb-8">
-          <h1 className="font-display font-black text-white mb-2" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: 0.9 }}>
-            {t('dashboard.welcome')}, {user?.fullName || 'Student'}!
-          </h1>
-          <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.subtitle')}</p>
+        <div className="mb-8 flex items-center gap-4">
+          <img src="/images/mascot-panda.webp" alt="" loading="lazy" width={72} height={72}
+            className="hidden sm:block w-[72px] h-[72px] object-contain shrink-0" />
+          <div>
+            <h1 className="font-display font-black text-white mb-2" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: 0.9 }}>
+              {t('dashboard.welcome')}, {user?.fullName || 'Student'}!
+            </h1>
+            <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.subtitle')}</p>
+          </div>
         </div>
 
         {(isTeacher || isAdmin) && (
@@ -129,6 +133,15 @@ export default function Dashboard() {
 
         {/* V2.9B: student progress panel (counts, XP, recent activity, continue) */}
         <ProgressPanel />
+
+        {/* V3.15: motivational banner */}
+        <div className="rounded-2xl overflow-hidden mb-6 relative" dir="rtl">
+          <img src="/images/banner-motivation.webp" alt="" loading="lazy" aria-hidden="true"
+            className="w-full h-[120px] object-cover" />
+          <div className="absolute inset-0 flex items-center px-6" style={{ background: 'linear-gradient(to left, transparent, rgba(13,13,13,0.85))' }}>
+            <p className="font-display font-bold text-white font-arabic text-lg max-w-[60%]">رحلتك نحو إتقان الصينية تبدأ بخطوة 🚀</p>
+          </div>
+        </div>
 
         {/* V3.14: visual progress — weekly streak, vocab, activity chart, level */}
         <StudentProgressDashboard />

@@ -29,6 +29,9 @@ export default function About() {
     <div>
       {/* Hero */}
       <section className="pt-24 pb-16 px-6 relative overflow-hidden">
+        <img src="/images/bg-temple.webp" alt="" loading="lazy" aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+          style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)' }} />
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,51,51,0.3) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         </div>

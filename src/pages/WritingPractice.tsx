@@ -40,6 +40,10 @@ export default function WritingPractice() {
       <p className="text-xs font-arabic mb-5 print:hidden" dir="rtl" style={{ color: 'var(--color-text-secondary)' }}>
         اختر حرفاً لمشاهدة ترتيب الكتابة الصحيح، ثم تدرّب عليه في الشبكة. اكتب كل حرف 3 مرات على الأقل. يمكنك طباعة الصفحة للتدريب على الورق.
       </p>
+      <div className="print:hidden mb-6 rounded-2xl overflow-hidden liquid-glass" dir="rtl">
+        <img src="/images/feature-calligraphy.webp" alt="فن الخط الصيني" loading="lazy" width={820} height={240}
+          className="w-full h-[180px] object-cover" />
+      </div>
 
       {/* character chips */}
       <div className="flex flex-wrap gap-1.5 mb-6 print:hidden" dir="rtl">

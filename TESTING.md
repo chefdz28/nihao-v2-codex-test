@@ -1,3 +1,12 @@
+# V3.15 brand illustrations checks
+- [ ] Homepage hero shows hero-main (desktop), headline + cards still work
+- [ ] "تعلّم بطريقة ممتعة" strip shows 4 images linking correctly
+- [ ] Dashboard: panda mascot by welcome + motivational banner; progress intact
+- [ ] Flashcard result screen shows the flashcard image; game still plays
+- [ ] About hero has temple background, text readable
+- [ ] Writing practice shows calligraphy banner (hidden on print)
+- [ ] All images load (no 404), hero eager / rest lazy
+- [ ] index ~472KB, deps unchanged, no new migration, build passes
 # V3.14 progress dashboard checks
 - [ ] New user (no completions) → panel hidden (no clutter)
 - [ ] After completing lessons/daily → "تقدّمك" panel appears on /dashboard

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Volume2, Check, X, Zap, Star, RotateCcw, ArrowLeft, Trophy, Flame } from 'lucide-react';
+import { Volume2, Check, X, Zap, Star, RotateCcw, ArrowLeft, Flame } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useFlashcardGame } from '@/hooks/useFlashcardGame';
 import { trackEvent } from '@/lib/analytics';
@@ -70,9 +70,8 @@ export const FlashcardPage: React.FC = () => {
       <div className="min-h-[70vh] flex items-center justify-center px-6 py-10" dir="rtl">
         <Seo />
         <div className="liquid-glass rounded-3xl p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#FF3333]/15 flex items-center justify-center mx-auto mb-4">
-            <Trophy size={30} className="text-[#FF3333]" />
-          </div>
+          <img src="/images/feature-flashcards.webp" alt="" loading="lazy" width={120} height={120}
+            className="w-[120px] h-[120px] object-contain mx-auto mb-3" />
           <h1 className="font-display font-black text-2xl text-white mb-1">أحسنت! 🎉</h1>
           <p className="font-arabic mb-6" style={{ color: 'var(--color-text-tertiary)' }}>أنهيت الجلسة</p>
 

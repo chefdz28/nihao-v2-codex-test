@@ -221,6 +221,26 @@ void main() {
           你好
         </motion.div>
 
+        {/* V3.15: brand hero illustration */}
+        <motion.img
+          src="/images/hero-main.webp"
+          alt="تعلّم الصينية مع NiHao"
+          loading="eager"
+          width={440}
+          height={440}
+          className="hidden lg:block absolute pointer-events-none select-none"
+          style={{
+            top: '12%',
+            [dir === 'rtl' ? 'left' : 'right']: '4%',
+            width: 'clamp(280px, 32vw, 440px)',
+            height: 'auto',
+            filter: 'drop-shadow(0 20px 60px rgba(255,51,51,0.25))',
+          }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        />
+
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -973,6 +993,43 @@ function TodayWordSection() {
   );
 }
 
+// V3.15: visual "learn in fun ways" strip using brand illustrations
+function FunWaysSection() {
+  const items = [
+    { img: '/images/feature-journey.webp', title: 'رحلة متدرّجة', desc: 'من الصفر إلى HSK خطوة بخطوة', to: '/courses' },
+    { img: '/images/feature-flashcards.webp', title: 'لعبة البطاقات', desc: 'احفظ الكلمات بمتعة وتحدٍّ', to: '/games/flashcard' },
+    { img: '/images/feature-writing.webp', title: 'الكتابة والخط', desc: 'تعلّم رسم الحروف الصينية', to: '/writing-practice' },
+    { img: '/images/feature-progress.webp', title: 'تتبّع تقدّمك', desc: 'streak ونقاط ومستوى', to: '/dashboard' },
+  ];
+  return (
+    <section className="section-padding" dir="rtl">
+      <div className="max-w-[1100px] mx-auto">
+        <h2 className="font-display font-black text-white text-center mb-2 font-arabic" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
+          تعلّم بطريقة ممتعة
+        </h2>
+        <p className="text-center font-arabic mb-10" style={{ color: 'var(--color-text-secondary)' }}>
+          أدوات متنوّعة تخلّي تعلّم الصينية تجربة شيّقة
+        </p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {items.map(it => (
+            <Link key={it.to} to={it.to} className="liquid-glass rounded-2xl overflow-hidden border border-transparent hover:border-[#FF3333]/30 transition-colors group">
+              <div className="aspect-square overflow-hidden bg-black">
+                <img src={it.img} alt={it.title} loading="lazy" decoding="async" width={300} height={300}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div className="p-3 text-center">
+                <p className="font-display font-bold text-white text-sm font-arabic">{it.title}</p>
+                <p className="text-[11px] font-arabic mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>{it.desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 export default function Home() {
   return (
     <>
@@ -999,6 +1056,7 @@ export default function Home() {
         </div>
       </section>
       <FeaturesSection />
+      <FunWaysSection />
       <LevelsSection />
       <HowItWorksSection />
       <WhyLearnSection />

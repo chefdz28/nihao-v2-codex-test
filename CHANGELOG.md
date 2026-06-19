@@ -1,3 +1,60 @@
+# NiHao V3.15 — Brand illustrations integration
+
+Base: GitHub main 53a4bee (V3.14). Integrates 9 new brand illustrations across the
+site, converted to optimized WebP and connected to the right pages — without
+changing the black/red identity or removing any feature. No new migration, no API,
+no new deps.
+
+## Images (all in public/images/, WebP q82, 1024x1024, 22-59 KB each)
+- hero-main.webp — Arab student + panda (homepage hero)
+- feature-journey.webp — red mountain path (FunWays: journey)
+- feature-writing.webp — red book + brush (FunWays: writing)
+- mascot-panda.webp — panda with scarf (dashboard welcome)
+- feature-flashcards.webp — lantern + character cards (game result screen + FunWays)
+- banner-motivation.webp — silhouette + red sun (dashboard motivational banner)
+- feature-calligraphy.webp — 汉 calligraphy (writing-practice banner)
+- feature-progress.webp — app stats screen (FunWays: progress)
+- bg-temple.webp — temple + bridge (About hero background)
+
+## Integration
+- Home hero (src/pages/Home.tsx): hero-main as a floating illustration opposite the
+  text, loading="eager", width/height set, hidden on small screens so it never
+  crowds the headline. The animated canvas and the 9 clickable feature cards
+  (V3.8.3) are untouched.
+- New "تعلّم بطريقة ممتعة" strip (FunWaysSection) after the features section: 4
+  image cards linking to /courses, /games/flashcard, /writing-practice, /dashboard.
+- Dashboard (src/pages/Dashboard.tsx): mascot-panda beside the welcome heading +
+  a slim banner-motivation strip above the progress dashboard. StudentProgressDashboard
+  and all real data untouched.
+- Flashcard game (src/pages/games/FlashcardPage.tsx): feature-flashcards on the
+  result screen (replaced the small trophy icon). Mechanics unchanged (4 Arabic
+  choices, instant feedback, XP/coins, audio, Supabase).
+- About (src/pages/About.tsx): bg-temple as a faded banner background behind the
+  hero, masked so text stays readable.
+- Writing practice (src/pages/WritingPractice.tsx): feature-calligraphy banner
+  under the intro (hidden on print). Tool unchanged.
+
+## Performance / accessibility
+- Only hero-main is loading="eager"; every other image is loading="lazy" with
+  width/height to avoid layout shift.
+- Images served from /images/*.webp (public), NOT imported into JS — the main
+  bundle is unaffected by image weight. index JS = 472 KB (+2 KB, just the new
+  FunWays JSX). Total added image weight ≈ 343 KB across 9 files, all lazy except
+  the hero.
+- Meaningful images have Arabic alt text; decorative ones use alt="" / aria-hidden.
+
+## Preserved (verified present)
+Flashcard game (redesigned), Student Progress Dashboard (V3.14), teacher
+assignments/feedback (V3.10), Teacher Dashboard (V3.9), AI Teacher, admin, Google
+login, GA4, smart pinyin, all 8 migrations. No migration added. Deps unchanged.
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. Routes verified to still build: /, /dashboard, /games/flashcard, /about,
+/writing-practice, /practice, /teacher-dashboard, /ai-teacher.
+
+---
+
 # NiHao V3.14 — Student progress dashboard (streak, vocab, activity, level)
 
 Base: GitHub main 2894a10 (V3.13). Adds a visual progress panel to the student
