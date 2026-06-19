@@ -1012,7 +1012,7 @@ function FunWaysSection() {
         </p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {items.map(it => (
-            <Link key={it.to} to={it.to} className="liquid-glass rounded-2xl overflow-hidden border border-transparent hover:border-[#FF3333]/30 transition-colors group">
+            <Link key={it.to} to={it.to} onClick={() => trackEvent('funways_click', { route: it.to })} className="block cursor-pointer liquid-glass rounded-2xl overflow-hidden border border-transparent hover:border-[#FF3333]/30 transition-colors group">
               <div className="aspect-square overflow-hidden bg-black">
                 <img src={it.img} alt={it.title} loading="lazy" decoding="async" width={300} height={300}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />

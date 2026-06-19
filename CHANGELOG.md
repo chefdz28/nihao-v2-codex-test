@@ -1,3 +1,33 @@
+# NiHao V3.15.1 — Fix: "تعلّم بطريقة ممتعة" cards now clickable
+
+Base: GitHub main e52f9b9 (V3.15 brand illustrations). Patch fix only.
+
+## Problem
+The 4 image cards in the new "تعلّم بطريقة ممتعة" strip on the homepage showed
+correctly but were not clickable / did not navigate.
+
+## Cause
+The <Link> wrapping each card lacked `display:block`. A react-router <Link>
+renders an <a> which is inline by default; with block-level children (the
+aspect-square image div) and overflow-hidden, the inline anchor's clickable area
+collapsed. The working feature cards (FeaturesSection) use `block cursor-pointer` —
+the new strip did not.
+
+## Fix (src/pages/Home.tsx, FunWaysSection only)
+- Added `block cursor-pointer` to each card's <Link> className.
+- Added GA4 `funways_click` event (route) so card usage is now tracked, matching
+  the existing homepage_feature_click pattern.
+
+No other changes. All V3.15 images, all features, all routes untouched. No
+migration, no API, no deps change. index JS 472 KB. Build passes.
+
+## If still not clickable after deploy
+Then it's a Cloudflare cache issue, not code — purge the cache for cnihao.com
+(or wait for TTL). The HTML/JS bundle hash changes each deploy, so a hard refresh
+usually suffices.
+
+---
+
 # NiHao V3.15 — Brand illustrations integration
 
 Base: GitHub main 53a4bee (V3.14). Integrates 9 new brand illustrations across the
