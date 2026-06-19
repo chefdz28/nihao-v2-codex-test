@@ -1,3 +1,11 @@
+# V3.14 progress dashboard checks
+- [ ] New user (no completions) → panel hidden (no clutter)
+- [ ] After completing lessons/daily → "تقدّمك" panel appears on /dashboard
+- [ ] Weekly bar marks active days with ✓; streak count matches consecutive days
+- [ ] "~N مفردات نشطة" grows with completions; level tier + bar update
+- [ ] 14-day activity chart shows bars on active days, faint on empty days
+- [ ] No new SQL; build passes; index 470KB; deps unchanged
+- [ ] Flashcard game + teacher assignments still work
 # V3.13 redesigned game checks
 - [ ] /games/flashcard shows a character + pinyin + 4 Arabic options (RTL, dark theme)
 - [ ] Audio auto-plays + tap speaker replays (Web Speech zh-CN)

@@ -1,3 +1,61 @@
+# NiHao V3.14 — Student progress dashboard (streak, vocab, activity, level)
+
+Base: GitHub main 2894a10 (V3.13). Adds a visual progress panel to the student
+dashboard so learners SEE their momentum — the single biggest driver of retention
+in language apps. Built entirely on existing student_progress data: NO new
+migration, NO API, NO paid services, fully deterministic. All V3.13 features
+(redesigned flashcard game, teacher assignments) preserved.
+
+## Why this
+The site already has rich content and records every completion in
+student_progress, but learners had no single place to feel their progress. This
+turns that existing (previously invisible) data into motivation.
+
+## What it adds (src/components/StudentProgressDashboard.tsx)
+Mounted on /dashboard between the stats panel and the daily-goal ring. Renders
+nothing for brand-new users (no completed activity yet), so it never clutters an
+empty dashboard. Four parts:
+1. Weekly streak bar — 7 day circles (Sun→Sat) with checkmarks for active days,
+   plus the current consecutive-day streak (reuses computeStreak from
+   src/lib/learning.ts).
+2. Active vocabulary estimate — a deterministic "~N words" from completed
+   lessons/daily/quizzes/stories/dialogues (fixed words-per-type weights; no AI).
+3. Level estimate — مبتدئ → A1 أساسيات → A1 متقدّم → HSK1 جاهز, with a progress
+   bar toward the next tier, derived from the vocab estimate.
+4. 14-day activity chart — a small bar per day showing how many items were
+   completed, so streaks and gaps are visible at a glance.
+
+## Data / cost
+- Reads via the existing getProgress() (src/lib/studentProgress.ts) — the same
+  student_progress table already used by ProgressPanel. No new table, no RPC, no
+  network beyond what the dashboard already does.
+- Deterministic math only. No AI, no secrets, no paid services.
+
+## Files
+- NEW: src/components/StudentProgressDashboard.tsx
+- EDIT: src/pages/Dashboard.tsx (mount the panel), package.json
+- PRESERVED: flashcard game (V3.13), teacher assignments (V3.10), teacher
+  dashboard (V3.9), AI Teacher, admin — all untouched.
+
+## Build
+`VITE_GA_MEASUREMENT_ID=G-P3BWZQ6KFM npm install && npm run build` → passes on
+Node 18. index JS = 470 KB (unchanged; the panel is small and on the already-lazy
+Dashboard chunk). Deps unchanged. No new migration (still 8). Logic verified
+(streak/vocab/level) against sample data.
+
+## Note on the vocab/level numbers
+These are intentionally simple, encouraging estimates (words-per-activity ×
+completions), not exact counts — designed to motivate, clearly shown as "~". Easy
+to tune the weights later, or to wire in real flashcard/game word coverage if you
+want exactness.
+
+## Future hooks (not in this release)
+- Fold flashcard game sessions into the streak/vocab once you want the game to
+  visibly feed progress.
+- Add a small "best streak" record and per-skill breakdown.
+
+---
+
 # NiHao V3.13 — Flashcard game redesigned (multiple-choice, beginner-friendly)
 
 Base: V3.12 (assignments + game restored). This release REPLACES the original
