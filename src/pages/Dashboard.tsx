@@ -13,6 +13,7 @@ import ProgressPanel from '@/components/ProgressPanel';
 import StudentAssignmentsCard from '@/components/StudentAssignmentsCard';
 import DailyGoalCard from '@/components/DailyGoalCard';
 import StudentProgressDashboard from '@/components/StudentProgressDashboard';
+import ReferralCard from '@/components/ReferralCard';
 import type { QuizResult, UserProgressItem, LessonRow, LevelRow } from '@/types/supabase';
 
 export default function Dashboard() {
@@ -145,6 +146,9 @@ export default function Dashboard() {
 
         {/* V3.14: visual progress — weekly streak, vocab, activity chart, level */}
         <StudentProgressDashboard />
+
+        {/* V3.17: invite a friend */}
+        <ReferralCard />
 
         {/* V3.6: daily XP goal ring */}
         <div className="mb-8">

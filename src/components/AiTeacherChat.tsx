@@ -7,6 +7,7 @@ import AiTeacherPlanCard from '@/components/AiTeacherPlanCard';
 import AiTeacherMiniQuiz from '@/components/AiTeacherMiniQuiz';
 import { markCompleted } from '@/lib/studentProgress';
 import { searchKnowledge, filterKnowledgeResultsForIntent, type KnowledgeResult } from '@/lib/aiTeacherKnowledge';
+import { askCohereTeacher } from '@/lib/aiTeacherCohere';
 import { trackEvent } from '@/lib/analytics';
 import {
   generateTeacherPlan, detectIntent, extractKnowledgeQuery, LEVEL_LABEL,
@@ -65,6 +66,43 @@ export default function AiTeacherChat() {
 
   const push = (m: MsgInput) => setMessages(prev => [...prev, { ...m, id: nid() } as Msg]);
 
+  // V3.16: update an existing message in place (used to swap "thinking…" → answer)
+  const updateMsg = (id: number, patch: Partial<Msg>) =>
+    setMessages(prev => prev.map(m => (m.id === id ? { ...m, ...patch } as Msg : m)));
+
+  // V3.16: smart fallback — when the local teacher finds nothing, try the
+  // Cohere-backed teacher (signed-in users only). Shows a thinking bubble, then
+  // replaces it with the answer, or with the safe deterministic links on failure.
+  const fallbackLinks = {
+    role: 'teacher' as const, type: 'links' as const,
+    text: 'لم أجد نتيجة دقيقة في بيانات NiHao، لكن أقدر أساعدك بهذه الخيارات:',
+    links: [
+      { label: 'خطة اليوم', href: '#خطة' },
+      { label: 'اختبار HSK', href: '/hsk-tests' },
+      { label: 'القاموس', href: '/dictionary' },
+      { label: 'تدريب الكتابة', href: '/writing-practice' },
+      { label: 'البينين', href: '/pinyin' },
+    ],
+  };
+
+  const smartFallback = async (question: string, localContext: string, lvl: string) => {
+    if (!isAuthenticated) { push(fallbackLinks); return; }
+    const thinkingId = nid();
+    setMessages(prev => [...prev, { id: thinkingId, role: 'teacher', type: 'text', text: '… أفكّر في إجابتك' } as Msg]);
+    trackEvent('ai_teacher_cohere_attempt', {});
+    const res = await askCohereTeacher(question, { context: localContext, level: lvl });
+    if (res.ok && res.answer) {
+      trackEvent('ai_teacher_cohere_success', {});
+      updateMsg(thinkingId, { type: 'text', text: res.answer });
+    } else if (res.error === 'daily_limit') {
+      updateMsg(thinkingId, { type: 'text', text: 'وصلت للحد اليومي من أسئلة المعلم الذكي المتقدّم. جرّب هذه الأدوات أو ارجع غداً 🙂' });
+      push(fallbackLinks);
+    } else {
+      trackEvent('ai_teacher_cohere_fallback', { reason: res.error || 'unknown' });
+      updateMsg(thinkingId, fallbackLinks);
+    }
+  };
+
   // turn an intent into one or more teacher messages (all deterministic)
   const reply = (text: string) => {
     const intent = detectIntent(text);
@@ -92,18 +130,8 @@ export default function AiTeacherChat() {
         push({ role: 'teacher', type: 'knowledgeResults', text: intro, results });
         return;
       }
-      // no match → deterministic fallback
-      push({
-        role: 'teacher', type: 'links',
-        text: 'لم أجد نتيجة دقيقة في بيانات NiHao، لكن أقدر أساعدك بهذه الخيارات:',
-        links: [
-          { label: 'خطة اليوم', href: '#خطة' },
-          { label: 'اختبار HSK', href: '/hsk-tests' },
-          { label: 'القاموس', href: '/dictionary' },
-          { label: 'تدريب الكتابة', href: '/writing-practice' },
-          { label: 'البينين', href: '/pinyin' },
-        ],
-      });
+      // no strong local match → smart fallback (Cohere for signed-in users)
+      void smartFallback(text, raw.slice(0, 3).map(r => `${r.chinese || ''} ${r.pinyin || ''} ${r.arabic || ''}`.trim()).filter(Boolean).join('\n'), useLevel);
       return;
     }
 

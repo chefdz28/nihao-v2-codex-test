@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Gift } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/contexts/AuthContext';
+import { stashPendingReferral, redeemReferral } from '@/lib/referral';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 export default function Register() {
@@ -16,6 +17,16 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [searchParams] = useSearchParams();
+  const [refCode, setRefCode] = useState('');
+
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      stashPendingReferral(ref);
+      queueMicrotask(() => setRefCode(ref.trim().toUpperCase()));
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +44,9 @@ export default function Register() {
     setLoading(true);
     try {
       await signUp(form.email, form.password, form.name, role === 'teacher');
+      // if a session exists immediately (email confirmation off), redeem now;
+      // otherwise it's redeemed on first sign-in via the pending stash.
+      if (refCode) { try { await redeemReferral(refCode); } catch { /* non-fatal */ } }
       setSuccess(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Registration failed';
@@ -101,6 +115,14 @@ export default function Register() {
             <span className="h-px flex-1 bg-white/10" />
           </div>
 
+          {refCode && (
+            <div className="mb-5 flex items-center gap-2 bg-[#FF3333]/10 border border-[#FF3333]/30 rounded-xl px-4 py-3" dir="rtl">
+              <Gift size={18} className="text-[#FF3333] shrink-0" />
+              <p className="text-sm font-arabic text-white">
+                دعاك صديق! ستحصل أنت وهو على <span className="font-bold text-[#FF6666]">٥٠ عملة</span> عند التسجيل.
+              </p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-white mb-2">نوع الحساب</label>

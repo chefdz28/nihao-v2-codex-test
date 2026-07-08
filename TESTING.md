@@ -1,3 +1,13 @@
+# V3.17 merged release checks
+- [ ] Run the 3 migrations (referral, ai_teacher_usage, pronunciation_usage)
+- [ ] Deploy both Edge Functions; set GROQ_API_KEY (+ COHERE_API_KEY when ready)
+- [ ] /dashboard: panda + banner + progress + NEW referral card all visible
+- [ ] Referral flow: copy link, second account signs up via ?ref= → both +50 coins
+- [ ] /ai-teacher: local answers still instant; unknown question → Cohere (if key)
+- [ ] /pronunciation: AI trainer records + scores; classic tool below still works
+- [ ] Without keys: referrals fully work; teacher falls back; trainer says not enabled
+- [ ] Home hero, FunWays strip, flashcard game, teacher tools intact
+- [ ] Build passes; index ~474KB; deps unchanged; migrations = 11
 # V3.15 brand illustrations checks
 - [ ] Homepage hero shows hero-main (desktop), headline + cards still work
 - [ ] "تعلّم بطريقة ممتعة" strip shows 4 images linking correctly

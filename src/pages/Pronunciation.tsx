@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { fetchVocabulary, fetchSentences } from '@/lib/dataService';
 import type { VocabRow, SentenceRow } from '@/types/supabase';
+import PronunciationTrainer from '@/components/PronunciationTrainer';
 
 export default function Pronunciation() {
   const { t } = useI18n();
@@ -192,6 +193,23 @@ export default function Pronunciation() {
         <motion.h1 className="font-display font-black text-4xl text-white mb-12" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           {t('pronunciation.title')}
         </motion.h1>
+
+        {/* V3.16: AI-powered pronunciation check (Groq Whisper) */}
+        <div className="mb-12">
+          <div className="inline-flex items-center gap-1.5 bg-[#FF3333]/15 text-[#FF6666] rounded-full px-3 py-1 text-xs font-arabic mb-4">
+            ✨ جديد · تقييم النطق بالذكاء الاصطناعي
+          </div>
+          <PronunciationTrainer />
+          <p className="text-xs font-arabic mt-4" style={{ color: 'var(--color-text-tertiary)' }}>
+            انطق الجملة الصينية وسيستمع الذكاء الاصطناعي ويقيّم نطقك فوراً
+          </p>
+        </div>
+
+        <div className="border-t border-white/10 pt-10 mb-6">
+          <p className="font-arabic text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+            أو تدرّب على الكلمات والجمل بالطريقة الكلاسيكية:
+          </p>
+        </div>
 
         {/* V2: choose words or sentences */}
         <div className="flex justify-center gap-2 mb-6">

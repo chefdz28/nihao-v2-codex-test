@@ -1,3 +1,46 @@
+# NiHao V3.17 — Growth & AI mega-release (referrals + Cohere teacher + Groq pronunciation)
+
+Base: GitHub main da90f20 (V3.15.1). Merges THREE previously separate packages
+into one clean release so they can be deployed together safely:
+
+1. REFERRAL SYSTEM (was v3.15-referral) — invite-a-friend: unique NH-XXXXX codes,
+   /register?ref= capture + banner, both sides get 50 coins, dashboard card with
+   share + invited counter. Deferred redeem on first sign-in (email-confirm flow).
+2. AI TEACHER + COHERE (was v3.16-ai-teacher-cohere) — hybrid: deterministic
+   local teacher first; Cohere Command R7B fallback via secure Edge Function for
+   questions it can't answer. 15/user/day limit.
+3. PRONUNCIATION TRAINER + GROQ (was v3.16-pronunciation-groq) — student records
+   a Chinese HSK1 sentence; Groq Whisper (open-source model, free tier) 
+   transcribes; deterministic char-match scoring → great/close/tryagain verdict.
+   30/user/day limit. New section on /pronunciation above the classic tool.
+
+## Merge notes (what was reconciled)
+- Dashboard.tsx: ReferralCard added on TOP of the current V3.15 dashboard (panda
+  mascot + motivation banner preserved) — the referral package's older Dashboard
+  was NOT copied wholesale, avoiding image regressions.
+- AiTeacherChat.tsx from the Cohere package; Pronunciation.tsx from the Groq
+  package; Register/AuthContext from the referral package — verified disjoint.
+- All 5 RPC names verified matching between frontend/functions and SQL.
+
+## Requires setup — see V3.17_DEPLOY_GUIDE.md
+3 migrations (all idempotent), 2 Edge Functions, 2 secrets (GROQ_API_KEY free /
+COHERE_API_KEY paid). Each system degrades gracefully without its key.
+
+## Verified
+Build passes (Node 18). Lint clean on all new/edited files (only the known
+pre-existing AuthContext react-refresh warning remains). Deps UNCHANGED. index
+JS = 474 KB (+2 KB total for all three systems' client code). Migrations 8→11.
+All features preserved: brand illustrations (hero, FunWays, mascot, banner),
+flashcard game, progress dashboard, teacher tools, AI Teacher local logic,
+admin, GA4. No secrets in frontend (grep-verified; watch out: 'hsk-tests'
+contains 'sk-' as a substring — false positive).
+
+## GA4 (no PII)
+referral_copy, referral_share, ai_teacher_cohere_attempt/success/fallback,
+pronunciation_attempt, pronunciation_result. All existing events kept.
+
+---
+
 # NiHao V3.15.1 — Fix: "تعلّم بطريقة ممتعة" cards now clickable
 
 Base: GitHub main e52f9b9 (V3.15 brand illustrations). Patch fix only.

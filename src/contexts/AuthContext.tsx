@@ -127,6 +127,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data.user?.user_metadata?.signup_role === 'teacher') {
       try { await supabase.rpc('set_my_role_teacher'); } catch { /* fail-silent */ }
     }
+    // redeem a pending referral captured at sign-up (if any)
+    try {
+      const pending = sessionStorage.getItem('nihao_pending_ref');
+      if (pending) {
+        await supabase.rpc('redeem_referral', { p_code: pending });
+        sessionStorage.removeItem('nihao_pending_ref');
+      }
+    } catch { /* fail-silent */ }
   }, []);
 
   // V3.4: Google OAuth via Supabase (provider must be enabled in Supabase
