@@ -57,14 +57,30 @@ export default function AiTeacherChat() {
   const { isVisible: pinyinIsVisible } = usePinyinMode();
   const [level, setLevel] = useState<TeacherLevel>('beginner');
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Msg[]>([
-    { id: nid(), role: 'teacher', type: 'text', text: 'أهلاً! أنا معلمك الذكي في NiHao. اختر مستواك وهدفك، أو اسألني عن كلمة أو اختبار أو بينين.' },
-  ]);
+  const GREETING: Msg = { id: nid(), role: 'teacher', type: 'text', text: 'أهلاً! أنا معلمك الذكي في NiHao. اختر مستواك وهدفك، أو اسألني عن كلمة أو اختبار أو بينين.' };
+  // V3.19: persist the conversation across reloads/navigation (sessionStorage)
+  const [messages, setMessages] = useState<Msg[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('nihao_ai_teacher_chat');
+      if (saved) { const parsed = JSON.parse(saved); if (Array.isArray(parsed) && parsed.length) return parsed as Msg[]; }
+    } catch { /* ignore */ }
+    return [GREETING];
+  });
+  useEffect(() => {
+    try { sessionStorage.setItem('nihao_ai_teacher_chat', JSON.stringify(messages.slice(-40))); } catch { /* ignore */ }
+  }, [messages]);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages]);
 
   const push = (m: MsgInput) => setMessages(prev => [...prev, { ...m, id: nid() } as Msg]);
+
+  // V3.19: reset the conversation
+  const clearChat = () => {
+    try { sessionStorage.removeItem('nihao_ai_teacher_chat'); } catch { /* ignore */ }
+    setMessages([{ id: nid(), role: 'teacher', type: 'text', text: 'أهلاً! أنا معلمك الذكي في NiHao. اختر مستواك وهدفك، أو اسألني عن كلمة أو اختبار أو بينين.' }]);
+    trackEvent('ai_teacher_clear', {});
+  };
 
   // V3.16: update an existing message in place (used to swap "thinking…" → answer)
   const updateMsg = (id: number, patch: Partial<Msg>) =>
@@ -87,10 +103,16 @@ export default function AiTeacherChat() {
 
   const smartFallback = async (question: string, localContext: string, lvl: string) => {
     if (!isAuthenticated) { push(fallbackLinks); return; }
+    // V3.19: build recent conversation history (text turns only) so the teacher
+    // remembers context within the session.
+    const history = messages
+      .filter((m): m is Extract<Msg, { type: 'text' }> => m.type === 'text')
+      .slice(-6)
+      .map(m => ({ role: (m.role === 'student' ? 'user' : 'assistant') as 'user' | 'assistant', content: m.text }));
     const thinkingId = nid();
     setMessages(prev => [...prev, { id: thinkingId, role: 'teacher', type: 'text', text: '… أفكّر في إجابتك' } as Msg]);
     trackEvent('ai_teacher_cohere_attempt', {});
-    const res = await askCohereTeacher(question, { context: localContext, level: lvl });
+    const res = await askCohereTeacher(question, { context: localContext, level: lvl, history });
     if (res.ok && res.answer) {
       trackEvent('ai_teacher_cohere_success', {});
       updateMsg(thinkingId, { type: 'text', text: res.answer });
@@ -200,12 +222,17 @@ export default function AiTeacherChat() {
         <div className="w-11 h-11 rounded-full bg-[#FF3333]/15 flex items-center justify-center shrink-0">
           <Sparkles size={20} className="text-[#FF3333]" />
         </div>
-        <div>
+        <div className="flex-1">
           <h2 className="font-display font-bold text-white text-base">المعلم الذكي</h2>
           <p className="text-[11px] font-arabic flex items-center gap-1.5" style={{ color: 'var(--color-text-tertiary)' }}>
             <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] inline-block" /> جاهز لمساعدتك في تعلّم الصينية
           </p>
         </div>
+        {messages.length > 1 && (
+          <button onClick={clearChat} className="text-[11px] font-arabic px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] transition-colors shrink-0" style={{ color: 'var(--color-text-secondary)' }}>
+            محادثة جديدة
+          </button>
+        )}
       </div>
 
       {/* level quick chips */}

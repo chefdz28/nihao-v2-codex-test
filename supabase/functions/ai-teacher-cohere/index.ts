@@ -25,10 +25,13 @@ const MODEL = 'command-r7b-12-2024';       // cheapest production Cohere model
 const DAILY_LIMIT = 15;                      // Cohere calls per user per day
 const MAX_QUESTION_LEN = 500;                // guard against huge prompts
 
+interface ChatTurn { role: 'user' | 'assistant'; content: string }
+
 interface Body {
   question?: string;
   context?: string;   // optional: local knowledge snippets the frontend found
   level?: string;     // beginner | intermediate | advanced
+  history?: ChatTurn[]; // recent conversation turns (for context/memory)
 }
 
 function json(body: unknown, status = 200) {
@@ -60,6 +63,16 @@ Deno.serve(async (req: Request) => {
     const context = (body.context || '').trim().slice(0, 2000);
     const level = (body.level || 'beginner').slice(0, 20);
     if (!question) return json({ error: 'no_question' }, 400);
+
+    // sanitize conversation history: keep the last 6 turns, cap each length,
+    // only allow user/assistant roles. Guards prompt size and abuse.
+    const history: ChatTurn[] = Array.isArray(body.history)
+      ? body.history
+          .filter(t => t && (t.role === 'user' || t.role === 'assistant') && typeof t.content === 'string')
+          .slice(-6)
+          .map(t => ({ role: t.role, content: t.content.trim().slice(0, 600) }))
+          .filter(t => t.content.length > 0)
+      : [];
 
     // ---- per-user daily rate limit (DB-enforced) ----
     // Uses an RPC that atomically increments today's counter and returns the
@@ -98,6 +111,7 @@ Deno.serve(async (req: Request) => {
         model: MODEL,
         messages: [
           { role: 'system', content: system },
+          ...history,
           { role: 'user', content: question },
         ],
         max_tokens: 400,

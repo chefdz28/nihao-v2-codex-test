@@ -18,15 +18,17 @@ export interface CohereResult {
   error?: CohereError;
 }
 
+export interface CohereTurn { role: 'user' | 'assistant'; content: string }
+
 /** Ask the Cohere-backed teacher. Requires a signed-in user (JWT sent
  *  automatically by supabase.functions.invoke). Returns a soft result. */
 export async function askCohereTeacher(
   question: string,
-  opts: { context?: string; level?: string } = {},
+  opts: { context?: string; level?: string; history?: CohereTurn[] } = {},
 ): Promise<CohereResult> {
   try {
     const { data, error } = await supabase.functions.invoke('ai-teacher-cohere', {
-      body: { question, context: opts.context, level: opts.level },
+      body: { question, context: opts.context, level: opts.level, history: opts.history },
     });
     if (error) {
       // supabase wraps non-2xx; try to read the status-specific error

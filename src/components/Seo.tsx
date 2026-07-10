@@ -11,6 +11,12 @@ interface SeoMeta { title_ar: string; title_en: string; desc_ar: string; desc_en
 // Static per-route metadata (Arabic + English). Dynamic routes (story/article)
 // set their own document.title in their page components; this covers the rest.
 const META: Record<string, SeoMeta> = {
+  '/start': {
+    title_ar: 'ابدأ تعلّم الصينية مجاناً — NiHao',
+    title_en: 'Start Learning Chinese Free — NiHao',
+    desc_ar: 'تعلّم اللغة الصينية من الصفر بالعربية: دروس، تقييم نطق بالذكاء الاصطناعي، اختبارات HSK وألعاب. سجّل مجاناً.',
+    desc_en: 'Learn Chinese from zero in Arabic: lessons, AI pronunciation, HSK tests and games. Sign up free.',
+  },
   '/': {
     title_ar: 'NiHao — تعلم الصينية من الصفر بالعربية والإنجليزية',
     title_en: 'NiHao — Learn Chinese from Zero (Arabic & English)',

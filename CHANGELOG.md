@@ -1,3 +1,54 @@
+# NiHao V3.20 — Merge: landing page (V3.18) + AI Teacher memory (V3.19)
+
+Base: GitHub main 393198c (V3.17). Merges the two separate feature packages into
+ONE clean release so deploying either alone can't delete the other's files via
+rsync --delete. No migration, no deps, no secrets added.
+
+## Why this merge
+V3.19 did not contain src/pages/Landing.tsx. Deploying V3.19 after V3.18 with
+rsync --delete would have removed the landing page. This release contains BOTH
+feature sets together. The two sets touch disjoint files (verified) — no manual
+conflict resolution was needed.
+
+## From V3.18 (ad landing page)
+- src/pages/Landing.tsx — distraction-free /start page (own lazy chunk).
+- /start route in App.tsx.
+- Layout.tsx BARE_ROUTES — /start renders with NO global header/footer.
+- referral (?ref=) + UTM (?utm_source/medium/campaign) passthrough into /register.
+- GA4 landing_view + landing_cta_click. /start SEO meta (Seo.tsx), sitemap entry,
+  and Course JSON-LD.
+
+## From V3.19 (AI Teacher memory)
+- AiTeacherChat.tsx — conversation persists in sessionStorage (last 40 messages),
+  survives reload/navigation; builds recent history for context; "محادثة جديدة"
+  button clears it.
+- aiTeacherCohere.ts — askCohereTeacher accepts a history option.
+- ai-teacher-cohere Edge Function — accepts + sanitizes history (last 6 turns,
+  user/assistant roles only, 600-char cap per turn).
+
+## ⚠️ Deployment note
+Re-deploy the ai-teacher-cohere Edge Function (paste the updated index.ts in
+Supabase) so conversation memory works. No migration, no new secrets. Until then
+the teacher answers without memory (nothing breaks). pronunciation-check is
+unchanged.
+
+## Verified (all 11 points)
+1. Landing.tsx present ✅  2. /start route ✅  3. no header/footer on /start ✅
+4. ref+UTM → /register ✅  5. sessionStorage persistence (40 msgs) ✅
+6. history passed to Cohere ✅  7. new-chat button clears ✅
+8. Edge Function sanitizes (6 turns / roles / 600 chars) ✅  9. build passes ✅
+10. all V3.17 features preserved (referrals, Cohere teacher, Groq pronunciation,
+    dashboard referral card, brand images, FunWays clickable, flashcard game,
+    student progress, teacher dashboard, assignments/feedback, admin, Google
+    login, GA4) ✅  11. no files from either set deleted ✅
+
+## Sizes / integrity
+index JS = 475 KB. Landing is a separate lazy chunk. Deps UNCHANGED. Migrations
+still 11. Edge functions: ai-teacher-cohere, pronunciation-check, process-pdf.
+23 brand webp images intact. No secrets in frontend. Lint clean on merged files.
+
+---
+
 # NiHao V3.17 — Growth & AI mega-release (referrals + Cohere teacher + Groq pronunciation)
 
 Base: GitHub main da90f20 (V3.15.1). Merges THREE previously separate packages

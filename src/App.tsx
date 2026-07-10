@@ -103,6 +103,7 @@ const Lesson = lazy(() => import('./pages/Lesson'));
 const Practice = lazy(() => import('./pages/Practice'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Dictionary = lazy(() => import('./pages/Dictionary'));
+const Landing = lazy(() => import('./pages/Landing'));
 
 export default function App() {
   return (
@@ -113,6 +114,7 @@ export default function App() {
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center" dir="rtl"><div className="text-white font-arabic text-sm flex items-center gap-2"><span className="w-4 h-4 border-2 border-[#FF3333] border-t-transparent rounded-full animate-spin inline-block"></span> جاري التحميل...</div></div>}>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/start" element={<Landing />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/courses/:levelId/:lessonId" element={<Lesson />} />
         <Route path="/quiz/:levelId" element={<Quiz />} />
